@@ -87,7 +87,7 @@ func main() {
 
 		filename := currentNotesFilePath(noteName)
 
-		must(os.MkdirAll(filepath.Dir(filename), 0777))
+		must(os.MkdirAll(filepath.Dir(filename), 0700))
 
 		if instantRecord != "" {
 			must(writeInstantRecord(filename, instantRecord))
