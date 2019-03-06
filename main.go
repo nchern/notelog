@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	defaultFilename = "main"
+	defaultFilename = "main.org"
 	notes           = "notes"
 )
 
