@@ -106,7 +106,7 @@ func main() {
 	} else if *cmd == cmdBashComplete {
 		fmt.Println(autoCompleteScript())
 	} else if *cmd == cmdPrintHome {
-		fmt.Println(notesRootPath())
+		fmt.Print(notesRootPath())
 	} else {
 		fatal("boom")
 	}
