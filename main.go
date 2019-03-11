@@ -74,6 +74,7 @@ var (
 	cmdLs           = c("list")
 	cmdEdit         = c("edit")
 	cmdPrintHome    = c("print-home")
+	cmdGetFullPath  = c("get-full-path")
 	cmdBashComplete = c("bash-complete")
 
 	cmd = flag.String("cmd", cmdEdit, fmt.Sprintf("One of: %s", commands))
@@ -107,6 +108,10 @@ func main() {
 		fmt.Println(autoCompleteScript())
 	} else if *cmd == cmdPrintHome {
 		fmt.Print(notesRootPath())
+	} else if *cmd == cmdGetFullPath {
+		noteName, _, err := parseArgs(flag.Args())
+		dieOnError(err)
+		fmt.Print(currentNotesFilePath(noteName))
 	} else {
 		fatal("boom")
 	}
