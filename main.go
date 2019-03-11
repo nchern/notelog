@@ -73,6 +73,7 @@ var (
 
 	cmdLs           = c("list")
 	cmdEdit         = c("edit")
+	cmdPrintHome    = c("print-home")
 	cmdBashComplete = c("bash-complete")
 
 	cmd = flag.String("cmd", cmdEdit, fmt.Sprintf("One of: %s", commands))
@@ -104,6 +105,8 @@ func main() {
 		}
 	} else if *cmd == cmdBashComplete {
 		fmt.Println(autoCompleteScript())
+	} else if *cmd == cmdPrintHome {
+		fmt.Println(notesRootPath())
 	} else {
 		fatal("boom")
 	}
