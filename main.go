@@ -12,8 +12,9 @@ import (
 )
 
 const (
-	defaultFilename = "main.org"
+	defaultPerms    = 0700
 	notes           = "notes"
+	defaultFilename = "main.org"
 )
 
 func fatal(s string) { log.Fatalf("FATAL: %s\n", s) }
@@ -88,8 +89,9 @@ func main() {
 		dieOnError(err)
 
 		filename := currentNotesFilePath(noteName)
+		dirName := filepath.Dir(filename)
 
-		must(os.MkdirAll(filepath.Dir(filename), 0700))
+		must(os.MkdirAll(dirName, defaultPerms))
 
 		if instantRecord != "" {
 			must(writeInstantRecord(filename, instantRecord))
@@ -98,6 +100,12 @@ func main() {
 
 		ed := editor(filename)
 		must(ed.Run())
+
+		_, err = os.Stat(filename)
+		if os.IsNotExist(err) {
+			must(os.Remove(dirName))
+		}
+
 	} else if *cmd == cmdLs {
 		dirs, err := ioutil.ReadDir(notesRootPath())
 		dieOnError(err)
