@@ -12,9 +12,8 @@ func writeInstantRecord(filename string, instantRecord string) error {
 	if err != nil {
 		return err
 	}
-	defer func() {
-		dstFile.Close()
-	}()
+	defer dstFile.Close()
+
 	if _, err := fmt.Fprintf(dstFile, " - %s\n\n", instantRecord); err != nil {
 		return err
 	}
