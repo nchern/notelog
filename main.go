@@ -121,6 +121,6 @@ func main() {
 		dieOnError(err)
 		fmt.Print(currentNotesFilePath(noteName))
 	} else {
-		fatal("boom")
+		fatal(fmt.Sprintf("Bad cmd: '%s'", *cmd))
 	}
 }
