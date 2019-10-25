@@ -22,12 +22,12 @@ func writeInstantRecord(filename string, instantRecord string) error {
 	if err != nil {
 		return err
 	}
+	defer srcFile.Close()
 
 	if _, err = io.Copy(dstFile, srcFile); err != nil {
-		srcFile.Close()
 		return err
 	}
-	srcFile.Close()
+	srcFile.Sync()
 
 	return os.Rename(dstFileName, filename)
 }
