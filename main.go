@@ -77,6 +77,7 @@ var (
 	cmdPrintHome    = c("print-home")
 	cmdGetFullPath  = c("get-full-path")
 	cmdBashComplete = c("bash-complete")
+	cmdSortTodoList = c("sort-todos")
 
 	cmd = flag.String("cmd", cmdEdit, fmt.Sprintf("One of: %s", commands))
 )
@@ -120,6 +121,8 @@ func main() {
 		noteName, _, err := parseArgs(flag.Args())
 		dieOnError(err)
 		fmt.Print(currentNotesFilePath(noteName))
+	} else if *cmd == cmdSortTodoList {
+		dieOnError(sortTODOList(os.Stdin, os.Stdout))
 	} else {
 		fatal(fmt.Sprintf("Bad cmd: '%s'", *cmd))
 	}
