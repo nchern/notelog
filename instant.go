@@ -7,6 +7,12 @@ import (
 )
 
 func writeInstantRecord(filename string, instantRecord string) error {
+	srcFile, err := os.Open(filename)
+	if err != nil {
+		return err
+	}
+	defer srcFile.Close()
+
 	dstFileName := filename + ".t"
 	dstFile, err := os.Create(dstFileName)
 	if err != nil {
@@ -17,12 +23,6 @@ func writeInstantRecord(filename string, instantRecord string) error {
 	if _, err := fmt.Fprintf(dstFile, " - %s\n\n", instantRecord); err != nil {
 		return err
 	}
-
-	srcFile, err := os.Open(filename)
-	if err != nil {
-		return err
-	}
-	defer srcFile.Close()
 
 	if _, err = io.Copy(dstFile, srcFile); err != nil {
 		return err
