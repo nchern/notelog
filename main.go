@@ -13,7 +13,7 @@ import (
 
 const (
 	defaultPerms    = 0700
-	notes           = "notes"
+	defaultNotesDir = "notes"
 	defaultFilename = "main.org"
 )
 
@@ -30,7 +30,7 @@ func dieOnError(err error) {
 }
 
 func notesRootPath() string {
-	return filepath.Join(os.Getenv("HOME"), notes)
+	return filepath.Join(os.Getenv("HOME"), defaultNotesDir)
 }
 
 func currentNotesFilePath(name string) string {
@@ -82,31 +82,41 @@ var (
 	cmd = flag.String("cmd", cmdEdit, fmt.Sprintf("One of: %s", commands))
 )
 
+func removeDirIfNotesFileNotExists(dirName string, filename string) {
+	_, err := os.Stat(filename)
+	if os.IsNotExist(err) {
+		os.Remove(dirName)
+	}
+}
+
+func edit() error {
+	noteName, instantRecord, err := parseArgs(flag.Args())
+	if err != nil {
+		return err
+	}
+
+	filename := currentNotesFilePath(noteName)
+	dirName := filepath.Dir(filename)
+
+	defer removeDirIfNotesFileNotExists(dirName, filename)
+
+	if err := os.MkdirAll(dirName, defaultPerms); err != nil {
+		return err
+	}
+
+	if instantRecord != "" {
+		return writeInstantRecord(filename, instantRecord)
+	}
+
+	ed := editor(filename)
+	return ed.Run()
+}
+
 func main() {
 	flag.Parse()
 
 	if *cmd == cmdEdit {
-		noteName, instantRecord, err := parseArgs(flag.Args())
-		dieOnError(err)
-
-		filename := currentNotesFilePath(noteName)
-		dirName := filepath.Dir(filename)
-
-		must(os.MkdirAll(dirName, defaultPerms))
-
-		if instantRecord != "" {
-			must(writeInstantRecord(filename, instantRecord))
-			return
-		}
-
-		ed := editor(filename)
-		must(ed.Run())
-
-		_, err = os.Stat(filename)
-		if os.IsNotExist(err) {
-			must(os.Remove(dirName))
-		}
-
+		edit()
 	} else if *cmd == cmdLs {
 		dirs, err := ioutil.ReadDir(notesRootPath())
 		dieOnError(err)
