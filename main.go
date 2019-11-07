@@ -12,9 +12,10 @@ import (
 )
 
 const (
-	defaultPerms    = 0700
-	defaultNotesDir = "notes"
-	defaultFilename = "main.org"
+	defaultDirPerms  = 0700
+	defaultFilePerms = 0644
+	defaultNotesDir  = "notes"
+	defaultFilename  = "main.org"
 )
 
 func fatal(s string) { log.Fatalf("FATAL: %s\n", s) }
@@ -100,7 +101,7 @@ func edit() error {
 
 	defer removeDirIfNotesFileNotExists(dirName, filename)
 
-	if err := os.MkdirAll(dirName, defaultPerms); err != nil {
+	if err := os.MkdirAll(dirName, defaultDirPerms); err != nil {
 		return err
 	}
 
@@ -116,7 +117,7 @@ func main() {
 	flag.Parse()
 
 	if *cmd == cmdEdit {
-		edit()
+		must(edit())
 	} else if *cmd == cmdLs {
 		dirs, err := ioutil.ReadDir(notesRootPath())
 		dieOnError(err)

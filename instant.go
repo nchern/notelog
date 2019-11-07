@@ -6,11 +6,14 @@ import (
 	"os"
 )
 
+const recordTemplate = " - %s"
+
 func writeInstantRecord(filename string, instantRecord string) error {
-	srcFile, err := os.Open(filename)
+	srcFile, err := os.OpenFile(filename, os.O_RDWR|os.O_CREATE, defaultFilePerms)
 	if err != nil {
 		return err
 	}
+
 	defer srcFile.Close()
 
 	dstFileName := filename + ".t"
@@ -20,7 +23,7 @@ func writeInstantRecord(filename string, instantRecord string) error {
 	}
 	defer dstFile.Close()
 
-	if _, err := fmt.Fprintf(dstFile, " - %s\n\n", instantRecord); err != nil {
+	if _, err := fmt.Fprintf(dstFile, recordTemplate+"\n\n", instantRecord); err != nil {
 		return err
 	}
 
