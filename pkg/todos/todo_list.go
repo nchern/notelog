@@ -1,4 +1,4 @@
-package main
+package todos
 
 import (
 	"bufio"
@@ -32,7 +32,8 @@ func writeEmptyLines(w io.Writer, count int) error {
 	return nil
 }
 
-func sortTODOList(r io.Reader, w io.Writer) error {
+// Sort sorts todo lists from r and outputs sorted to w
+func Sort(r io.Reader, w io.Writer) error {
 	scanner := bufio.NewScanner(r)
 
 	emptyLinesCount := 0

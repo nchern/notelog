@@ -1,4 +1,4 @@
-package main
+package todos
 
 import (
 	"bytes"
@@ -47,7 +47,7 @@ func TestTODORegex(t *testing.T) {
 	}
 }
 
-func TestFormatTodoList(t *testing.T) {
+func TestShouldSort(t *testing.T) {
 	var tests = []struct {
 		name     string
 		expected string
@@ -127,7 +127,7 @@ func TestFormatTodoList(t *testing.T) {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			var actualBuf bytes.Buffer
-			assert.NoError(t, sortTODOList(bytes.NewBufferString(tt.given), &actualBuf))
+			assert.NoError(t, Sort(bytes.NewBufferString(tt.given), &actualBuf))
 			assert.Equal(t, tt.expected, actualBuf.String())
 		})
 	}

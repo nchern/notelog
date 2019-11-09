@@ -7,15 +7,12 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"path/filepath"
 	"strings"
-)
 
-const (
-	defaultDirPerms  = 0700
-	defaultFilePerms = 0644
-	defaultNotesDir  = "notes"
-	defaultFilename  = "main.org"
+	"github.com/nchern/notelog/pkg/editor"
+	"github.com/nchern/notelog/pkg/env"
+	"github.com/nchern/notelog/pkg/searcher"
+	"github.com/nchern/notelog/pkg/todos"
 )
 
 func fatal(s string) { log.Fatalf("FATAL: %s\n", s) }
@@ -28,14 +25,6 @@ func must(err error) {
 
 func dieOnError(err error) {
 	must(err)
-}
-
-func notesRootPath() string {
-	return filepath.Join(os.Getenv("HOME"), defaultNotesDir)
-}
-
-func currentNotesFilePath(name string) string {
-	return filepath.Join(notesRootPath(), name, defaultFilename)
 }
 
 func init() {
@@ -51,6 +40,13 @@ func parseArgs(args []string) (filename string, instantRecord string, err error)
 	filename = args[0]
 	instantRecord = strings.TrimSpace(strings.Join(args[1:], " "))
 	return
+}
+
+func parseSearchArgs(args []string) (string, error) {
+	if len(args) < 1 {
+		return "", errors.New("Not enough args. Specify a search term")
+	}
+	return args[0], nil
 }
 
 func autoCompleteScript() string {
@@ -84,43 +80,15 @@ var (
 	cmd = flag.String("cmd", cmdEdit, fmt.Sprintf("One of: %s", commands))
 )
 
-func removeDirIfNotesFileNotExists(dirName string, filename string) {
-	_, err := os.Stat(filename)
-	if os.IsNotExist(err) {
-		os.Remove(dirName)
-	}
-}
-
-func edit() error {
-	noteName, instantRecord, err := parseArgs(flag.Args())
-	if err != nil {
-		return err
-	}
-
-	filename := currentNotesFilePath(noteName)
-	dirName := filepath.Dir(filename)
-
-	defer removeDirIfNotesFileNotExists(dirName, filename)
-
-	if err := os.MkdirAll(dirName, defaultDirPerms); err != nil {
-		return err
-	}
-
-	if instantRecord != "" {
-		return writeInstantRecord(filename, instantRecord)
-	}
-
-	ed := editor(filename)
-	return ed.Run()
-}
-
 func main() {
 	flag.Parse()
 
 	if *cmd == cmdEdit {
-		must(edit())
+		noteName, instantRecord, err := parseArgs(flag.Args())
+		dieOnError(err)
+		must(editor.Edit(noteName, instantRecord))
 	} else if *cmd == cmdLs {
-		dirs, err := ioutil.ReadDir(notesRootPath())
+		dirs, err := ioutil.ReadDir(env.NotesRootPath())
 		dieOnError(err)
 		for _, dir := range dirs {
 			fmt.Println(dir.Name())
@@ -128,17 +96,17 @@ func main() {
 	} else if *cmd == cmdBashComplete {
 		fmt.Println(autoCompleteScript())
 	} else if *cmd == cmdPrintHome {
-		fmt.Print(notesRootPath())
+		fmt.Print(env.NotesRootPath())
 	} else if *cmd == cmdGetFullPath {
 		noteName, _, err := parseArgs(flag.Args())
 		dieOnError(err)
-		fmt.Print(currentNotesFilePath(noteName))
+		fmt.Print(env.NotesFilePath(noteName))
 	} else if *cmd == cmdSortTodoList {
-		dieOnError(sortTODOList(os.Stdin, os.Stdout))
+		dieOnError(todos.Sort(os.Stdin, os.Stdout))
 	} else if *cmd == cmdSearch {
 		terms, err := parseSearchArgs(flag.Args())
 		dieOnError(err)
-		must(search(terms))
+		must(searcher.Search(terms))
 	} else {
 		fatal(fmt.Sprintf("Bad cmd: '%s'", *cmd))
 	}
