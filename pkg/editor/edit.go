@@ -15,6 +15,10 @@ const (
 	defaultEditor = "vim"
 )
 
+var (
+	editorCmd = env.Get("EDITOR", defaultEditor)
+)
+
 // Edit note: calls editor or writes instant
 func Edit(noteName string, instantRecord string) error {
 
@@ -35,18 +39,8 @@ func Edit(noteName string, instantRecord string) error {
 	return ed.Run()
 }
 
-func getEditorName() string {
-	name := os.Getenv("EDITOR")
-	if name == "" {
-		return defaultEditor
-	}
-	return name
-}
-
 func editor(fileName string) *exec.Cmd {
-	ed := getEditorName()
-
-	cmd := exec.Command(ed, fileName)
+	cmd := exec.Command(editorCmd, fileName)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr

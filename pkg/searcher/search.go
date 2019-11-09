@@ -12,18 +12,12 @@ const (
 	defaultGrepArgs = "-rni"
 )
 
-func getGrepCmd() string {
-	name := os.Getenv("NOTELOG_GREP")
-	if name == "" {
-		return defaultGrep
-	}
-	return name
-}
+var grepCmd = env.Get("NOTELOG_GREP", defaultGrepArgs)
 
 // Search runs the search over all notes in notes home and prints results to stdout
 func Search(terms string) error {
 
-	cmd := exec.Command(getGrepCmd(), defaultGrepArgs, terms, env.NotesRootPath())
+	cmd := exec.Command(grepCmd, defaultGrepArgs, terms, env.NotesRootPath())
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()

@@ -19,3 +19,12 @@ func NotesRootPath() string {
 func NotesFilePath(name string) string {
 	return filepath.Join(NotesRootPath(), name, defaultFilename)
 }
+
+// Get returns value of env var with given name. If it's empty, returns defaultVal
+func Get(name string, defaultVal string) string {
+	val := os.Getenv(name)
+	if val == "" {
+		return defaultVal
+	}
+	return val
+}
