@@ -76,6 +76,7 @@ var (
 	cmdGetFullPath  = c("get-full-path")
 	cmdBashComplete = c("bash-complete")
 	cmdSortTodoList = c("sort-todos")
+	cmdListVars     = c("list-vars")
 
 	cmd = flag.String("cmd", cmdEdit, fmt.Sprintf("One of: %s", commands))
 )
@@ -108,6 +109,8 @@ func main() {
 		terms, err := parseSearchArgs(flag.Args())
 		dieOnError(err)
 		must(searcher.Search(terms))
+	case cmdListVars:
+		fmt.Println(env.VarNames())
 	default:
 		fatal(fmt.Sprintf("Bad cmd: '%s'", *cmd))
 	}
