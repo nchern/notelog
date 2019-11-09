@@ -83,31 +83,32 @@ var (
 func main() {
 	flag.Parse()
 
-	if *cmd == cmdEdit {
+	switch *cmd {
+	case cmdEdit:
 		noteName, instantRecord, err := parseArgs(flag.Args())
 		dieOnError(err)
 		must(editor.Edit(noteName, instantRecord))
-	} else if *cmd == cmdLs {
+	case cmdLs:
 		dirs, err := ioutil.ReadDir(env.NotesRootPath())
 		dieOnError(err)
 		for _, dir := range dirs {
 			fmt.Println(dir.Name())
 		}
-	} else if *cmd == cmdBashComplete {
+	case cmdBashComplete:
 		fmt.Println(autoCompleteScript())
-	} else if *cmd == cmdPrintHome {
+	case cmdPrintHome:
 		fmt.Print(env.NotesRootPath())
-	} else if *cmd == cmdGetFullPath {
+	case cmdGetFullPath:
 		noteName, _, err := parseArgs(flag.Args())
 		dieOnError(err)
 		fmt.Print(env.NotesFilePath(noteName))
-	} else if *cmd == cmdSortTodoList {
+	case cmdSortTodoList:
 		dieOnError(todos.Sort(os.Stdin, os.Stdout))
-	} else if *cmd == cmdSearch {
+	case cmdSearch:
 		terms, err := parseSearchArgs(flag.Args())
 		dieOnError(err)
 		must(searcher.Search(terms))
-	} else {
+	default:
 		fatal(fmt.Sprintf("Bad cmd: '%s'", *cmd))
 	}
 }
