@@ -30,13 +30,11 @@ func search(terms string) error {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()
-	switch err.(type) {
+	switch e := err.(type) {
 	case *exec.ExitError:
-		// TODO: check for error code 1
-		os.Exit(1)
-	default:
-		return err
+		if e.ExitCode() == 1 {
+			os.Exit(1)
+		}
 	}
-
-	return nil
+	return err
 }
