@@ -4,8 +4,10 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 
 	"github.com/nchern/notelog/pkg/env"
+	"github.com/pkg/errors"
 )
 
 const (
@@ -21,6 +23,9 @@ var (
 
 // Edit note: calls editor or writes instant
 func Edit(noteName string, instantRecord string) error {
+	if strings.HasPrefix(noteName, ".") {
+		return errors.New("Note name can not start with '.'")
+	}
 
 	filename := env.NotesFilePath(noteName)
 	dirName := filepath.Dir(filename)
