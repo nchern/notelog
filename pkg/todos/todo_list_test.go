@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestTODORegex(t *testing.T) {
+func TestTODORegexNotDone(t *testing.T) {
 	var tests = []struct {
 		name     string
 		expected bool
@@ -16,6 +16,7 @@ func TestTODORegex(t *testing.T) {
 		{"undone", true, "   - [] foo"},
 		{"undone with whitespace", true, "   - [ ] foo bar"},
 		{"done item", false, "   - [x] foo bar"},
+		{"done item, capital X", false, "   - [X] foo bar"},
 		{"not an item", false, " [] foo bar"},
 		{"not an item", false, " - ] foo bar"},
 		{"not an item", false, " - [ foo bar"},
@@ -27,13 +28,16 @@ func TestTODORegex(t *testing.T) {
 			assert.Equal(t, tt.expected, todoItemUndoneRx.MatchString(tt.given))
 		})
 	}
+}
 
-	tests = []struct {
+func TestTODORegexDone(t *testing.T) {
+	var tests = []struct {
 		name     string
 		expected bool
 		given    string
 	}{
 		{"done", true, "   - [x] foo"},
+		{"done, capital X", true, "   - [X] foo"},
 		{"undone item", false, " [] foo bar"},
 		{"not an item", false, " - x] foo bar"},
 		{"not an item", false, " - [x foo bar"},

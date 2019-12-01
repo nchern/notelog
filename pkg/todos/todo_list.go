@@ -8,8 +8,8 @@ import (
 )
 
 var (
-	todoItemUndoneRx = regexp.MustCompile(`^\s*?-\s*?\[\s?\]\s+?.+$`)
-	todoItemDoneRx   = regexp.MustCompile(`^\s*?-\s*?\[x\]\s+?.+$`)
+	todoItemUndoneRx = regexp.MustCompile(`(?i)^\s*?-\s*?\[\s?\]\s+?.+$`)
+	todoItemDoneRx   = regexp.MustCompile(`(?i)^\s*?-\s*?\[x\]\s+?.+$`)
 
 	whitespaceRx = regexp.MustCompile(`^\s*$`)
 )
