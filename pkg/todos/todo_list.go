@@ -63,8 +63,9 @@ func Sort(r io.Reader, w io.Writer) error {
 			if emptyLinesCount > 1 {
 				writeLines(w, doneBuffer)
 				writeEmptyLines(w, emptyLinesCount)
-				doneBuffer = []string{}
+
 				emptyLinesCount = 0
+				doneBuffer = []string{}
 			}
 			continue
 		}
