@@ -41,8 +41,10 @@ func Sort(r io.Reader, w io.Writer) error {
 
 	for scanner.Scan() {
 		line := scanner.Text()
+
 		isDoneItem := todoItemDoneRx.MatchString(line)
 		isUndoneItem := todoItemUndoneRx.MatchString(line)
+		isBlankLine := whitespaceRx.MatchString(line) || line == ""
 
 		if isDoneItem {
 			writeEmptyLines(w, emptyLinesCount)
@@ -56,7 +58,7 @@ func Sort(r io.Reader, w io.Writer) error {
 			fmt.Fprintln(w, line)
 			continue
 		}
-		if whitespaceRx.MatchString(line) || line == "" {
+		if isBlankLine {
 			emptyLinesCount++
 			if emptyLinesCount > 1 {
 				writeLines(w, doneBuffer)
