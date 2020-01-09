@@ -13,11 +13,13 @@ const (
 
 var (
 	settings = settingsBag{}
+
+	notesRootPath = Get("NOTELOG_HOME", filepath.Join(os.Getenv("HOME"), defaultNotesDir))
 )
 
 // NotesRootPath returns notes home dir
 func NotesRootPath() string {
-	return Get("NOTELOG_HOME", filepath.Join(os.Getenv("HOME"), defaultNotesDir))
+	return notesRootPath
 }
 
 // NotesFilePath returns full path to the notes file
