@@ -23,7 +23,7 @@ func must(err error) {
 	}
 }
 
-func dieOnError(err error) {
+func dieIf(err error) {
 	must(err)
 }
 
@@ -87,11 +87,11 @@ func main() {
 	switch *cmd {
 	case cmdEdit:
 		noteName, instantRecord, err := parseArgs(flag.Args())
-		dieOnError(err)
+		dieIf(err)
 		must(editor.Edit(noteName, instantRecord))
 	case cmdLs:
 		dirs, err := ioutil.ReadDir(env.NotesRootPath())
-		dieOnError(err)
+		dieIf(err)
 		for _, dir := range dirs {
 			fmt.Println(dir.Name())
 		}
@@ -101,13 +101,13 @@ func main() {
 		fmt.Print(env.NotesRootPath())
 	case cmdGetFullPath:
 		noteName, _, err := parseArgs(flag.Args())
-		dieOnError(err)
+		dieIf(err)
 		fmt.Print(env.NotesFilePath(noteName))
 	case cmdSortTodoList:
-		dieOnError(todos.Sort(os.Stdin, os.Stdout))
+		dieIf(todos.Sort(os.Stdin, os.Stdout))
 	case cmdSearch:
 		terms, err := parseSearchArgs(flag.Args())
-		dieOnError(err)
+		dieIf(err)
 		must(searcher.Search(terms))
 	case cmdListVars:
 		fmt.Println(env.VarNames())
