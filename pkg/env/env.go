@@ -17,7 +17,7 @@ var (
 
 // NotesRootPath returns notes home dir
 func NotesRootPath() string {
-	return filepath.Join(os.Getenv("HOME"), defaultNotesDir)
+	return Get("NOTELOG_HOME", filepath.Join(os.Getenv("HOME"), defaultNotesDir))
 }
 
 // NotesFilePath returns full path to the notes file
