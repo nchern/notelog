@@ -27,6 +27,11 @@ func NotesFilePath(name string) string {
 	return filepath.Join(NotesRootPath(), name, defaultFilename)
 }
 
+// NotesMetadataPath returns full path to the notelog metadata for a given file
+func NotesMetadataPath(name string) string {
+	return filepath.Join(NotesRootPath(), ".notelog", name)
+}
+
 // Get returns value of env var with given name. If it's empty, returns defaultVal
 func Get(name string, defaultVal string) string {
 	settings[name] = defaultVal

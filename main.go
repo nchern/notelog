@@ -11,6 +11,7 @@ import (
 
 	"github.com/nchern/notelog/pkg/editor"
 	"github.com/nchern/notelog/pkg/env"
+	"github.com/nchern/notelog/pkg/remote"
 	"github.com/nchern/notelog/pkg/searcher"
 	"github.com/nchern/notelog/pkg/todos"
 )
@@ -83,6 +84,8 @@ var (
 	cmdBashComplete = c("bash-complete")
 	cmdSortTodoList = c("sort-todos")
 	cmdListVars     = c("list-vars")
+	cmdRemotePush   = c("push")
+	cmdRemotePull   = c("pull")
 
 	cmd = flag.String("cmd", cmdEdit, fmt.Sprintf("One of: %s", commands))
 )
@@ -117,6 +120,10 @@ func main() {
 		must(searcher.Search(terms))
 	case cmdListVars:
 		fmt.Println(env.VarNames())
+	case cmdRemotePush:
+		must(remote.Push())
+	case cmdRemotePull:
+		//		remote.Pull()
 	default:
 		fatal(fmt.Sprintf("Bad cmd: '%s'", *cmd))
 	}
