@@ -15,6 +15,8 @@ import (
 	"github.com/nchern/notelog/pkg/todos"
 )
 
+const scratchPadName = ".scratchpad"
+
 func fatal(s string) { log.Fatalf("FATAL: %s\n", s) }
 
 func must(err error) {
@@ -33,11 +35,15 @@ func init() {
 
 func parseArgs(args []string) (filename string, instantRecord string, err error) {
 	if len(args) < 1 {
-		err = errors.New("Not enough args. Specify at least notes file name")
+		filename = scratchPadName
 		return
 	}
 
 	filename = args[0]
+	if strings.HasPrefix(filename, ".") {
+		err = errors.New("Note name can not start with '.'")
+		return
+	}
 	instantRecord = strings.TrimSpace(strings.Join(args[1:], " "))
 	return
 }

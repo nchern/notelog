@@ -23,8 +23,9 @@ var (
 
 // Edit note: calls editor or writes instant
 func Edit(noteName string, instantRecord string) error {
-	if strings.HasPrefix(noteName, ".") {
-		return errors.New("Note name can not start with '.'")
+	noteName = strings.TrimSpace(noteName)
+	if noteName == "" {
+		return errors.New("Empty note name. Specify the real name")
 	}
 
 	filename := env.NotesFilePath(noteName)
