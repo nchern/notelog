@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"strings"
 
 	"github.com/nchern/notelog/pkg/env"
 )
@@ -15,12 +16,12 @@ const (
 )
 
 var (
+	errUnknownScheme = errors.New("Unknown scheme")
+
 	schemeToCmd = map[string][]string{
 		"rsync": []string{"rsync", "-r"},
 	}
 )
-
-var errUnknownScheme = errors.New("Unknown scheme")
 
 type entry struct {
 	Scheme string
@@ -32,7 +33,7 @@ func (e *entry) Push(name string) ([]string, error) {
 	if res == nil {
 		return nil, errUnknownScheme
 	}
-	res = append(res, name, e.Addr)
+	res = append(res, withTrailingSlash(name), withTrailingSlash(e.Addr))
 	return res, nil
 }
 
@@ -56,10 +57,18 @@ func Push() error {
 }
 
 func run(args []string) error {
-	log.Println(args)
+	log.Println("running> ", args)
+
 	cmd := exec.Command(args[0], args[1:]...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	return cmd.Run()
 
+	return cmd.Run()
+}
+
+func withTrailingSlash(s string) string {
+	if !strings.HasSuffix(s, "/") {
+		s = s + "/"
+	}
+	return s
 }
