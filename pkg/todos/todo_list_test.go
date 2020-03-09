@@ -25,7 +25,7 @@ func TestTODORegexNotDone(t *testing.T) {
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
-			assert.Equal(t, tt.expected, todoItemUndoneRx.MatchString(tt.given))
+			assert.Equal(t, tt.expected, todoItemNotDoneRx.MatchString(tt.given))
 		})
 	}
 }
@@ -61,7 +61,7 @@ func TestShouldSort(t *testing.T) {
 			`
 			- [] foo
 			- [] bazz
-			- [x] bar` + "\n",
+			- [x] bar`,
 			`
 			- [] foo
 			- [x] bar
@@ -71,7 +71,7 @@ func TestShouldSort(t *testing.T) {
 			- [] foo
 			- [] bazz
 			- [x] bar
-			more random text` + "\n",
+			more random text`,
 			`some random text
 			- [] foo
 			- [x] bar
@@ -85,7 +85,7 @@ func TestShouldSort(t *testing.T) {
 
 			- [] foobazz
 			- [x] foo
-			- [x] buzz` + "\n",
+			- [x] buzz`,
 			`
 			- [x] foo
 			- [] bar
@@ -101,7 +101,7 @@ func TestShouldSort(t *testing.T) {
 			random text
 			- [] buzz
 			- [] foobazz
-			- [x] foobar` + "\n",
+			- [x] foobar`,
 			`
 			- [x] foo
 			- [] bar
@@ -117,7 +117,7 @@ func TestShouldSort(t *testing.T) {
 
 			- [] buzz
 			- [] foobazz
-			- [x] foobar` + "\n",
+			- [x] foobar`,
 			`
 			- [x] foo
 			- [] bar
@@ -126,13 +126,67 @@ func TestShouldSort(t *testing.T) {
 			- [] buzz
 			- [x] foobar
 			- [] foobazz`},
+
+		{"hierarchical todos",
+			`foo bar
+				- [] bar
+				- [] buzz
+				- [] fuzzbuzz
+					- [] fuzzbuzz - 1
+					- [] fuzzbuzz - 2
+				- [] foobar
+				- [x] foo
+					- [x] sub foo
+					- [ ] sub bar
+				- [x] foobazz`,
+			`foo bar
+				- [] bar
+				- [x] foo
+					- [x] sub foo
+					- [ ] sub bar
+				- [] buzz
+				- [x] foobazz
+				- [] fuzzbuzz
+					- [] fuzzbuzz - 1
+					- [] fuzzbuzz - 2
+				- [] foobar`},
+		{"hierarchical todos with non-todo sub items",
+			`foo bar
+				- [] bar
+				- [] buzz
+				- [] foobar
+				- [x] foo
+					- foo context
+					more context
+				- [x] foobazz`,
+			`foo bar
+				- [] bar
+				- [x] foo
+					- foo context
+					more context
+				- [] buzz
+				- [x] foobazz
+				- [] foobar`},
+		{"empty line after list",
+			`
+				- [ ] foo
+				- [x] bar
+				- [x] buzzbar
+
+				text`,
+			`
+				- [x] bar
+				- [x] buzzbar
+				- [ ] foo
+
+				text`},
 	}
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			var actualBuf bytes.Buffer
 			assert.NoError(t, Sort(bytes.NewBufferString(tt.given), &actualBuf))
-			assert.Equal(t, tt.expected, actualBuf.String())
+			assert.Equal(t, tt.expected+"\n", actualBuf.String())
 		})
 	}
 }
