@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestEntryPush(t *testing.T) {
+func TestPush(t *testing.T) {
 	var tests = []struct {
 		name        string
 		expected    []string
@@ -21,7 +21,7 @@ func TestEntryPush(t *testing.T) {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			e := &entry{Scheme: tt.given, Addr: "localhost:foo"}
-			args, err := e.Push("src")
+			args, err := push(e, "src")
 			assert.Equal(t, tt.expectedErr, err)
 			assert.Equal(t, tt.expected, args)
 		})
