@@ -15,7 +15,7 @@ rsync://user@example.com:bak/name/
 git://git@github.com:nchern/go-codegen.git
 `
 
-const actualMalformedConfig = `
+const malformedConfig = `
 # comment
 
 foo bar
@@ -35,7 +35,7 @@ func TestParseConfig(t *testing.T) {
 }
 
 func TestParseMalformedConfig(t *testing.T) {
-	actualRemotes, err := parse(bytes.NewBufferString(actualMalformedConfig))
+	actualRemotes, err := parse(bytes.NewBufferString(malformedConfig))
 	assert.Error(t, err)
 	assert.Nil(t, actualRemotes)
 }
