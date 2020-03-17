@@ -9,7 +9,7 @@ import (
 const recordTemplate = " - %s"
 
 func writeInstantRecord(filename string, instantRecord string) error {
-	srcFile, err := os.OpenFile(filename, os.O_RDWR|os.O_CREATE, defaultFilePerms)
+	srcFile, err := os.OpenFile(filename, os.O_RDWR|os.O_CREATE, DefaultFilePerms)
 	if err != nil {
 		return err
 	}

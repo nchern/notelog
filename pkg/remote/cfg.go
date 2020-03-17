@@ -1,6 +1,6 @@
 package remote
 
-const remoteConfig = `
+const DefaultConfig = `
 # Put your remotes here
 
 rsync://<hostname>:notes/personal

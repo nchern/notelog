@@ -11,8 +11,11 @@ import (
 )
 
 const (
-	defaultDirPerms  = 0700
-	defaultFilePerms = 0644
+	// DefaultDirPerms
+	DefaultDirPerms = 0700
+
+	// DefaultFilePerms
+	DefaultFilePerms = 0644
 
 	defaultEditor = "vim"
 )
@@ -21,8 +24,8 @@ var (
 	editorCmd = env.Get("EDITOR", defaultEditor)
 )
 
-// Edit note: calls editor or writes instant
-func Edit(noteName string, instantRecord string) error {
+// EditNote note: calls editor or writes instant
+func EditNote(noteName string, instantRecord string) error {
 	noteName = strings.TrimSpace(noteName)
 	if noteName == "" {
 		return errors.New("Empty note name. Specify the real name")
@@ -33,7 +36,7 @@ func Edit(noteName string, instantRecord string) error {
 
 	defer removeDirIfNotesFileNotExists(dirName, filename)
 
-	if err := os.MkdirAll(dirName, defaultDirPerms); err != nil {
+	if err := os.MkdirAll(dirName, DefaultDirPerms); err != nil {
 		return err
 	}
 
@@ -41,11 +44,12 @@ func Edit(noteName string, instantRecord string) error {
 		return writeInstantRecord(filename, instantRecord)
 	}
 
-	ed := editor(filename)
+	ed := Command(filename)
 	return ed.Run()
 }
 
-func editor(fileName string) *exec.Cmd {
+// Command creates exec.Command with editor to edit given filename
+func Command(fileName string) *exec.Cmd {
 	cmd := exec.Command(editorCmd, fileName)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout

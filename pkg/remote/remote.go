@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	remoteConfigName = "remote"
+	ConfigName = "remote"
 )
 
 var (
@@ -46,7 +46,7 @@ func (e *entry) Pull(name string) ([]string, error) {
 }
 
 func Push() error {
-	f, err := os.Open(env.NotesMetadataPath(remoteConfigName))
+	f, err := os.Open(env.NotesMetadataPath(ConfigName))
 	if err != nil {
 		return err
 	}

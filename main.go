@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"path"
 	"strings"
 
 	"github.com/nchern/notelog/pkg/editor"
@@ -32,28 +33,6 @@ func dieIf(err error) {
 
 func init() {
 	log.SetFlags(0)
-}
-
-func parseArgs(args []string) (filename string, instantRecord string, err error) {
-	if len(args) < 1 {
-		filename = scratchPadName
-		return
-	}
-
-	filename = args[0]
-	if strings.HasPrefix(filename, ".") {
-		err = errors.New("Note name can not start with '.'")
-		return
-	}
-	instantRecord = strings.TrimSpace(strings.Join(args[1:], " "))
-	return
-}
-
-func parseSearchArgs(args []string) (string, error) {
-	if len(args) < 1 {
-		return "", errors.New("Not enough args. Specify a search term")
-	}
-	return args[0], nil
 }
 
 func autoCompleteScript() string {
@@ -97,7 +76,7 @@ func main() {
 	case cmdEdit:
 		noteName, instantRecord, err := parseArgs(flag.Args())
 		dieIf(err)
-		must(editor.Edit(noteName, instantRecord))
+		must(editor.EditNote(noteName, instantRecord))
 	case cmdLs:
 		dirs, err := ioutil.ReadDir(env.NotesRootPath())
 		dieIf(err)
@@ -121,10 +100,47 @@ func main() {
 	case cmdListVars:
 		fmt.Println(env.VarNames())
 	case cmdRemotePush:
-		must(remote.Push())
+		must(handleNoRemoteConfig(remote.Push()))
 	case cmdRemotePull:
-		must(remote.Pull())
+		must(handleNoRemoteConfig(remote.Pull()))
 	default:
 		fatal(fmt.Sprintf("Bad cmd: '%s'", *cmd))
 	}
+}
+
+func handleNoRemoteConfig(err error) error {
+	if os.IsNotExist(err) {
+		configPath := env.NotesMetadataPath(remote.ConfigName)
+		if err := os.MkdirAll(path.Dir(configPath), editor.DefaultDirPerms); err != nil {
+			return err
+		}
+		if err := ioutil.WriteFile(configPath, []byte(remote.DefaultConfig), editor.DefaultFilePerms); err != nil {
+			return err
+		}
+
+		return editor.Command(configPath).Run()
+	}
+	return err
+}
+
+func parseArgs(args []string) (filename string, instantRecord string, err error) {
+	if len(args) < 1 {
+		filename = scratchPadName
+		return
+	}
+
+	filename = args[0]
+	if strings.HasPrefix(filename, ".") {
+		err = errors.New("Note name can not start with '.'")
+		return
+	}
+	instantRecord = strings.TrimSpace(strings.Join(args[1:], " "))
+	return
+}
+
+func parseSearchArgs(args []string) (string, error) {
+	if len(args) < 1 {
+		return "", errors.New("Not enough args. Specify a search term")
+	}
+	return args[0], nil
 }

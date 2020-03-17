@@ -7,7 +7,7 @@ import (
 )
 
 func Pull() error {
-	f, err := os.Open(env.NotesMetadataPath(remoteConfigName))
+	f, err := os.Open(env.NotesMetadataPath(ConfigName))
 	if err != nil {
 		return err
 	}
