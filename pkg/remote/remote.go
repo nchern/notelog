@@ -36,6 +36,15 @@ func (e *entry) Push(name string) ([]string, error) {
 	return res, nil
 }
 
+func (e *entry) Pull(name string) ([]string, error) {
+	res := schemeToCmd[e.Scheme]
+	if res == nil {
+		return nil, errUnknownScheme
+	}
+	res = append(res, withTrailingSlash(e.Addr), withTrailingSlash(name))
+	return res, nil
+}
+
 func Push() error {
 	f, err := os.Open(env.NotesMetadataPath(remoteConfigName))
 	if err != nil {
