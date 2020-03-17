@@ -22,12 +22,22 @@ var (
 	}
 )
 
+type action func(*entry, string) ([]string, error)
+
 type entry struct {
-	Scheme string
 	Addr   string
+	Scheme string
 }
 
-func (e *entry) Push(name string) ([]string, error) {
+func Push() error {
+	return execute(push)
+}
+
+func Pull() error {
+	return execute(pull)
+}
+
+func push(e *entry, name string) ([]string, error) {
 	res := schemeToCmd[e.Scheme]
 	if res == nil {
 		return nil, errUnknownScheme
@@ -36,7 +46,7 @@ func (e *entry) Push(name string) ([]string, error) {
 	return res, nil
 }
 
-func (e *entry) Pull(name string) ([]string, error) {
+func pull(e *entry, name string) ([]string, error) {
 	res := schemeToCmd[e.Scheme]
 	if res == nil {
 		return nil, errUnknownScheme
@@ -45,7 +55,7 @@ func (e *entry) Pull(name string) ([]string, error) {
 	return res, nil
 }
 
-func Push() error {
+func execute(pushOrPull action) error {
 	f, err := os.Open(env.NotesMetadataPath(ConfigName))
 	if err != nil {
 		return err
@@ -54,7 +64,8 @@ func Push() error {
 	if err != nil {
 		return err
 	}
-	args, err := remotes[0].Push(env.NotesRootPath())
+	// TODO: support multiple remotes
+	args, err := pushOrPull(remotes[0], env.NotesRootPath())
 	if err != nil {
 		return err
 	}
