@@ -123,7 +123,7 @@ func main() {
 	case cmdRemotePush:
 		must(remote.Push())
 	case cmdRemotePull:
-		//	must(remote.Pull())
+		must(remote.Pull())
 	default:
 		fatal(fmt.Sprintf("Bad cmd: '%s'", *cmd))
 	}

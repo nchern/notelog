@@ -2,7 +2,6 @@ package remote
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"os"
 	"os/exec"
@@ -45,9 +44,6 @@ func Push() error {
 	remotes, err := parse(f)
 	if err != nil {
 		return err
-	}
-	if len(remotes) < 1 {
-		return fmt.Errorf("No remotes configured")
 	}
 	args, err := remotes[0].Push(env.NotesRootPath())
 	if err != nil {

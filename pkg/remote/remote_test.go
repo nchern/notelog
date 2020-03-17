@@ -13,7 +13,7 @@ func TestEntryPush(t *testing.T) {
 		expectedErr error
 		given       string
 	}{
-		{"rsync", []string{"rsync", "-r", "src", "localhost:foo"}, nil, "rsync"},
+		{"rsync", []string{"rsync", "-r", "src/", "localhost:foo/"}, nil, "rsync"},
 		//		{"git", "git", "git"},
 		{"unknown scheme", nil, errUnknownScheme, "bla"},
 	}
