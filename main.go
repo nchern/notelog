@@ -4,6 +4,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"os"
@@ -35,12 +36,6 @@ func init() {
 	log.SetFlags(0)
 }
 
-func autoCompleteScript() string {
-	name := os.Args[0]
-	return fmt.Sprintf("# Bash autocompletion for %s. Completes notes\ncomplete -W \"`%s -cmd=list`\" %s",
-		name, name, name)
-}
-
 type commandList []string
 
 func (l commandList) String() string {
@@ -58,6 +53,7 @@ var (
 	cmdLs           = c("list")
 	cmdEdit         = c("edit")
 	cmdSearch       = c("search")
+	cmdPrint        = c("print")
 	cmdPrintHome    = c("print-home")
 	cmdGetFullPath  = c("get-full-path")
 	cmdBashComplete = c("bash-complete")
@@ -85,6 +81,10 @@ func main() {
 		}
 	case cmdBashComplete:
 		fmt.Println(autoCompleteScript())
+	case cmdPrint:
+		noteName, _, err := parseArgs(flag.Args())
+		dieIf(err)
+		must(printNote(noteName))
 	case cmdPrintHome:
 		fmt.Print(env.NotesRootPath())
 	case cmdGetFullPath:
@@ -143,4 +143,21 @@ func parseSearchArgs(args []string) (string, error) {
 		return "", errors.New("Not enough args. Specify a search term")
 	}
 	return args[0], nil
+}
+
+func autoCompleteScript() string {
+	name := os.Args[0]
+	return fmt.Sprintf("# Bash autocompletion for %s. Completes notes\ncomplete -W \"`%s -cmd=list`\" %s",
+		name, name, name)
+}
+
+func printNote(noteName string) error {
+	filename := env.NotesFilePath(noteName)
+	f, err := os.Open(filename)
+	if err != nil {
+		return err
+	}
+
+	_, err = io.Copy(os.Stdout, f)
+	return err
 }
