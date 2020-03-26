@@ -92,7 +92,7 @@ func main() {
 		dieIf(err)
 		fmt.Print(env.NotesFilePath(noteName))
 	case cmdSortTodoList:
-		dieIf(todos.Sort(os.Stdin, os.Stdout))
+		must(todos.Sort(os.Stdin, os.Stdout))
 	case cmdSearch:
 		terms, err := parseSearchArgs(flag.Args())
 		dieIf(err)
