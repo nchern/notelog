@@ -18,7 +18,7 @@ import (
 	"github.com/nchern/notelog/pkg/todos"
 )
 
-const scratchPadName = ".scratchpad"
+const scratchpadName = ".scratchpad"
 
 func fatal(s string) { log.Fatalf("FATAL: %s\n", s) }
 
@@ -74,11 +74,7 @@ func main() {
 		dieIf(err)
 		must(editor.EditNote(noteName, instantRecord))
 	case cmdLs:
-		dirs, err := ioutil.ReadDir(env.NotesRootPath())
-		dieIf(err)
-		for _, dir := range dirs {
-			fmt.Println(dir.Name())
-		}
+		must(listNotes())
 	case cmdBashComplete:
 		fmt.Println(autoCompleteScript())
 	case cmdPrint:
@@ -123,9 +119,22 @@ func handleNoRemoteConfig(err error) error {
 	return err
 }
 
+func listNotes() error {
+	dirs, err := ioutil.ReadDir(env.NotesRootPath())
+	if err != nil {
+		return err
+	}
+	for _, dir := range dirs {
+		if dir.Name() == scratchpadName {
+			continue
+		}
+		fmt.Println(dir.Name())
+	}
+}
+
 func parseArgs(args []string) (filename string, instantRecord string, err error) {
 	if len(args) < 1 {
-		filename = scratchPadName
+		filename = scratchpadName
 		return
 	}
 
