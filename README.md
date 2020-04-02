@@ -22,3 +22,8 @@ $ notelog my-note foo bar
 # Prints help
 $ notelog -h
 ```
+
+## Roadmap
+
+ - [] note templates
+ - [] search browsing: quick jump to search results
