@@ -1,13 +1,13 @@
 package editor
 
 import (
+	"errors"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
 
 	"github.com/nchern/notelog/pkg/env"
-	"github.com/pkg/errors"
 )
 
 const (
