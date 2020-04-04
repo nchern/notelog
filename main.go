@@ -125,7 +125,7 @@ func listNotes() error {
 		return err
 	}
 	for _, dir := range dirs {
-		if dir.Name() == scratchpadName {
+		if validateNoteName(dir.Name()) != nil {
 			continue
 		}
 		fmt.Println(dir.Name())
@@ -140,12 +140,18 @@ func parseArgs(args []string) (filename string, instantRecord string, err error)
 	}
 
 	filename = args[0]
-	if strings.HasPrefix(filename, ".") {
-		err = errors.New("Note name can not start with '.'")
+	if err = validateNoteName(filename); err != nil {
 		return
 	}
 	instantRecord = strings.TrimSpace(strings.Join(args[1:], " "))
 	return
+}
+
+func validateNoteName(name string) error {
+	if strings.HasPrefix(name, ".") {
+		return errors.New("Note name can not start with '.'")
+	}
+	return nil
 }
 
 func parseSearchArgs(args []string) (string, error) {
