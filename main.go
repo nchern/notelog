@@ -130,6 +130,7 @@ func listNotes() error {
 		}
 		fmt.Println(dir.Name())
 	}
+	return nil
 }
 
 func parseArgs(args []string) (filename string, instantRecord string, err error) {
