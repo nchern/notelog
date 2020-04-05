@@ -27,3 +27,6 @@ $ notelog -h
 
  - [] note templates
  - [] search browsing: quick jump to search results
+ - [] vim plugin
+    - [] mvp
+    - [] with ftdetect to '.note'
