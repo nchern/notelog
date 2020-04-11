@@ -94,7 +94,7 @@ func main() {
 		dieIf(err)
 		must(searcher.Search(terms))
 	case cmdEnv:
-		fmt.Println(env.VarNames())
+		fmt.Println(env.Vars())
 	case cmdRemotePush:
 		must(handleNoRemoteConfig(remote.Push()))
 	case cmdRemotePull:

@@ -1,6 +1,7 @@
 package env
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -42,7 +43,8 @@ func Get(name string, defaultVal string) string {
 	return val
 }
 
-func VarNames() string {
+// Vars returns string dump of all env variables along with their values
+func Vars() string {
 	return settings.String()
 }
 
@@ -50,8 +52,8 @@ type settingsBag map[string]string
 
 func (b settingsBag) String() string {
 	res := []string{}
-	for k, _ := range b {
-		res = append(res, k)
+	for k, v := range b {
+		res = append(res, fmt.Sprintf("%s=%s", k, v))
 	}
 	return strings.Join(res, "\n")
 }
