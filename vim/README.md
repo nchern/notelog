@@ -19,3 +19,4 @@ Plug 'nchern/notelog', { 'rtp': 'vim' }
 And then update your packages by running `:PlugInstall`.
 
 `notelog` binary should be already [installed](https://github.com/nchern/notelog#installation) or you can install it by running `:NoteInstallBinaries` command in the open `org` buffer.
+Installation requires [golang](https://golang.org/dl/) installed on your machine.
