@@ -35,12 +35,16 @@ func NotesMetadataPath(name string) string {
 
 // Get returns value of env var with given name. If it's empty, returns defaultVal
 func Get(name string, defaultVal string) string {
-	settings[name] = defaultVal
+	res := defaultVal
+
+	defer func() { settings[name] = res }()
+
 	val := os.Getenv(name)
 	if val == "" {
-		return defaultVal
+		return res
 	}
-	return val
+	res = val
+	return res
 }
 
 // Vars returns string dump of all env variables along with their values
