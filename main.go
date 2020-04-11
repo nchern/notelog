@@ -55,10 +55,10 @@ var (
 	cmdSearch       = c("search")
 	cmdPrint        = c("print")
 	cmdPrintHome    = c("print-home")
-	cmdGetFullPath  = c("get-full-path")
+	cmdGetFullPath  = c("path")
 	cmdBashComplete = c("bash-complete")
 	cmdSortTodoList = c("sort-todos")
-	cmdListVars     = c("list-vars")
+	cmdEnv          = c("env")
 	cmdRemotePush   = c("push")
 	cmdRemotePull   = c("pull")
 
@@ -93,7 +93,7 @@ func main() {
 		terms, err := parseSearchArgs(flag.Args())
 		dieIf(err)
 		must(searcher.Search(terms))
-	case cmdListVars:
+	case cmdEnv:
 		fmt.Println(env.VarNames())
 	case cmdRemotePush:
 		must(handleNoRemoteConfig(remote.Push()))
