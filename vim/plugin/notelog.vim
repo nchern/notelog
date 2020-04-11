@@ -46,3 +46,8 @@ autocmd FileType org command! -nargs=1 -complete=custom,NotesList NotesInsertLin
 
 " Performs search
 autocmd FileType org command! -nargs=1 NotesSearch :call NotesDoSearch(<f-args>)
+
+" Installs notelog binaries
+autocmd FileType org command! NoteInstallBinaries :!go get github/nchern/notelog/...
+" Updates notelog binaries
+autocmd FileType org command! NoteUpdateBinaries :!go get -u github/nchern/notelog/...
