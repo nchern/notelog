@@ -25,8 +25,8 @@ $ notelog -h
 
 ## Roadmap
 
- - [] note templates
- - [] search browsing: quick jump to search results
- - [] vim plugin
-    - [] mvp
-    - [] with ftdetect to '.note'
+ - [ ] note templates
+ - [ ] search browsing: quick jump to search results
+ - [ ] vim plugin
+   - [ ] mvp
+   - [ ] with ftdetect to '.note'
