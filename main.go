@@ -86,7 +86,7 @@ func main() {
 	case cmdGetFullPath:
 		noteName, _, err := parseArgs(flag.Args())
 		dieIf(err)
-		fmt.Print(env.NotesFilePath(noteName))
+		must(printFullPath(noteName))
 	case cmdSortTodoList:
 		must(todos.Sort(os.Stdin, os.Stdout))
 	case cmdSearch:
@@ -175,5 +175,14 @@ func printNote(noteName string) error {
 	}
 
 	_, err = io.Copy(os.Stdout, f)
+	return err
+}
+
+func printFullPath(noteName string) error {
+	path := env.NotesFilePath(noteName)
+	if _, err := os.Stat(path); err != nil {
+		return err
+	}
+	_, err := fmt.Print(path)
 	return err
 }
