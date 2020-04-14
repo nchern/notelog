@@ -24,7 +24,7 @@ var (
 	editorCmd = env.Get("EDITOR", defaultEditor)
 )
 
-// EditNote note: calls editor or writes instant
+// EditNote calls an editor to interactively edit `noteName` or directly writes an `instant` string to it
 func EditNote(noteName string, instantRecord string) error {
 	noteName = strings.TrimSpace(noteName)
 	if noteName == "" {

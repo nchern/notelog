@@ -62,7 +62,7 @@ var (
 	cmdRemotePush   = c("push")
 	cmdRemotePull   = c("pull")
 
-	cmd = flag.String("cmd", cmdEdit, fmt.Sprintf("One of: %s", commands))
+	cmd = flag.String("c", cmdEdit, fmt.Sprintf("One of: %s", commands))
 )
 
 func main() {
