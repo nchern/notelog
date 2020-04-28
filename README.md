@@ -26,7 +26,9 @@ $ notelog -h
 ## Roadmap
 
  - [ ] note templates
- - [ ] search browsing: quick jump to search results
+ - [ ] cross-linking: you can fetch all the references from other notes to a given note
+   - [ ] embed cross links in notes?
+ - [ ] search browsing: quick jump to search results from command line
  - [ ] vim plugin
    - [x] mvp
-   - [ ] with ftdetect to '.note'
+   - [ ] with ftdetect to '.note'?
