@@ -5,7 +5,12 @@ autocmd FileType org set grepprg=notelog\ -c\ search
 
 " Notes autocomplete for Notelog
 :fun NotesList(A,L,P)
-:    return system("notelog -c list")
+:    let res = system("notelog -c list")
+:    if v:shell_error != 0
+:       echoerr l:red
+:       return ''
+:    endif
+:    return l:res
 :endfun
 
 " Returns full path to notes in Notelog
