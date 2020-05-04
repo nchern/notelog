@@ -4,7 +4,7 @@ endif
 
 
 " highlights deadlines(the usual usecase is todo item): <by Mon, 3d>
-syntax match notelogItemDeadline /\v\<[by|till|until]\s.*\>/ containedin=ALL
+syntax match notelogItemDeadline /\v\<(by|till|until)\s.*\>/ containedin=ALL
 highlight notelogItemDeadline ctermfg=DarkRed term=bold cterm=bold gui=bold
 
 
