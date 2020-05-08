@@ -114,7 +114,7 @@ func handleNoRemoteConfig(err error) error {
 			return err
 		}
 
-		return editor.Command(configPath).Run()
+		return editor.Shellout(configPath).Run()
 	}
 	return err
 }

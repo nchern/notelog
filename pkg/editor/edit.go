@@ -46,12 +46,13 @@ func EditNote(noteName string, instantRecord string) error {
 		return writeInstantRecord(filename, instantRecord)
 	}
 
-	ed := Command(filename)
+	ed := Shellout(filename)
 	return ed.Run()
 }
 
-// Command creates exec.Command with editor to edit given filename
-func Command(fileName string) *exec.Cmd {
+// Shellout creates a ready to shellout exec.Command editor to edit given filename.
+// It inherits all std* streams from the current process
+func Shellout(fileName string) *exec.Cmd {
 	// HACK: this will not work properly if flags contain values with spaces
 	args := strings.Fields(strings.TrimSpace(editorFlags))
 	args = append(args, fileName)
