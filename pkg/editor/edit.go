@@ -22,6 +22,8 @@ const (
 
 var (
 	editorCmd = env.Get("EDITOR", defaultEditor)
+
+	editorFlags = env.Get("EDITOR_FLAGS", "")
 )
 
 // EditNote calls an editor to interactively edit `noteName` or directly writes an `instant` string to it
@@ -50,7 +52,11 @@ func EditNote(noteName string, instantRecord string) error {
 
 // Command creates exec.Command with editor to edit given filename
 func Command(fileName string) *exec.Cmd {
-	cmd := exec.Command(editorCmd, fileName)
+	// HACK: this will not work properly if flags contain values with spaces
+	args := strings.Fields(strings.TrimSpace(editorFlags))
+	args = append(args, fileName)
+
+	cmd := exec.Command(editorCmd, args...)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
