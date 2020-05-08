@@ -3,7 +3,6 @@ package editor
 import (
 	"os"
 	"os/exec"
-	"path/filepath"
 	"strings"
 
 	"github.com/nchern/notelog/pkg/env"
@@ -25,22 +24,25 @@ var (
 	editorFlags = env.Get("EDITOR_FLAGS", "")
 )
 
+// Note abstracts the note to edit
+type Note interface {
+	Dir() string
+	FullPath() string
+}
+
 // EditNote calls an editor to interactively edit `noteName` or directly writes an `instant` string to it
-func EditNote(noteName string, instantRecord string) error {
-	filename := env.NotesFilePath(noteName)
-	dirName := filepath.Dir(filename)
+func EditNote(note Note, instantRecord string) error {
+	defer removeDirIfNotesFileNotExists(note.Dir(), note.FullPath())
 
-	defer removeDirIfNotesFileNotExists(dirName, filename)
-
-	if err := os.MkdirAll(dirName, DefaultDirPerms); err != nil {
+	if err := os.MkdirAll(note.Dir(), DefaultDirPerms); err != nil {
 		return err
 	}
 
 	if instantRecord != "" {
-		return writeInstantRecord(filename, instantRecord)
+		return writeInstantRecord(note.FullPath(), instantRecord)
 	}
 
-	ed := Shellout(filename)
+	ed := Shellout(note.FullPath())
 	return ed.Run()
 }
 

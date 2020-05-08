@@ -13,6 +13,7 @@ import (
 
 	"github.com/nchern/notelog/pkg/editor"
 	"github.com/nchern/notelog/pkg/env"
+	"github.com/nchern/notelog/pkg/note"
 	"github.com/nchern/notelog/pkg/remote"
 	"github.com/nchern/notelog/pkg/searcher"
 	"github.com/nchern/notelog/pkg/todos"
@@ -68,11 +69,13 @@ var (
 func main() {
 	flag.Parse()
 
+	notes := note.NewList()
+
 	switch *cmd {
 	case cmdEdit:
 		noteName, instantRecord, err := parseArgs(flag.Args())
 		dieIf(err)
-		must(editor.EditNote(noteName, instantRecord))
+		must(editor.EditNote(notes.Note(noteName), instantRecord))
 	case cmdLs:
 		must(listNotes())
 	case cmdBashComplete:
@@ -80,25 +83,25 @@ func main() {
 	case cmdPrint:
 		noteName, _, err := parseArgs(flag.Args())
 		dieIf(err)
-		must(printNote(noteName))
+		must(printNote(notes.Note(noteName)))
 	case cmdPrintHome:
-		fmt.Print(env.NotesRootPath())
+		fmt.Print(notes.HomeDir())
 	case cmdGetFullPath:
 		noteName, _, err := parseArgs(flag.Args())
 		dieIf(err)
-		must(printFullPath(noteName))
+		must(printFullPath(notes.Note(noteName)))
 	case cmdSortTodoList:
 		must(todos.Sort(os.Stdin, os.Stdout))
 	case cmdSearch:
 		terms, err := parseSearchArgs(flag.Args())
 		dieIf(err)
-		must(searcher.Search(terms))
+		must(searcher.Search(notes, terms))
 	case cmdEnv:
 		fmt.Println(env.Vars())
 	case cmdRemotePush:
-		must(handleNoRemoteConfig(remote.Push()))
+		must(handleNoRemoteConfig(remote.Push(notes)))
 	case cmdRemotePull:
-		must(handleNoRemoteConfig(remote.Pull()))
+		must(handleNoRemoteConfig(remote.Pull(notes)))
 	default:
 		fatal(fmt.Sprintf("Bad cmd: '%s'", *cmd))
 	}
@@ -106,7 +109,7 @@ func main() {
 
 func handleNoRemoteConfig(err error) error {
 	if os.IsNotExist(err) {
-		configPath := env.NotesMetadataPath(remote.ConfigName)
+		configPath := note.NewList().MetadataFilename(remote.ConfigName)
 		if err := os.MkdirAll(path.Dir(configPath), editor.DefaultDirPerms); err != nil {
 			return err
 		}
@@ -120,7 +123,7 @@ func handleNoRemoteConfig(err error) error {
 }
 
 func listNotes() error {
-	dirs, err := ioutil.ReadDir(env.NotesRootPath())
+	dirs, err := ioutil.ReadDir(note.NewList().HomeDir())
 	if err != nil {
 		return err
 	}
@@ -170,9 +173,8 @@ func autoCompleteScript() string {
 		name, name, name)
 }
 
-func printNote(noteName string) error {
-	filename := env.NotesFilePath(noteName)
-	f, err := os.Open(filename)
+func printNote(n *note.Note) error {
+	f, err := os.Open(n.FullPath())
 	if err != nil {
 		return err
 	}
@@ -181,8 +183,8 @@ func printNote(noteName string) error {
 	return err
 }
 
-func printFullPath(noteName string) error {
-	path := env.NotesFilePath(noteName)
+func printFullPath(n *note.Note) error {
+	path := n.FullPath()
 	if _, err := os.Stat(path); err != nil {
 		return err
 	}

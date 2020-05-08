@@ -6,8 +6,6 @@ import (
 	"os"
 	"os/exec"
 	"strings"
-
-	"github.com/nchern/notelog/pkg/env"
 )
 
 const (
@@ -29,12 +27,18 @@ type entry struct {
 	Scheme string
 }
 
-func Push() error {
-	return execute(push)
+// Notes abstracts note collection that provides metadata
+type Notes interface {
+	HomeDir() string
+	MetadataFilename(string) string
 }
 
-func Pull() error {
-	return execute(pull)
+func Push(notes Notes) error {
+	return execute(notes, push)
+}
+
+func Pull(notes Notes) error {
+	return execute(notes, pull)
 }
 
 func push(e *entry, name string) ([]string, error) {
@@ -55,17 +59,19 @@ func pull(e *entry, name string) ([]string, error) {
 	return res, nil
 }
 
-func execute(pushOrPull action) error {
-	f, err := os.Open(env.NotesMetadataPath(ConfigName))
+func execute(notes Notes, pushOrPull action) error {
+	f, err := os.Open(notes.MetadataFilename(ConfigName))
 	if err != nil {
 		return err
 	}
+	defer f.Close()
+
 	remotes, err := parse(f)
 	if err != nil {
 		return err
 	}
 	// TODO: support multiple remotes
-	args, err := pushOrPull(remotes[0], env.NotesRootPath())
+	args, err := pushOrPull(remotes[0], notes.HomeDir())
 	if err != nil {
 		return err
 	}

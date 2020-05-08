@@ -14,9 +14,14 @@ const (
 
 var grepCmd = env.Get("NOTELOG_GREP", defaultGrep)
 
+// Notes abstracts note collection to search in
+type Notes interface {
+	HomeDir() string
+}
+
 // Search runs the search over all notes in notes home and prints results to stdout
-func Search(terms string) error {
-	cmd := exec.Command(grepCmd, defaultGrepArgs, terms, env.NotesRootPath())
+func Search(notes Notes, terms string) error {
+	cmd := exec.Command(grepCmd, defaultGrepArgs, terms, notes.HomeDir())
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()
