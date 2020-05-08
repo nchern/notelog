@@ -75,7 +75,7 @@ func main() {
 	case cmdEdit:
 		noteName, instantRecord, err := parseArgs(flag.Args())
 		dieIf(err)
-		must(editor.EditNote(notes.Note(noteName), instantRecord))
+		must(editor.Edit(notes.Note(noteName), instantRecord))
 	case cmdLs:
 		must(listNotes())
 	case cmdBashComplete:
