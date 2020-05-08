@@ -133,14 +133,14 @@ func listNotes() error {
 	return nil
 }
 
-func parseArgs(args []string) (filename string, instantRecord string, err error) {
+func parseArgs(args []string) (noteName string, instantRecord string, err error) {
 	if len(args) < 1 {
-		filename = scratchpadName
+		noteName = scratchpadName
 		return
 	}
 
-	filename = args[0]
-	if err = validateNoteName(filename); err != nil {
+	noteName = strings.TrimSpace(args[0])
+	if err = validateNoteName(noteName); err != nil {
 		return
 	}
 	instantRecord = strings.TrimSpace(strings.Join(args[1:], " "))
@@ -148,6 +148,9 @@ func parseArgs(args []string) (filename string, instantRecord string, err error)
 }
 
 func validateNoteName(name string) error {
+	if name == "" {
+		return errors.New("Empty note name. Specify the real name")
+	}
 	if strings.HasPrefix(name, ".") {
 		return errors.New("Note name can not start with '.'")
 	}

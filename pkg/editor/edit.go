@@ -1,7 +1,6 @@
 package editor
 
 import (
-	"errors"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -28,11 +27,6 @@ var (
 
 // EditNote calls an editor to interactively edit `noteName` or directly writes an `instant` string to it
 func EditNote(noteName string, instantRecord string) error {
-	noteName = strings.TrimSpace(noteName)
-	if noteName == "" {
-		return errors.New("Empty note name. Specify the real name")
-	}
-
 	filename := env.NotesFilePath(noteName)
 	dirName := filepath.Dir(filename)
 
