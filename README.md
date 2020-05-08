@@ -32,3 +32,5 @@ $ notelog -h
  - [ ] vim plugin
    - [x] mvp
    - [ ] with ftdetect to '.note'?
+- [ ] add rm feature
+- [ ] add rename feature
