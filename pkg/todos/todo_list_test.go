@@ -156,13 +156,13 @@ func TestShouldSort(t *testing.T) {
 				- [] buzz
 				- [] foobar
 				- [x] foo
-					- foo context
+                  - foo context
 					more context
 				- [x] foobazz`,
 			`foo bar
 				- [] bar
 				- [x] foo
-					- foo context
+                  - foo context
 					more context
 				- [] buzz
 				- [x] foobazz
