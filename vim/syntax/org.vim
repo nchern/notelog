@@ -13,7 +13,8 @@ syntax      match               notelogWarning /\v!.*!/ containedin=ALL
 highlight   notelogWarning      ctermfg=Red term=bold,underline cterm=bold,underline
 
 
-" highlights a block with backgound color: %this block is highlighted%
+" highlights a block with backgound color: % this block is highlighted %
+" mind the spaces BEFORE and AFTER %
 syntax      match           notelogMarker  /\v\% [0-9a-zA-Z _:;\%]* \%/ containedin=ALL
 highlight   notelogMarker   ctermbg=Yellow ctermfg=Black term=bold cterm=bold gui=bold
 
