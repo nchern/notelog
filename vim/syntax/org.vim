@@ -19,4 +19,9 @@ syntax      match           notelogMarker  /\v\% [0-9a-zA-Z _:;\%]* \%/ containe
 highlight   notelogMarker   ctermbg=Yellow ctermfg=Black term=bold cterm=bold gui=bold
 
 
+" highlight references to people: @John.Doe
+syntax      match           notelogPerson   /\v\@[a-zA-Z.]+/ containedin=ALL
+highlight   notelogPerson   ctermfg=Blue    term=bold cterm=bold gui=bold
+
+
 let b:note_syntax = "notelog"
