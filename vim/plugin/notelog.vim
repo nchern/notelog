@@ -40,6 +40,37 @@ func NotesDoInsertLink(name)
    endtry
 endfun
 
+" NotesBrowseGroupDirectory calls an external command if a word under cursor
+" is a reference to a person. This word is passed to the command. This command
+" can call an external program to browse info for this person
+fun NotesBrowseGroupDirectory()
+    let person_class = 'notelogPerson'
+
+    let is_person = 0
+
+    for id in synstack(line('.'), col('.'))
+        if (synIDattr(id, 'name') == l:person_class)
+            let l:is_person = 1
+            break
+        endif
+    endfor
+
+    if !l:is_person
+        return
+    endif
+    let name = substitute(trim(expand('<cWORD>'), '@'), '\.', ' ', 'g')
+
+    if !exists('g:nl_gd_browse_command')
+        let g:nl_gd_browse_command = 'nl_gd_browse'
+    endif
+
+    execute ':silent !' . g:nl_gd_browse_command . ' "' . l:name . '"'
+endfun
+
+
+" Calls an external command to search info on a person
+autocmd FileType org nnoremap <Localleader>gd :call BrowseGroupDirectory()<CR>
+
 " Opens an existing note with Notelog
 autocmd FileType org command! -nargs=1 -complete=custom,NotesList NotesOpen execute ':e ' NotesFullPath(<f-args>)
 
