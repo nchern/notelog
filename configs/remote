@@ -1,0 +1,5 @@
+# Put your remotes here
+
+rsync://<hostname>:notes/personal
+
+# git://git@github.com:<user>/repo.git

@@ -69,7 +69,7 @@ endfun
 
 
 " Calls an external command to search info on a person
-autocmd FileType org nnoremap <Localleader>gd :call BrowseGroupDirectory()<CR>
+autocmd FileType org nnoremap <Localleader>gd :call NotesBrowseGroupDirectory()<CR>
 
 " Opens an existing note with Notelog
 autocmd FileType org command! -nargs=1 -complete=custom,NotesList NotesOpen execute ':e ' NotesFullPath(<f-args>)
