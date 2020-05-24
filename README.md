@@ -1,3 +1,4 @@
+[![Go Report Card](https://goreportcard.com/badge/github.com/nchern/notelog)](https://goreportcard.com/report/github.com/nchern/notelog)
 # notelog
 
 Notelog is a simple organiser to maintain personal notes.
@@ -5,12 +6,12 @@ Notelog is a simple organiser to maintain personal notes.
 It keeps notebase in your home directory as files under a single folder.
 Integrates with your favourite text editor(tested with VIM).
 
-### Installation
+## Installation
 ```bash
 go get github.com/nchern/notelog/...
 ```
 
-### Examples
+## Examples
 
 ```bash
 # Opens "my-note" in editor
