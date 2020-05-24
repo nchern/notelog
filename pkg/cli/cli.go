@@ -4,17 +4,12 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"io"
-	"io/ioutil"
 	"os"
-	"path"
 	"strings"
 
-	"github.com/nchern/notelog/pkg/editor"
 	"github.com/nchern/notelog/pkg/env"
 	"github.com/nchern/notelog/pkg/note"
 	"github.com/nchern/notelog/pkg/remote"
-	"github.com/nchern/notelog/pkg/searcher"
 	"github.com/nchern/notelog/pkg/todos"
 )
 
@@ -45,90 +40,29 @@ func Execute(cmd string) error {
 
 	switch cmd {
 	case cmdEdit:
-		noteName, instantRecord, err := parseArgs(flag.Args())
-		if err != nil {
-			return err
-		}
-		if err := editor.Edit(notes.Note(noteName), instantRecord); err != nil {
-			return err
-		}
+		return edit()
 	case cmdLs:
-		if err := listNotes(); err != nil {
-			return err
-		}
+		return listNotes()
 	case cmdBashComplete:
 		fmt.Println(autoCompleteScript())
 	case cmdPrint:
-		noteName, _, err := parseArgs(flag.Args())
-		if err != nil {
-			return err
-		}
-		if err := printNote(notes.Note(noteName)); err != nil {
-			return err
-		}
+		return printNote()
 	case cmdPrintHome:
 		fmt.Print(notes.HomeDir())
 	case cmdGetFullPath:
-		noteName, _, err := parseArgs(flag.Args())
-		if err != nil {
-			return err
-		}
-		if err := printFullPath(notes.Note(noteName)); err != nil {
-			return err
-		}
+		return printFullPath()
 	case cmdSortTodoList:
-		if err := todos.Sort(os.Stdin, os.Stdout); err != nil {
-			return err
-		}
+		return todos.Sort(os.Stdin, os.Stdout)
 	case cmdSearch:
-		terms, err := parseSearchArgs(flag.Args())
-		if err != nil {
-			return err
-		}
-		if err := searcher.Search(notes, terms); err != nil {
-			return err
-		}
+		return search()
 	case cmdEnv:
 		fmt.Println(env.Vars())
 	case cmdRemotePush:
-		if err := handleNoRemoteConfig(remote.Push(notes)); err != nil {
-			return err
-		}
+		return handleNoRemoteConfig(remote.Push(notes))
 	case cmdRemotePull:
-		if err := handleNoRemoteConfig(remote.Pull(notes)); err != nil {
-			return err
-		}
+		return handleNoRemoteConfig(remote.Pull(notes))
 	default:
 		return fmt.Errorf("Bad cmd: '%s'", cmd)
-	}
-	return nil
-}
-
-func handleNoRemoteConfig(err error) error {
-	if os.IsNotExist(err) {
-		configPath := note.NewList().MetadataFilename(remote.ConfigName)
-		if err := os.MkdirAll(path.Dir(configPath), editor.DefaultDirPerms); err != nil {
-			return err
-		}
-		if err := ioutil.WriteFile(configPath, []byte(remote.DefaultConfig), editor.DefaultFilePerms); err != nil {
-			return err
-		}
-
-		return editor.Shellout(configPath).Run()
-	}
-	return err
-}
-
-func listNotes() error {
-	dirs, err := ioutil.ReadDir(note.NewList().HomeDir())
-	if err != nil {
-		return err
-	}
-	for _, dir := range dirs {
-		if validateNoteName(dir.Name()) != nil {
-			continue
-		}
-		fmt.Println(dir.Name())
 	}
 	return nil
 }
@@ -162,29 +96,4 @@ func parseSearchArgs(args []string) (string, error) {
 		return "", errors.New("Not enough args. Specify a search term")
 	}
 	return args[0], nil
-}
-
-func autoCompleteScript() string {
-	name := os.Args[0]
-	return fmt.Sprintf("# Bash autocompletion for %s. Completes notes\ncomplete -W \"`%s -cmd=list`\" %s",
-		name, name, name)
-}
-
-func printNote(n *note.Note) error {
-	f, err := os.Open(n.FullPath())
-	if err != nil {
-		return err
-	}
-
-	_, err = io.Copy(os.Stdout, f)
-	return err
-}
-
-func printFullPath(n *note.Note) error {
-	path := n.FullPath()
-	if _, err := os.Stat(path); err != nil {
-		return err
-	}
-	_, err := fmt.Print(path)
-	return err
 }
