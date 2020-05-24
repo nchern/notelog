@@ -34,8 +34,8 @@ func TestShouldParseConfig(t *testing.T) {
 
 	assert.Equal(t,
 		[]*entry{
-			&entry{Scheme: "rsync", Addr: "user@example.com:bak/name/"},
-			&entry{Scheme: "git", Addr: "git@github.com:nchern/go-codegen.git"},
+			{Scheme: "rsync", Addr: "user@example.com:bak/name/"},
+			{Scheme: "git", Addr: "git@github.com:nchern/go-codegen.git"},
 		},
 		actual)
 }

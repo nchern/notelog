@@ -16,7 +16,7 @@ var (
 	errUnknownScheme = errors.New("Unknown scheme")
 
 	schemeToCmd = map[string][]string{
-		"rsync": []string{"rsync", "-r"},
+		"rsync": {"rsync", "-r"},
 	}
 )
 
