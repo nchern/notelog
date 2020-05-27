@@ -25,13 +25,19 @@ $ notelog -h
 ```
 
 ## Roadmap
-
- - [ ] note templates
+ - [ ] search: add simple query language, e.g "foo bar -buzz" == "foo OR bar EXCLUDE buzz"
+ - [ ] add rm feature
+ - [ ] add rename feature
+ - [ ] archive: note can:
+   - [ ] be put into archive, so it will not stay in the main note list
+   - [ ] restored from the archive (eventually)
  - [ ] cross-linking: you can fetch all the references from other notes to a given note
    - [ ] embed cross links in notes?
  - [ ] search browsing: quick jump to search results from command line
+ - [ ] cloud capabilities:
+   - [x] via simple rsync
+   - [ ] via git
  - [ ] vim plugin
    - [x] mvp
    - [ ] with ftdetect to '.note'?
-- [ ] add rm feature
-- [ ] add rename feature
+ - [ ] note templates
