@@ -16,7 +16,7 @@ func search() error {
 	}
 
 	notes := note.NewList()
-	err := searcher.Search(notes, os.Stdout, flag.Args()...)
+	err := searcher.NewSearcher(notes, os.Stdout).Search(flag.Args()...)
 	switch e := err.(type) {
 	case *exec.ExitError:
 		if e.ExitCode() == 1 {

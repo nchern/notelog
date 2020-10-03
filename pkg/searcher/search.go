@@ -20,6 +20,7 @@ var grepCmd = env.Get("NOTELOG_GREP", defaultGrep)
 // Notes abstracts note collection to search in
 type Notes interface {
 	HomeDir() string
+	MetadataFilename(name string) string
 }
 
 type request struct {
@@ -27,21 +28,35 @@ type request struct {
 	excludeTerms []string
 }
 
+// Searcher represents a search engine over notes
+type Searcher struct {
+	notes Notes
+	out   io.Writer
+}
+
+// NewSearcher returns a new Searcher instance
+func NewSearcher(notes Notes, out io.Writer) *Searcher {
+	return &Searcher{
+		notes: notes,
+		out:   out,
+	}
+}
+
 // Search runs the search over all notes in notes home and prints results to stdout
 // Terms grammar looks like: "foo bar -buzz -fuzz" where -xxx means exclude xxx matches from the output
-func Search(notes Notes, out io.Writer, terms ...string) error {
+func (s *Searcher) Search(terms ...string) error {
 	var cmd *exec.Cmd
 	req := parseRequest(terms...)
 
 	if len(req.excludeTerms) > 0 {
-		findCmd := strings.Join([]string{grepCmd, defaultGrepArgs, quote(regexOr(req.terms)), notes.HomeDir()}, " ")
+		findCmd := strings.Join([]string{grepCmd, defaultGrepArgs, quote(regexOr(req.terms)), s.notes.HomeDir()}, " ")
 		excludeCmd := strings.Join([]string{grepCmd, "-vi", quote(regexOr(req.excludeTerms))}, " ")
 		cmd = exec.Command("sh", "-c", fmt.Sprintf("%s | %s", findCmd, excludeCmd))
 	} else {
-		cmd = exec.Command(grepCmd, defaultGrepArgs, regexOr(req.terms), notes.HomeDir())
+		cmd = exec.Command(grepCmd, defaultGrepArgs, regexOr(req.terms), s.notes.HomeDir())
 	}
 
-	cmd.Stdout = out
+	cmd.Stdout = s.out
 	cmd.Stderr = os.Stderr
 
 	return cmd.Run()

@@ -47,7 +47,8 @@ func TestShoudSearch(t *testing.T) {
 			tt := tt
 			t.Run(tt.name, func(t *testing.T) {
 				actual := &bytes.Buffer{}
-				assert.NoError(t, Search(&testContext{}, actual, tt.given...))
+				underTest := NewSearcher(&mock{}, actual)
+				assert.NoError(t, underTest.Search(tt.given...))
 				assert.Equal(t, tt.expected, len(toLines(actual.String())))
 			})
 		}
@@ -57,16 +58,19 @@ func TestShoudSearch(t *testing.T) {
 func TestSearchShoudReturnOneIfFoundNothing(t *testing.T) {
 	withFiles(func() {
 		actual := &bytes.Buffer{}
-		err := Search(&testContext{}, actual, "you will not find me")
+		underTest := NewSearcher(&mock{}, actual)
+		err := underTest.Search("you will not find me")
 
 		assert.NotNil(t, err)
 		assert.Equal(t, 1, (err.(*exec.ExitError)).ExitCode())
 	})
 }
 
-type testContext struct{}
+type mock struct{}
 
-func (t *testContext) HomeDir() string { return homeDir }
+func (m *mock) HomeDir() string { return homeDir }
+
+func (m *mock) MetadataFilename(_ string) string { return homeDir }
 
 func withFiles(fn func()) {
 	must(os.MkdirAll(homeDir, 0755))
