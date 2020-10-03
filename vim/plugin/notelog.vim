@@ -72,18 +72,18 @@ endfun
 autocmd FileType org nnoremap <Localleader>gd :call NotesBrowseGroupDirectory()<CR>
 
 " Opens an existing note with Notelog
-command! -nargs=1 -complete=custom,NotesList NotesOpen execute ':e ' NotesFullPath(<f-args>)
+command! -nargs=1 -complete=custom,NotesList NLOpen execute ':e ' NotesFullPath(<f-args>)
 
 " Sorts todos with notelog
-autocmd FileType org command! -range=% NotesSortTodos :<line1>,<line2>!notelog -c sort-todos
+autocmd FileType org command! -range=% NLSortTodos :<line1>,<line2>!notelog -c sort-todos
 
 " Inserts link to another note under the cursor pos
-autocmd FileType org command! -nargs=1 -complete=custom,NotesList NotesInsertLink :call NotesDoInsertLink(<f-args>)
+autocmd FileType org command! -nargs=1 -complete=custom,NotesList NLInsertLink :call NotesDoInsertLink(<f-args>)
 
 " Performs search
-autocmd FileType org command! -nargs=1 NotesSearch :call NotesDoSearch(<f-args>)
+autocmd FileType org command! -nargs=1 NLSearch :call NotesDoSearch(<f-args>)
 
 " Installs notelog binaries
-autocmd FileType org command! NoteInstallBinaries :!go get github.com/nchern/notelog/...
+autocmd FileType org command! NLInstallBinaries :!go get github.com/nchern/notelog/...
 " Updates notelog binaries
-autocmd FileType org command! NoteUpdateBinaries :!go get -u github.com/nchern/notelog/...
+autocmd FileType org command! NLUpdateBinaries :!go get -u github.com/nchern/notelog/...
