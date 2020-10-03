@@ -2,7 +2,6 @@ package searcher
 
 import (
 	"bytes"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -55,6 +54,23 @@ func TestShoudSearch(t *testing.T) {
 	})
 }
 
+func TestSearchShoudWriteLastSearchResults(t *testing.T) {
+	withFiles(func() {
+		actual := &bytes.Buffer{}
+
+		underTest := NewSearcher(&mock{}, actual)
+		underTest.SaveResults = true
+
+		assert.NoError(t, underTest.Search("foobar"))
+
+		resultsFilename := filepath.Join(homeDir, lastResultsFile)
+		body, err := ioutil.ReadFile(resultsFilename)
+
+		assert.NoError(t, err) // file must exist
+		assert.Equal(t, actual.Bytes(), body)
+	})
+}
+
 func TestSearchShoudReturnOneIfFoundNothing(t *testing.T) {
 	withFiles(func() {
 		actual := &bytes.Buffer{}
@@ -70,7 +86,7 @@ type mock struct{}
 
 func (m *mock) HomeDir() string { return homeDir }
 
-func (m *mock) MetadataFilename(_ string) string { return homeDir }
+func (m *mock) MetadataFilename(name string) string { return filepath.Join(homeDir, name) }
 
 func withFiles(fn func()) {
 	must(os.MkdirAll(homeDir, 0755))
@@ -90,6 +106,5 @@ func must(err error) {
 }
 
 func toLines(s string) []string {
-	fmt.Println(s)
 	return strings.Split(strings.Trim(s, "\n"), "\n")
 }

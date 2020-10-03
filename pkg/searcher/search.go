@@ -13,6 +13,8 @@ import (
 const (
 	defaultGrep     = "egrep"
 	defaultGrepArgs = "-rni"
+
+	lastResultsFile = "last_search"
 )
 
 var grepCmd = env.Get("NOTELOG_GREP", defaultGrep)
@@ -30,8 +32,9 @@ type request struct {
 
 // Searcher represents a search engine over notes
 type Searcher struct {
-	notes Notes
-	out   io.Writer
+	SaveResults bool
+	notes       Notes
+	out         io.Writer
 }
 
 // NewSearcher returns a new Searcher instance
@@ -49,17 +52,31 @@ func (s *Searcher) Search(terms ...string) error {
 	req := parseRequest(terms...)
 
 	if len(req.excludeTerms) > 0 {
-		findCmd := strings.Join([]string{grepCmd, defaultGrepArgs, quote(regexOr(req.terms)), s.notes.HomeDir()}, " ")
-		excludeCmd := strings.Join([]string{grepCmd, "-vi", quote(regexOr(req.excludeTerms))}, " ")
+		findCmd := c(grepCmd, defaultGrepArgs, quote(regexOr(req.terms)), s.notes.HomeDir())
+		excludeCmd := c(grepCmd, "-vi", quote(regexOr(req.excludeTerms)))
+
 		cmd = exec.Command("sh", "-c", fmt.Sprintf("%s | %s", findCmd, excludeCmd))
 	} else {
 		cmd = exec.Command(grepCmd, defaultGrepArgs, regexOr(req.terms), s.notes.HomeDir())
 	}
 
-	cmd.Stdout = s.out
 	cmd.Stderr = os.Stderr
 
+	cmd.Stdout = s.out
+	if s.SaveResults {
+		f, err := os.Create(s.notes.MetadataFilename(lastResultsFile))
+		if err != nil {
+			return err
+		}
+		defer f.Close()
+		cmd.Stdout = io.MultiWriter(s.out, f)
+	}
+
 	return cmd.Run()
+}
+
+func c(s ...string) string {
+	return strings.Join(s, " ")
 }
 
 func quote(s string) string {
