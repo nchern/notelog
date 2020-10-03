@@ -72,7 +72,7 @@ endfun
 autocmd FileType org nnoremap <Localleader>gd :call NotesBrowseGroupDirectory()<CR>
 
 " Opens an existing note with Notelog
-autocmd FileType org command! -nargs=1 -complete=custom,NotesList NotesOpen execute ':e ' NotesFullPath(<f-args>)
+command! -nargs=1 -complete=custom,NotesList NotesOpen execute ':e ' NotesFullPath(<f-args>)
 
 " Sorts todos with notelog
 autocmd FileType org command! -range=% NotesSortTodos :<line1>,<line2>!notelog -c sort-todos

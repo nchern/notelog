@@ -25,7 +25,7 @@ $ notelog -h
 ```
 
 ## Roadmap
- - [ ] search: add simple query language, e.g "foo bar -buzz" == "foo OR bar EXCLUDE buzz"
+ - [x] search: add simple query language, e.g "foo bar -buzz" == "foo OR bar EXCLUDE buzz"
  - [ ] add rm feature
  - [ ] add rename feature
  - [ ] archive: note can:
