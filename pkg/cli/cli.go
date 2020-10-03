@@ -90,10 +90,3 @@ func validateNoteName(name string) error {
 	}
 	return nil
 }
-
-func parseSearchArgs(args []string) (string, error) {
-	if len(args) < 1 {
-		return "", errors.New("Not enough args. Specify a search term")
-	}
-	return args[0], nil
-}
