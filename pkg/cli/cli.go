@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/nchern/notelog/pkg/env"
@@ -13,9 +14,13 @@ import (
 	"github.com/nchern/notelog/pkg/todos"
 )
 
-const scratchpadName = ".scratchpad"
+const (
+	subCommand     = "c"
+	scratchpadName = ".scratchpad"
+)
 
 var (
+	cmdAutoComplete = c("autocomplete")
 	cmdBashComplete = c("bash-complete")
 	cmdEnv          = c("env")
 	cmdEdit         = c("edit")
@@ -33,7 +38,7 @@ var (
 	cmdSortTodoList = c("sort-todos")
 
 	// Command is a user subcommand
-	Command = flag.String("c", cmdEdit, fmt.Sprintf("One of: %s", commands))
+	Command = flag.String(subCommand, cmdEdit, fmt.Sprintf("One of: %s", commands))
 )
 
 // Execute runs specified command
@@ -42,15 +47,18 @@ func Execute(cmd string) error {
 	notes := note.NewList()
 
 	switch cmd {
+	case cmdAutoComplete:
+		pos, err := strconv.Atoi(os.Getenv("COMP_POINT"))
+		if err != nil {
+			return err
+		}
+		return autoComplete(note.NewList(), os.Getenv("COMP_LINE"), pos, os.Stdout)
 	case cmdEdit:
 		return edit()
 	case cmdLs:
-		return listNotes()
+		return listNotes(note.NewList(), os.Stdout)
 	case cmdLsCmds:
-		for _, c := range commands {
-			fmt.Println(c)
-		}
-		return nil
+		return listCommands(os.Stdout)
 	case cmdBashComplete:
 		_, err = fmt.Println(autoCompleteScript())
 		return err

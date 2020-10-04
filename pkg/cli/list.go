@@ -2,21 +2,20 @@ package cli
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 
 	"github.com/nchern/notelog/pkg/note"
 )
 
-func listNotes() error {
-	dirs, err := ioutil.ReadDir(note.NewList().HomeDir())
+func listNotes(list note.List, w io.Writer) error {
+	notes, err := list.All()
 	if err != nil {
 		return err
 	}
-	for _, dir := range dirs {
-		if validateNoteName(dir.Name()) != nil {
-			continue
+	for _, note := range notes {
+		if _, err := fmt.Fprintln(w, note.Name()); err != nil {
+			return err
 		}
-		fmt.Println(dir.Name())
 	}
 	return nil
 }

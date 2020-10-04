@@ -2,8 +2,10 @@ package note
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 // List represents a collection of notes.
@@ -44,6 +46,23 @@ func (l List) Rename(oldName string, newName string) error {
 	}
 
 	return os.Rename(path, l.Note(newName).Dir())
+}
+
+// All returns all notes from this list
+func (l List) All() ([]*Note, error) {
+	res := []*Note{}
+	dirs, err := ioutil.ReadDir(l.HomeDir())
+	if err != nil {
+		return nil, err
+	}
+	for _, dir := range dirs {
+		if strings.HasPrefix(dir.Name(), ".") {
+			continue
+		}
+		res = append(res, l.Note(dir.Name()))
+	}
+
+	return res, nil
 }
 
 // NewList returns a list of notes

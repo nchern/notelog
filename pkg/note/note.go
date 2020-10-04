@@ -34,3 +34,8 @@ func (n *Note) Dir() string {
 func (n *Note) MetadataFilename(name string) string {
 	return filepath.Join(n.Dir(), name)
 }
+
+// Name returns a note's name
+func (n *Note) Name() string {
+	return n.name
+}
