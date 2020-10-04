@@ -26,8 +26,8 @@ $ notelog -h
 
 ## Roadmap
  - [x] search: add simple query language, e.g "foo bar -buzz" == "foo OR bar EXCLUDE buzz"
- - [ ] add rm feature
- - [ ] add rename feature
+ - [x] add rm feature
+ - [x] add rename feature
  - [ ] archive: note can:
    - [ ] be put into archive, so it will not stay in the main note list
    - [ ] restored from the archive (eventually)

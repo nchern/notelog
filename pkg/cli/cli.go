@@ -26,6 +26,7 @@ var (
 	cmdRemotePull   = c("pull")
 	cmdRemotePush   = c("push")
 	cmdRemove       = c("rm")
+	cmdRename       = c("rename")
 	cmdSearch       = c("search")
 	cmdSearchBrowse = c("search-browse")
 	cmdSortTodoList = c("sort-todos")
@@ -60,6 +61,12 @@ func Execute(cmd string) error {
 			return err
 		}
 		return notes.Remove(name)
+	case cmdRename:
+		name, newName, err := parseArgs(flag.Args())
+		if err != nil {
+			return err
+		}
+		return notes.Rename(name, newName)
 	case cmdSortTodoList:
 		return todos.Sort(os.Stdin, os.Stdout)
 	case cmdSearch:

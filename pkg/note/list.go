@@ -28,17 +28,37 @@ func (l List) MetadataFilename(name string) string {
 
 // Remove removes a note by name
 func (l List) Remove(name string) error {
-	filename := l.Note(name).Dir()
-	if _, err := os.Stat(filename); err != nil {
-		if os.IsNotExist(err) {
-			return fmt.Errorf("%s does not exist", name)
-		}
+	path, err := getExistingNotePath(l.Note(name))
+	if err != nil {
 		return err
 	}
-	return os.RemoveAll(filename)
+
+	return os.RemoveAll(path)
+}
+
+// Rename renames a note
+func (l List) Rename(oldName string, newName string) error {
+	path, err := getExistingNotePath(l.Note(oldName))
+	if err != nil {
+		return err
+	}
+
+	return os.Rename(path, l.Note(newName).Dir())
 }
 
 // NewList returns a list of notes
 func NewList() List {
 	return List(notesRootPath)
+}
+
+func getExistingNotePath(note *Note) (string, error) {
+	path := note.Dir()
+	if _, err := os.Stat(path); err != nil {
+		if os.IsNotExist(err) {
+			return "", fmt.Errorf("%s does not exist", note.name)
+		}
+		return "", err
+	}
+
+	return path, nil
 }
