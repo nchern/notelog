@@ -25,6 +25,7 @@ var (
 	cmdPrintHome    = c("print-home")
 	cmdRemotePull   = c("pull")
 	cmdRemotePush   = c("push")
+	cmdRemove       = c("rm")
 	cmdSearch       = c("search")
 	cmdSearchBrowse = c("search-browse")
 	cmdSortTodoList = c("sort-todos")
@@ -53,6 +54,12 @@ func Execute(cmd string) error {
 		return err
 	case cmdGetFullPath:
 		return printFullPath()
+	case cmdRemove:
+		name, _, err := parseArgs(flag.Args())
+		if err != nil {
+			return err
+		}
+		return notes.Remove(name)
 	case cmdSortTodoList:
 		return todos.Sort(os.Stdin, os.Stdout)
 	case cmdSearch:

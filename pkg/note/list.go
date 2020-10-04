@@ -1,6 +1,10 @@
 package note
 
-import "path/filepath"
+import (
+	"fmt"
+	"os"
+	"path/filepath"
+)
 
 // List represents a collection of notes.
 // As of now this is a collection of folders in NOTELOG_HOME
@@ -20,6 +24,18 @@ func (l List) Note(name string) *Note {
 // MetadataFilename returns full path to the notelog metadata for a given file
 func (l List) MetadataFilename(name string) string {
 	return filepath.Join(l.HomeDir(), ".notelog", name)
+}
+
+// Remove removes a note by name
+func (l List) Remove(name string) error {
+	filename := l.Note(name).Dir()
+	if _, err := os.Stat(filename); err != nil {
+		if os.IsNotExist(err) {
+			return fmt.Errorf("%s does not exist", name)
+		}
+		return err
+	}
+	return os.RemoveAll(filename)
 }
 
 // NewList returns a list of notes
