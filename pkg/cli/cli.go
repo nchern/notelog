@@ -20,6 +20,7 @@ var (
 	cmdEnv          = c("env")
 	cmdEdit         = c("edit")
 	cmdLs           = c("list")
+	cmdLsCmds       = c("list-cmds")
 	cmdGetFullPath  = c("path")
 	cmdPrint        = c("print")
 	cmdPrintHome    = c("print-home")
@@ -45,6 +46,11 @@ func Execute(cmd string) error {
 		return edit()
 	case cmdLs:
 		return listNotes()
+	case cmdLsCmds:
+		for _, c := range commands {
+			fmt.Println(c)
+		}
+		return nil
 	case cmdBashComplete:
 		_, err = fmt.Println(autoCompleteScript())
 		return err
