@@ -22,6 +22,6 @@ func must(err error) {
 
 func dieIf(err error) {
 	if err != nil {
-		log.Fatalf("FATAL: %s", err)
+		log.Fatalf("fatal: %s", err)
 	}
 }
