@@ -47,6 +47,7 @@ func TestShoudSearch(t *testing.T) {
 			t.Run(tt.name, func(t *testing.T) {
 				actual := &bytes.Buffer{}
 				underTest := NewSearcher(&mock{}, actual)
+
 				assert.NoError(t, underTest.Search(tt.given...))
 				assert.Equal(t, tt.expected, len(toLines(actual.String())))
 			})
@@ -75,10 +76,28 @@ func TestSearchShoudReturnOneIfFoundNothing(t *testing.T) {
 	withFiles(func() {
 		actual := &bytes.Buffer{}
 		underTest := NewSearcher(&mock{}, actual)
+
 		err := underTest.Search("you will not find me")
 
 		assert.NotNil(t, err)
 		assert.Equal(t, 1, (err.(*exec.ExitError)).ExitCode())
+	})
+}
+
+func TestGetLastNthResult(t *testing.T) {
+	withFiles(func() {
+		m := &mock{}
+		buf := &bytes.Buffer{}
+		underTest := NewSearcher(m, buf)
+		underTest.SaveResults = true
+
+		err := underTest.Search("foo")
+
+		assert.NoError(t, err)
+		actual, err := GetLastNthResult(m, 1)
+
+		assert.NoError(t, err)
+		assert.True(t, strings.HasPrefix(actual, filepath.Join(homeDir, "b.txt")))
 	})
 }
 

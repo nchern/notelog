@@ -16,19 +16,18 @@ import (
 const scratchpadName = ".scratchpad"
 
 var (
-	commands = commandList{}
-
-	cmdLs           = c("list")
+	cmdBashComplete = c("bash-complete")
+	cmdEnv          = c("env")
 	cmdEdit         = c("edit")
-	cmdSearch       = c("search")
+	cmdLs           = c("list")
+	cmdGetFullPath  = c("path")
 	cmdPrint        = c("print")
 	cmdPrintHome    = c("print-home")
-	cmdGetFullPath  = c("path")
-	cmdBashComplete = c("bash-complete")
-	cmdSortTodoList = c("sort-todos")
-	cmdEnv          = c("env")
-	cmdRemotePush   = c("push")
 	cmdRemotePull   = c("pull")
+	cmdRemotePush   = c("push")
+	cmdSearch       = c("search")
+	cmdSearchBrowse = c("search-browse")
+	cmdSortTodoList = c("sort-todos")
 
 	// Command is a user subcommand
 	Command = flag.String("c", cmdEdit, fmt.Sprintf("One of: %s", commands))
@@ -36,6 +35,7 @@ var (
 
 // Execute runs specified command
 func Execute(cmd string) error {
+	var err error
 	notes := note.NewList()
 
 	switch cmd {
@@ -44,19 +44,24 @@ func Execute(cmd string) error {
 	case cmdLs:
 		return listNotes()
 	case cmdBashComplete:
-		fmt.Println(autoCompleteScript())
+		_, err = fmt.Println(autoCompleteScript())
+		return err
 	case cmdPrint:
 		return printNote()
 	case cmdPrintHome:
-		fmt.Print(notes.HomeDir())
+		_, err = fmt.Print(notes.HomeDir())
+		return err
 	case cmdGetFullPath:
 		return printFullPath()
 	case cmdSortTodoList:
 		return todos.Sort(os.Stdin, os.Stdout)
 	case cmdSearch:
 		return search()
+	case cmdSearchBrowse:
+		return browseSearch()
 	case cmdEnv:
-		fmt.Println(env.Vars())
+		_, err = fmt.Println(env.Vars())
+		return err
 	case cmdRemotePush:
 		return handleNoRemoteConfig(remote.Push(notes))
 	case cmdRemotePull:
@@ -64,7 +69,6 @@ func Execute(cmd string) error {
 	default:
 		return fmt.Errorf("Bad cmd: '%s'", cmd)
 	}
-	return nil
 }
 
 func parseArgs(args []string) (noteName string, instantRecord string, err error) {

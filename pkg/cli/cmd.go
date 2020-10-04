@@ -2,6 +2,8 @@ package cli
 
 import "strings"
 
+var commands = commandList{}
+
 type commandList []string
 
 func (l commandList) String() string {

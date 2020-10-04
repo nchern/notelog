@@ -33,7 +33,7 @@ $ notelog -h
    - [ ] restored from the archive (eventually)
  - [ ] cross-linking: you can fetch all the references from other notes to a given note
    - [ ] embed cross links in notes?
- - [ ] search browsing: quick jump to search results from command line
+ - [x] search browsing: quick jump to search results from command line
  - [ ] cloud capabilities:
    - [x] via simple rsync
    - [ ] via git

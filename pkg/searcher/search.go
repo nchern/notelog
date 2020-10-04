@@ -1,6 +1,7 @@
 package searcher
 
 import (
+	"bufio"
 	"fmt"
 	"io"
 	"os"
@@ -73,6 +74,26 @@ func (s *Searcher) Search(terms ...string) error {
 	}
 
 	return cmd.Run()
+}
+
+// GetLastNthResult returns nth result from last saved search results
+func GetLastNthResult(notes Notes, n int) (string, error) {
+	f, err := os.Open(notes.MetadataFilename(lastResultsFile))
+	if err != nil {
+		if os.IsNotExist(err) {
+			return "", nil // just an empty result same if we asked for non-existing item
+		}
+		return "", err
+	}
+	i := 1
+	scanner := bufio.NewScanner(f)
+	for scanner.Scan() {
+		if i == n {
+			return scanner.Text(), nil
+		}
+		i++
+	}
+	return "", scanner.Err()
 }
 
 func c(s ...string) string {

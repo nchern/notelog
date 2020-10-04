@@ -48,10 +48,10 @@ func Edit(note Note, instantRecord string) error {
 
 // Shellout creates a ready to shellout exec.Command editor to edit given filename.
 // It inherits all std* streams from the current process
-func Shellout(fileName string) *exec.Cmd {
+func Shellout(flags ...string) *exec.Cmd {
 	// HACK: this will not work properly if flags contain values with spaces
 	args := strings.Fields(strings.TrimSpace(editorFlags))
-	args = append(args, fileName)
+	args = append(args, flags...)
 
 	cmd := exec.Command(editorCmd, args...)
 	cmd.Stdin = os.Stdin
