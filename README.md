@@ -34,6 +34,8 @@ $ notelog -h
  - [ ] cross-linking: you can fetch all the references from other notes to a given note
    - [ ] embed cross links in notes?
  - [x] search browsing: quick jump to search results from command line
+ - [ ] search aggregations (? - do we need to return all lines or just docs?)
+ - [ ] search over note names
  - [ ] cloud capabilities:
    - [x] via simple rsync
    - [ ] via git
