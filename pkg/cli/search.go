@@ -3,6 +3,7 @@ package cli
 import (
 	"errors"
 	"flag"
+	"io"
 	"os"
 	"os/exec"
 
@@ -10,7 +11,10 @@ import (
 	"github.com/nchern/notelog/pkg/searcher"
 )
 
-var saveResults = flag.Bool("save-results", false, "(search only) if set, search results are saved to a file under NOTELOG_HOME dir")
+var interactive = flag.Bool(
+	"interactive",
+	false,
+	"(search only) if set, search results are saved to a file under NOTELOG_HOME dir. Search results in output get numbered.")
 
 func search() error {
 	if len(flag.Args()) < 1 {
@@ -19,8 +23,12 @@ func search() error {
 
 	notes := note.NewList()
 
-	s := searcher.NewSearcher(notes, os.Stdout)
-	s.SaveResults = *saveResults
+	var out io.Writer = os.Stdout
+	if *interactive {
+		out = &nlWriter{inner: out}
+	}
+	s := searcher.NewSearcher(notes, out)
+	s.SaveResults = *interactive
 
 	err := s.Search(flag.Args()...)
 

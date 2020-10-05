@@ -3,7 +3,6 @@ package cli
 import (
 	"errors"
 	"flag"
-	"fmt"
 	"strconv"
 	"strings"
 
@@ -26,7 +25,6 @@ func browseSearch() error {
 		return nil
 	}
 	toks := strings.Split(r, ":")
-	fmt.Println(toks)
 
 	return editor.Shellout(toks[0], "+"+toks[1]).Run()
 }
