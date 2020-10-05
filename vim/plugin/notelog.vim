@@ -68,11 +68,14 @@ fun NotesBrowseGroupDirectory()
 endfun
 
 
-" Calls an external command to search info on a person
-autocmd FileType org nnoremap <Localleader>gd :call NotesBrowseGroupDirectory()<CR>
+" Creates a new note with Notelog
+command! -nargs=1 NLNew execute ':silent !notelog -c touch <f-args>' | execute ':e ' NotesFullPath(<f-args>)
 
 " Opens an existing note with Notelog
 command! -nargs=1 -complete=custom,NotesList NLOpen execute ':e ' NotesFullPath(<f-args>)
+
+" Calls an external command to search info on a person
+autocmd FileType org nnoremap <Localleader>gd :call NotesBrowseGroupDirectory()<CR>
 
 " Sorts todos with notelog
 autocmd FileType org command! -range=% NLSortTodos :<line1>,<line2>!notelog -c sort-todos

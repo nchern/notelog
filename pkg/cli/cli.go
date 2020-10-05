@@ -36,6 +36,7 @@ var (
 	cmdSearch       = c("search")
 	cmdSearchBrowse = c("search-browse")
 	cmdSortTodoList = c("sort-todos")
+	cmdTouch        = c("touch")
 
 	// Command is a user subcommand
 	Command = flag.String(subCommand, cmdEdit, fmt.Sprintf("One of: %s", commands))
@@ -94,6 +95,8 @@ func Execute(cmd string) error {
 		return handleNoRemoteConfig(remote.Push(notes))
 	case cmdRemotePull:
 		return handleNoRemoteConfig(remote.Pull(notes))
+	case cmdTouch:
+		return touch(notes)
 	default:
 		return fmt.Errorf("Bad cmd: '%s'", cmd)
 	}

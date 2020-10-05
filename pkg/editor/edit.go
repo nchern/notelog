@@ -30,7 +30,7 @@ type Note interface {
 	FullPath() string
 }
 
-// Edit calls an editor to interactively edit `noteName` or directly writes an `instant` string to it
+// Edit calls an editor to interactively edit given note or directly writes an `instant` string to it
 func Edit(note Note, instantRecord string) error {
 	defer removeDirIfNotesFileNotExists(note.Dir(), note.FullPath())
 
@@ -59,6 +59,22 @@ func Shellout(flags ...string) *exec.Cmd {
 	cmd.Stderr = os.Stderr
 
 	return cmd
+}
+
+// Touch creates given note if it does not exist otherwise does nothing
+func Touch(note Note) error {
+	if err := os.MkdirAll(note.Dir(), DefaultDirPerms); err != nil {
+		return err
+	}
+	_, err := os.Stat(note.FullPath())
+	if os.IsNotExist(err) {
+		f, err := os.OpenFile(note.FullPath(), os.O_RDWR|os.O_CREATE, DefaultFilePerms)
+		if err != nil {
+			return err
+		}
+		return f.Close()
+	}
+	return nil
 }
 
 func removeDirIfNotesFileNotExists(dirName string, filename string) {
