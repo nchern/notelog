@@ -10,7 +10,6 @@ import (
 
 	"github.com/nchern/notelog/pkg/env"
 	"github.com/nchern/notelog/pkg/note"
-	"github.com/nchern/notelog/pkg/remote"
 	"github.com/nchern/notelog/pkg/todos"
 )
 
@@ -29,8 +28,8 @@ var (
 	cmdGetFullPath  = c("path")
 	cmdPrint        = c("print")
 	cmdPrintHome    = c("print-home")
-	cmdRemotePull   = c("pull")
-	cmdRemotePush   = c("push")
+	cmdSync         = c("sync")
+	cmdInitRepo     = c("init-repo")
 	cmdRemove       = c("rm")
 	cmdRename       = c("rename")
 	cmdSearch       = c("search")
@@ -91,10 +90,10 @@ func Execute(cmd string) error {
 	case cmdEnv:
 		_, err = fmt.Println(env.Vars())
 		return err
-	case cmdRemotePush:
-		return handleNoRemoteConfig(remote.Push(notes))
-	case cmdRemotePull:
-		return handleNoRemoteConfig(remote.Pull(notes))
+	case cmdInitRepo:
+		return errors.New("not implemented")
+	case cmdSync:
+		return errors.New("not implemented")
 	case cmdTouch:
 		return touch(notes)
 	default:
