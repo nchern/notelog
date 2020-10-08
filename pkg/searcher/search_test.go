@@ -28,7 +28,7 @@ var (
 )
 
 func init() {
-	grepCmd = defaultGrep // make sure we always use defaultGrep in tests
+	must(os.Setenv("NOTELOG_GREP", defaultGrep)) // make sure we always use defaultGrep in tests
 }
 
 func TestShoudSearch(t *testing.T) {
@@ -83,6 +83,18 @@ func TestSearchShoudReturnOneIfFoundNothing(t *testing.T) {
 		assert.NotNil(t, err)
 		assert.Equal(t, 1, (err.(*exec.ExitError)).ExitCode())
 	})
+}
+
+func TestSearchShouldCorrectlyHandleCommandOverride(t *testing.T) {
+	m := &mock{}
+	actual := &bytes.Buffer{}
+	underTest := NewSearcher(m, actual)
+	underTest.grepCmd = "echo --bar" // use echo to get args as output
+
+	err := underTest.Search("foo")
+
+	assert.NoError(t, err)
+	assert.Equal(t, fmt.Sprintf("--bar -rni (foo) %s\n", m.HomeDir()), actual.String())
 }
 
 func TestGetLastNthResult(t *testing.T) {

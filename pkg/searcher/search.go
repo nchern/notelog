@@ -2,12 +2,12 @@ package searcher
 
 import (
 	"bufio"
-	"fmt"
 	"io"
 	"os"
 	"os/exec"
 	"strings"
 
+	"github.com/google/shlex"
 	"github.com/nchern/notelog/pkg/env"
 )
 
@@ -17,8 +17,6 @@ const (
 
 	lastResultsFile = "last_search"
 )
-
-var grepCmd = env.Get("NOTELOG_GREP", defaultGrep)
 
 // Notes abstracts note collection to search in
 type Notes interface {
@@ -34,31 +32,30 @@ type request struct {
 // Searcher represents a search engine over notes
 type Searcher struct {
 	SaveResults bool
-	notes       Notes
-	out         io.Writer
+
+	notes   Notes
+	grepCmd string
+
+	out io.Writer
 }
 
 // NewSearcher returns a new Searcher instance
 func NewSearcher(notes Notes, out io.Writer) *Searcher {
 	return &Searcher{
-		notes: notes,
-		out:   out,
+		out:     out,
+		notes:   notes,
+		grepCmd: env.Get("NOTELOG_GREP", defaultGrep),
 	}
 }
 
 // Search runs the search over all notes in notes home and prints results to stdout
 // Terms grammar looks like: "foo bar -buzz -fuzz" where -xxx means exclude xxx matches from the output
 func (s *Searcher) Search(terms ...string) error {
-	var cmd *exec.Cmd
 	req := parseRequest(terms...)
 
-	if len(req.excludeTerms) > 0 {
-		findCmd := c(grepCmd, defaultGrepArgs, quote(regexOr(req.terms)), s.notes.HomeDir())
-		excludeCmd := c(grepCmd, "-vi", quote(regexOr(req.excludeTerms)))
-
-		cmd = exec.Command("sh", "-c", fmt.Sprintf("%s | %s", findCmd, excludeCmd))
-	} else {
-		cmd = exec.Command(grepCmd, defaultGrepArgs, regexOr(req.terms), s.notes.HomeDir())
+	cmd, err := s.makeCmd(s.notes, req)
+	if err != nil {
+		return err
 	}
 
 	cmd.Stderr = os.Stderr
@@ -94,6 +91,55 @@ func GetLastNthResult(notes Notes, n int) (string, error) {
 		i++
 	}
 	return "", scanner.Err()
+}
+
+func (s *Searcher) makeCmd(notes Notes, req *request) (*exec.Cmd, error) {
+	cmd, extraArgs, err := parseToCmdAndExtraArgs(s.grepCmd)
+	if err != nil {
+		return nil, err
+	}
+
+	args := []string{defaultGrepArgs}
+	if len(extraArgs) > 0 {
+		args = append(extraArgs, args...)
+	}
+
+	if len(req.excludeTerms) > 0 {
+		return searchCmdWithExcludeTerms(cmd, args, req, notes.HomeDir()), nil
+	}
+
+	args = append(args, regexOr(req.terms), notes.HomeDir())
+	return exec.Command(cmd, args...), nil
+}
+
+func searchCmdWithExcludeTerms(cmd string, args []string, req *request, homeDir string) *exec.Cmd {
+	args = append(args, quote(regexOr(req.terms)), homeDir)
+	findCmd := c(append([]string{cmd}, args...)...)
+
+	excludeCmd := c(cmd, "-vi", quote(regexOr(req.excludeTerms)))
+
+	return exec.Command("sh", "-c", pipe(findCmd, excludeCmd))
+}
+
+func parseToCmdAndExtraArgs(s string) (cmd string, args []string, err error) {
+	cmd = defaultGrep
+
+	toks, err := shlex.Split(strings.TrimSpace(s))
+	if err != nil {
+		return
+	}
+
+	if len(toks) > 0 {
+		cmd = toks[0]
+	}
+	if len(toks) > 1 {
+		args = toks[1:]
+	}
+	return
+}
+
+func pipe(s ...string) string {
+	return strings.Join(s, " | ")
 }
 
 func c(s ...string) string {
