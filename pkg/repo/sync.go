@@ -2,15 +2,12 @@ package repo
 
 import (
 	"fmt"
-	"io"
-	"os"
 	"os/exec"
 
 	"github.com/nchern/notelog/pkg/note"
 )
 
-const gitErrorLog = "git-errors.log"
-
+// Sync syncs git repo in current $NOTELOG_HOME if the repo exists
 func Sync(notes note.List) error {
 	msg := "notelog: pre-sync update"
 
@@ -34,31 +31,9 @@ func Sync(notes note.List) error {
 
 		switch v := err.(type) {
 		case *exec.ExitError:
-			fmt.Println(v.ExitCode())
+			fmt.Printf("notelog: [%s] returned code %d\n", cmd, v.ExitCode())
 		}
 	}
 
 	return err
-}
-
-func git(notes note.List, logFile io.Writer, args ...string) *exec.Cmd {
-	cmd := exec.Command("git", args...)
-
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = logFile
-	cmd.Dir = notes.HomeDir()
-
-	return cmd
-}
-
-func openErrorLog(logName string) (*os.File, error) {
-	if _, err := os.Stat(logName); err != nil {
-		if os.IsNotExist(err) {
-			return os.Create(logName)
-		}
-		return nil, err
-	}
-
-	// file exists
-	return os.OpenFile(logName, os.O_WRONLY|os.O_APPEND, 0666)
 }
