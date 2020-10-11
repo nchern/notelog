@@ -27,17 +27,23 @@ $ notelog -h
 ## Roadmap
  - [ ] archive: note can:
    - [ ] be put into archive, so it will not stay in the main note list
-   - [ ] restored from the archive (eventually)
- - [ ] note templates
+   - [ ] be restored from the archive (eventually)
+ - [ ] attachments to notes (?)
+   - [ ] notelog -c attach <notename> <filepath> - puts <filepath> into note directory
+   - [ ] notelog -c attach-open <notename> <attach-name> - opens attach
+   - [ ] integrate with search?
+ - [ ] smart bash auto-completion for subcommands
+ - [ ] note templates (?)
  - [ ] cross-linking: you can fetch all the references from other notes to a given note
    - [ ] embed cross links in notes?
  - [ ] search capabilities
    - [x] search browsing: quick jump to search results from command line
-   - [ ] search aggregations (? - do we need to return all lines or just docs?)
+   - [ ] search aggregations:  - group by files(—notes-only)  (? - do we need to return all lines or just docs?)
    - [ ] search over note names
  - [ ] vim plugin
    - [x] mvp
-   - [ ] with ftdetect to '.note'?
+   - [ ] with ftdetect to '.note' (???)
+ - [ ] migrate to cobra subcommand parser (?)
  - [x] search: add simple query language, e.g. "foo bar -buzz" == "foo OR bar EXCLUDE buzz"
  - [x] add rm feature
  - [x] add rename feature
