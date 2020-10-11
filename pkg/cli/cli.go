@@ -53,6 +53,7 @@ func Execute(cmd string) error {
 		if err != nil {
 			return err
 		}
+		pos-- // bash sets position as 1- array based
 		return autoComplete(note.NewList(), os.Getenv("COMP_LINE"), pos, os.Stdout)
 	case cmdEdit:
 		return edit()

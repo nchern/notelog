@@ -28,11 +28,26 @@ func TestAutoComplete(t *testing.T) {
 			expected string
 		}{
 			{"should complete names",
-				"notelog",
-				text(names...) + "\n"},
+				"notelog ",
+				text(names...)},
 			{"should complete subcommands",
+				"notelog -c ",
+				text(commands...)},
+			{"should complete flag",
+				"notelog -",
+				text("-c")},
+			{"should complete flag 2",
 				"notelog -c",
-				text(commands...) + "\n"},
+				text("-c")},
+			{"should complete subcommands with common prefix only",
+				"notelog -c li",
+				text("list", "list-cmds")},
+			{"should complete subcommands with common prefix only-2",
+				"notelog -c p",
+				text("path", "print", "print-home")},
+			{"should complete names with common prefix only",
+				"notelog b",
+				text("bar", "buzz")},
 		}
 		for _, tt := range tests {
 			tt := tt
@@ -42,7 +57,7 @@ func TestAutoComplete(t *testing.T) {
 
 				assert.NoError(t,
 					autoComplete(note.List(homeDir), tt.given, pos, w))
-				assert.Equal(t, tt.expected, w.String())
+				assert.Equal(t, tt.expected+"\n", w.String())
 			})
 		}
 	})
