@@ -10,6 +10,7 @@ import (
 
 	"github.com/nchern/notelog/pkg/env"
 	"github.com/nchern/notelog/pkg/note"
+	"github.com/nchern/notelog/pkg/repo"
 	"github.com/nchern/notelog/pkg/todos"
 )
 
@@ -93,7 +94,7 @@ func Execute(cmd string) error {
 	case cmdInitRepo:
 		return errors.New("not implemented")
 	case cmdSync:
-		return errors.New("not implemented")
+		return repo.Sync(notes)
 	case cmdTouch:
 		return touch(notes)
 	default:
