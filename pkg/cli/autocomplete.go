@@ -11,13 +11,12 @@ import (
 
 func autoCompleteScript() string {
 	name := os.Args[0]
-	return fmt.Sprintf("# Bash autocompletion for %s. Completes notes\ncomplete -W \"`%s -c=list`\" %s",
+	return fmt.Sprintf("# Bash autocompletion for %s. Completes notes\ncomplete -C \"`%s -c=autocomplete`\" %s",
 		name, name, name)
 }
 
 func autoComplete(list note.List, line string, i int, w io.Writer) error {
 	const cmdFlag = "-" + subCommand
-	// the code below is not perfect and has to be improved(readability)
 
 	beforeCursor := line[0 : i+1]
 	curTok := getCurrentCompletingToken(beforeCursor)
@@ -29,23 +28,31 @@ func autoComplete(list note.List, line string, i int, w io.Writer) error {
 	}
 
 	if strings.HasSuffix(prevToks, cmdFlag) {
-		for _, c := range commands {
-			if !strings.HasPrefix(c, curTok) {
-				continue
-			}
-			if _, err := fmt.Fprintln(w, c); err != nil {
-				return err
-			}
-		}
-		return nil
+		return printCommandsWithPrefix(curTok, w)
 	}
 
 	notes, err := list.All()
 	if err != nil {
 		return err
 	}
+	return printNotesWithPrefix(notes, curTok, w)
+}
+
+func printCommandsWithPrefix(prefix string, w io.Writer) error {
+	for _, c := range commands {
+		if !strings.HasPrefix(c, prefix) {
+			continue
+		}
+		if _, err := fmt.Fprintln(w, c); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func printNotesWithPrefix(notes []*note.Note, prefix string, w io.Writer) error {
 	for _, note := range notes {
-		if !strings.HasPrefix(note.Name(), curTok) {
+		if !strings.HasPrefix(note.Name(), prefix) {
 			continue
 		}
 		if _, err := fmt.Fprintln(w, note.Name()); err != nil {
