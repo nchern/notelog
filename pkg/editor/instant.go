@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-const recordTemplate = " - %s"
+const recordTemplate = "%s"
 
 func writeInstantRecord(filename string, instantRecord string) error {
 	srcFile, err := os.OpenFile(filename, os.O_RDWR|os.O_CREATE, DefaultFilePerms)
@@ -30,7 +30,9 @@ func writeInstantRecord(filename string, instantRecord string) error {
 	if _, err = io.Copy(dstFile, srcFile); err != nil {
 		return err
 	}
-	srcFile.Sync()
+	if err := dstFile.Sync(); err != nil {
+		return err
+	}
 
 	return os.Rename(dstFileName, filename)
 }
