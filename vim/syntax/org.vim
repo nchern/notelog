@@ -29,4 +29,8 @@ syntax      match           notelogUrl      /\v(\[)@<!https?:\/\/[^[:space:]]*/ 
 highlight   notelogUrl      ctermfg=Blue    term=underline cterm=underline gui=underline
 
 
+syntax      match           notelogComment  /\v(^|\s)\/\/ .*$/
+hi def link notelogComment  Comment
+
+
 let b:note_syntax = "notelog"
