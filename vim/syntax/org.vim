@@ -19,12 +19,12 @@ syntax      match           notelogMarker   /\v\% [0-9a-zA-Z _:;\%]* \%/    cont
 highlight   notelogMarker   ctermbg=Yellow  ctermfg=Black term=bold cterm=bold gui=bold
 
 
-" highlight references to people: @John.Doe
+" highlights references to people: @John.Doe
 syntax      match           notelogPerson   /\v\@[a-zA-Z.]+/    containedin=ALL
 highlight   notelogPerson   ctermfg=Blue    term=bold cterm=bold gui=bold
 
 
-" highlight urls: https://example.com
+" highlights urls: https://example.com
 syntax      match           notelogUrl      /\v(\[)@<!https?:\/\/[^[:space:]]*/     containedin=ALL
 highlight   notelogUrl      ctermfg=Blue    term=underline cterm=underline gui=underline
 
