@@ -2,14 +2,16 @@ package repo
 
 import (
 	"fmt"
+	"os"
 	"os/exec"
+	"os/user"
 
 	"github.com/nchern/notelog/pkg/note"
 )
 
 // Sync syncs git repo in current $NOTELOG_HOME if the repo exists
 func Sync(notes note.List) error {
-	msg := "notelog: pre-sync update"
+	msg := createMessage()
 
 	logName := notes.MetadataFilename(gitErrorLog)
 	logFile, err := openErrorLog(logName)
@@ -36,4 +38,17 @@ func Sync(notes note.List) error {
 	}
 
 	return err
+}
+
+func createMessage() string {
+	username := "unknown"
+	if u, err := user.Current(); err == nil {
+		username = u.Username
+	}
+	hostname := "unknown"
+	if name, err := os.Hostname(); err == nil {
+		hostname = name
+	}
+
+	return fmt.Sprintf("notelog: sync called by %s@%s", username, hostname)
 }
