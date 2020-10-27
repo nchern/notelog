@@ -25,14 +25,15 @@ $ notelog -h
 ```
 
 ## Roadmap
- - [ ] archive: note can:
+ - [ ] create dir structure in one go during init phase. Consider fixing existing incomplete structure.
+ - [ ] archive: a note can:
    - [ ] be put into archive, so it will not stay in the main note list
    - [ ] be restored from the archive (eventually)
  - [ ] attachments to notes (?)
    - [ ] notelog -c attach <notename> <filepath> - puts <filepath> into note directory
    - [ ] notelog -c attach-open <notename> <attach-name> - opens attach
    - [ ] integrate with search?
- - [ ] smart bash auto-completion for subcommands
+ - [x] smart bash auto-completion for subcommands
  - [ ] note templates (?)
  - [ ] cross-linking: you can fetch all the references from other notes to a given note
    - [ ] embed cross links in notes?

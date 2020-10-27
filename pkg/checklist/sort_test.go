@@ -1,4 +1,4 @@
-package todos
+package checklist
 
 import (
 	"bytes"
@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestTODORegexNotDone(t *testing.T) {
+func TestRegexNotDone(t *testing.T) {
 	var tests = []struct {
 		name     string
 		expected bool
@@ -30,7 +30,7 @@ func TestTODORegexNotDone(t *testing.T) {
 	}
 }
 
-func TestTODORegexDone(t *testing.T) {
+func TestRegexDone(t *testing.T) {
 	var tests = []struct {
 		name     string
 		expected bool

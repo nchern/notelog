@@ -8,10 +8,10 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/nchern/notelog/pkg/checklist"
 	"github.com/nchern/notelog/pkg/env"
 	"github.com/nchern/notelog/pkg/note"
 	"github.com/nchern/notelog/pkg/repo"
-	"github.com/nchern/notelog/pkg/todos"
 )
 
 const (
@@ -20,23 +20,23 @@ const (
 )
 
 var (
-	cmdAutoComplete = c("autocomplete")
-	cmdBashComplete = c("bash-complete")
-	cmdEnv          = c("env")
-	cmdEdit         = c("edit")
-	cmdLs           = c("list")
-	cmdLsCmds       = c("list-cmds")
-	cmdGetFullPath  = c("path")
-	cmdPrint        = c("print")
-	cmdPrintHome    = c("print-home")
-	cmdSync         = c("sync")
-	cmdInitRepo     = c("init-repo")
-	cmdRemove       = c("rm")
-	cmdRename       = c("rename")
-	cmdSearch       = c("search")
-	cmdSearchBrowse = c("search-browse")
-	cmdSortTodoList = c("sort-todos")
-	cmdTouch        = c("touch")
+	cmdAutoComplete  = c("autocomplete")
+	cmdBashComplete  = c("bash-complete")
+	cmdEnv           = c("env")
+	cmdEdit          = c("edit")
+	cmdLs            = c("list")
+	cmdLsCmds        = c("list-cmds")
+	cmdGetFullPath   = c("path")
+	cmdPrint         = c("print")
+	cmdPrintHome     = c("print-home")
+	cmdSync          = c("sync")
+	cmdInitRepo      = c("init-repo")
+	cmdRemove        = c("rm")
+	cmdRename        = c("rename")
+	cmdSearch        = c("search")
+	cmdSearchBrowse  = c("search-browse")
+	cmdSortCheckList = c("sort-checklist")
+	cmdTouch         = c("touch")
 
 	// Command is a user subcommand
 	Command = flag.String(subCommand, cmdEdit, fmt.Sprintf("One of: %s", commands))
@@ -83,8 +83,8 @@ func Execute(cmd string) error {
 			return err
 		}
 		return notes.Rename(name, newName)
-	case cmdSortTodoList:
-		return todos.Sort(os.Stdin, os.Stdout)
+	case cmdSortCheckList:
+		return checklist.Sort(os.Stdin, os.Stdout)
 	case cmdSearch:
 		return search()
 	case cmdSearchBrowse:

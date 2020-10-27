@@ -1,4 +1,4 @@
-package todos
+package checklist
 
 import (
 	"bufio"
@@ -23,7 +23,7 @@ var (
 
 type kind int
 
-// Sort sorts todo lists from r and outputs sorted to w
+// Sort sorts checkbox lists from r and outputs sorted to w
 func Sort(r io.Reader, w io.Writer) error {
 	emptyLinesCount := 0
 	prevIndent, curIndent := 0, 0

@@ -77,8 +77,8 @@ command! -nargs=1 -complete=custom,NotesList NLOpen execute ':e ' NotesFullPath(
 " Calls an external command to search info on a person
 autocmd FileType org nnoremap <Localleader>gd :call NotesBrowseGroupDirectory()<CR>
 
-" Sorts todos with notelog
-autocmd FileType org command! -range=% NLSortTodos :<line1>,<line2>!notelog -c sort-todos
+" Sorts checkboxed items with notelog
+autocmd FileType org command! -range=% NLSortCheckList :<line1>,<line2>!notelog -c sort-checklist
 
 " Inserts link to another note under the cursor pos
 autocmd FileType org command! -nargs=1 -complete=custom,NotesList NLInsertLink :call NotesDoInsertLink(<f-args>)
