@@ -1,15 +1,17 @@
 package editor
 
 import (
+	"bufio"
 	"fmt"
-	"io"
 	"os"
 )
 
-const recordTemplate = "%s"
+const (
+	recordTemplate = "%s"
+)
 
 // WriteInstantRecord directly writes an `instant` string to a given note
-func WriteInstantRecord(note Note, record string) error {
+func WriteInstantRecord(note Note, record string, skipLines uint) error {
 	filename := note.FullPath()
 	srcFile, err := os.OpenFile(filename, os.O_RDWR|os.O_CREATE, DefaultFilePerms)
 	if err != nil {
@@ -23,16 +25,33 @@ func WriteInstantRecord(note Note, record string) error {
 	if err != nil {
 		return err
 	}
+
 	defer dstFile.Close()
 
-	if _, err := fmt.Fprintf(dstFile, recordTemplate+"\n\n", record); err != nil {
-		return err
+	i := uint(0)
+	scanner := bufio.NewScanner(srcFile)
+	for scanner.Scan() {
+		if i > 0 {
+			if _, err := fmt.Fprintln(dstFile); err != nil {
+				return err
+			}
+		}
+		if i == skipLines {
+			if _, err := fmt.Fprintf(dstFile, recordTemplate+"\n\n", record); err != nil {
+				return err
+			}
+		}
+		if _, err := fmt.Fprint(dstFile, scanner.Text()); err != nil {
+			return err
+		}
+		i++
 	}
-
-	if _, err = io.Copy(dstFile, srcFile); err != nil {
-		return err
+	if i <= skipLines {
+		if _, err := fmt.Fprintf(dstFile, "\n"+recordTemplate+"\n", record); err != nil {
+			return err
+		}
 	}
-	if err := dstFile.Sync(); err != nil {
+	if err := scanner.Err(); err != nil {
 		return err
 	}
 

@@ -7,6 +7,11 @@ import (
 	"github.com/nchern/notelog/pkg/note"
 )
 
+const (
+	// should be configurable
+	skipLines uint = 2
+)
+
 func edit() error {
 	notes := note.NewList()
 
@@ -15,7 +20,7 @@ func edit() error {
 		return err
 	}
 	if instantRecord != "" {
-		return editor.WriteInstantRecord(notes.Note(noteName), instantRecord)
+		return editor.WriteInstantRecord(notes.Note(noteName), instantRecord, skipLines)
 	}
 	return editor.Edit(notes.Note(noteName))
 }
