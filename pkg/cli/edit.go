@@ -14,5 +14,8 @@ func edit() error {
 	if err != nil {
 		return err
 	}
-	return editor.Edit(notes.Note(noteName), instantRecord)
+	if instantRecord != "" {
+		return editor.WriteInstantRecord(notes.Note(noteName), instantRecord)
+	}
+	return editor.Edit(notes.Note(noteName))
 }

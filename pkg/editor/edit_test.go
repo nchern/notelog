@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestEditShouldWriteInstantRecord(t *testing.T) {
+func TestWriteInstantRecordShouldWork(t *testing.T) {
 	const sample = "instant"
 	initial := text(
 		"foo",
@@ -28,7 +28,7 @@ func TestEditShouldWriteInstantRecord(t *testing.T) {
 	must(ioutil.WriteFile(n.FullPath(), []byte(initial), DefaultFilePerms))
 	defer os.Remove(n.FullPath())
 
-	assert.NoError(t, Edit(n, sample))
+	assert.NoError(t, WriteInstantRecord(n, sample))
 
 	actual, err := ioutil.ReadFile(n.FullPath())
 

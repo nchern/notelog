@@ -30,16 +30,12 @@ type Note interface {
 	FullPath() string
 }
 
-// Edit calls an editor to interactively edit given note or directly writes an `instant` string to it
-func Edit(note Note, instantRecord string) error {
+// Edit calls an editor to interactively edit given note
+func Edit(note Note) error {
 	defer removeDirIfNotesFileNotExists(note.Dir(), note.FullPath())
 
 	if err := os.MkdirAll(note.Dir(), DefaultDirPerms); err != nil {
 		return err
-	}
-
-	if instantRecord != "" {
-		return writeInstantRecord(note.FullPath(), instantRecord)
 	}
 
 	ed := Shellout(note.FullPath())

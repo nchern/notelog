@@ -8,7 +8,9 @@ import (
 
 const recordTemplate = "%s"
 
-func writeInstantRecord(filename string, instantRecord string) error {
+// WriteInstantRecord directly writes an `instant` string to a given note
+func WriteInstantRecord(note Note, record string) error {
+	filename := note.FullPath()
 	srcFile, err := os.OpenFile(filename, os.O_RDWR|os.O_CREATE, DefaultFilePerms)
 	if err != nil {
 		return err
@@ -23,7 +25,7 @@ func writeInstantRecord(filename string, instantRecord string) error {
 	}
 	defer dstFile.Close()
 
-	if _, err := fmt.Fprintf(dstFile, recordTemplate+"\n\n", instantRecord); err != nil {
+	if _, err := fmt.Fprintf(dstFile, recordTemplate+"\n\n", record); err != nil {
 		return err
 	}
 
