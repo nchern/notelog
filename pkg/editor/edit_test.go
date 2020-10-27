@@ -50,7 +50,7 @@ func TestWriteInstantRecord(t *testing.T) {
 				"buzz"),
 			2,
 		},
-		{"should write to the end if asked to skip more lines that fa file contains",
+		{"should write to the end if asked to skip more lines that a file contains",
 			text(
 				"foo",
 				"bar",
