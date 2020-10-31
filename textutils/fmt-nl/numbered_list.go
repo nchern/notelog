@@ -32,14 +32,19 @@ func printOutNumbered(w io.Writer, items []string) error {
 			p.Println()
 		}
 
-		l = cleanOldListNumbers(l)
-		if isEmptyOrSubitem(l) {
-			p.Print(l)
+		isSubItem := indent.MatchString(l) || isBlankLine(l)
+		isListItem := listNumber.MatchString(l) || !isSubItem
+
+		if isListItem {
+			l = cleanOldListNumbers(l)
+			n++
+			l = strings.TrimSpace(fmt.Sprintf("%d. %s", n, l))
+			p.Printf(l)
 			continue
 		}
 
-		n++
-		p.Printf("%d. %s", n, l)
+		p.Print(l)
+
 		if p.err != nil {
 			return p.err
 		}
@@ -48,14 +53,11 @@ func printOutNumbered(w io.Writer, items []string) error {
 }
 
 func cleanOldListNumbers(s string) string {
-	if listNumber.MatchString(s) {
-		return strings.TrimSpace(listNumber.ReplaceAllString(s, ""))
-	}
-	return s
+	return strings.TrimSpace(listNumber.ReplaceAllString(s, ""))
 }
 
-func isEmptyOrSubitem(s string) bool {
-	return strings.TrimSpace(s) == "" || indent.MatchString(s)
+func isBlankLine(s string) bool {
+	return indent.ReplaceAllString(s, "") == ""
 }
 
 func readItems(r io.Reader) ([]string, error) {

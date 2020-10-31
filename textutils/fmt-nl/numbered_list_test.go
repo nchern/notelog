@@ -89,6 +89,22 @@ func TestShouldFormat(t *testing.T) {
 				"\t6. foobar",
 			),
 		},
+		{"numbered items with no text",
+			text(
+				"1.",
+				"2. foo",
+				" foobar",
+				"3. bar",
+				"\tbuzz",
+			),
+			text(
+				"2.",
+				"foo",
+				" foobar",
+				"4. bar",
+				"\tbuzz",
+			),
+		},
 	}
 	for _, tt := range tests {
 		tt := tt
