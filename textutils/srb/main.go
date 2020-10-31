@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 )
@@ -20,6 +21,12 @@ const (
 
 var (
 	nth = flag.Int("n", 1, "Results ordinal number")
+
+	// \x1b(or \x1B)	is the escape special character (sed does not support alternatives \e and \033)
+	// \[				is the second character of the escape sequence
+	// [0-9;]*			is the color value(s) regex
+	// m				is the last character of the escape sequence
+	termEscapeSequence = regexp.MustCompile(`\x1b\[[0-9;]*m`)
 )
 
 func dotFileFullPath() string {
@@ -91,6 +98,7 @@ func readAndSave(src io.Reader, dst io.Writer, file io.Writer) error {
 		if _, err := fmt.Fprintf(dst, "%6d %s\n", i, l); err != nil {
 			return err
 		}
+		l = termEscapeSequence.ReplaceAllString(l, "")
 		if _, err := fmt.Fprintln(file, l); err != nil {
 			return err
 		}
