@@ -14,8 +14,8 @@ import (
 )
 
 const (
-	dotFile       = ".srp"
-	defaultEditor = "vim"
+	dotFile       = ".srb"
+	defaultEditor = "vi"
 )
 
 var (
@@ -61,7 +61,8 @@ func edit() error {
 	return openEditor(getEditor(), e.fullPath(), e.RowNum)
 }
 
-// srp stands for Search results page
+// srb - Search Results (Console) Browser
+// option: srp stands for Search results page
 func main() {
 	if len(os.Args) < 2 {
 		must(save())
