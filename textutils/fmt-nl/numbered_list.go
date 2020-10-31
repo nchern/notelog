@@ -49,6 +49,7 @@ func printOutNumbered(w io.Writer, items []string) error {
 			return p.err
 		}
 	}
+	p.Println() // always print trailing new line for better integration with text editors
 	return p.err
 }
 

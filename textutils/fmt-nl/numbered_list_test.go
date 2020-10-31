@@ -113,7 +113,7 @@ func TestShouldFormat(t *testing.T) {
 
 			err := Format(bytes.NewBufferString(tt.given), actual)
 			assert.NoError(t, err)
-			assert.Equal(t, tt.expected, actual.String())
+			assert.Equal(t, tt.expected+"\n", actual.String())
 		})
 	}
 }
