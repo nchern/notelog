@@ -86,6 +86,9 @@ autocmd FileType org command! -nargs=1 -complete=custom,NotesList NLInsertLink :
 " Performs search
 autocmd FileType org command! -nargs=1 NLSearch :call NotesDoSearch(<f-args>)
 
+" Syncs notes
+autocmd FileType org command! -nargs=0 NLSync :!notelog -c sync
+
 " Installs notelog binaries
 autocmd FileType org command! NLInstallBinaries :!go get github.com/nchern/notelog/...
 " Updates notelog binaries
