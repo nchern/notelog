@@ -20,7 +20,7 @@ const (
 )
 
 var (
-	nth = flag.Int("n", 1, "Results ordinal number")
+	nth = flag.Int("j", 1, "Jump to a specified result")
 
 	// \x1b(or \x1B)	is the escape special character (sed does not support alternatives \e and \033)
 	// \[				is the second character of the escape sequence
