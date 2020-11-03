@@ -23,6 +23,16 @@ func TestShouldFormat(t *testing.T) {
 			text(""),
 			text("   \t"),
 		},
+		{"header Wiki style",
+			text(
+				"### Header",
+				"    content",
+			),
+			text(
+				"### Header",
+				" content",
+			),
+		},
 		{"subtext in numbered list",
 			text(
 				"abc",

@@ -10,7 +10,7 @@ import (
 
 var (
 	indent     = regexp.MustCompile(`^\s+?`)
-	listNumber = regexp.MustCompile(`(^\s*?\d+?\.\s*|^\s*?\d+?\s+?|^\s*?\*+\s*)`)
+	listNumber = regexp.MustCompile(`(^\s*?\d+?\.\s*|^\s*?\d+?\s+?|^\s*?(\*|#)+\s*)`)
 )
 
 // Format formats identation list
