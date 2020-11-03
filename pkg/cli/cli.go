@@ -37,6 +37,7 @@ var (
 	cmdSearchBrowse  = c("search-browse")
 	cmdSortCheckList = c("sort-checklist")
 	cmdTouch         = c("touch")
+	cmdVersion       = c("version")
 
 	// Command is a user subcommand
 	Command = flag.String(subCommand, cmdEdit, fmt.Sprintf("One of: %s", commands))
@@ -98,6 +99,8 @@ func Execute(cmd string) error {
 		return repo.Sync(notes)
 	case cmdTouch:
 		return touch(notes)
+	case cmdVersion:
+		return printVersion()
 	default:
 		return fmt.Errorf("Bad cmd: '%s'", cmd)
 	}

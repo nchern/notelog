@@ -1,3 +1,5 @@
+VERSION_FILE="pkg/cli/version_generated.go"
+
 .PHONY: build
 build: vet
 	go build ./...
@@ -12,8 +14,12 @@ lint:
 
 .PHONY: vet
 vet:
-	 go vet ./...
+	@go vet ./...
 
 .PHONY: test
 test: build
 	go test -race ./...
+
+.PHONY: gen-version
+gen-version:
+	@./generate-version.sh $(VERSION_FILE)
