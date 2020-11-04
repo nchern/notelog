@@ -1,4 +1,4 @@
-" Notelog plugin
+        " Notelog plugin
 " currently integrated with OrgMode by sharing the same file extention: org
 
 autocmd FileType org set grepprg=notelog\ -c\ search
@@ -73,6 +73,9 @@ command! -nargs=1 NLNew execute ':silent !notelog -c touch <f-args>' | execute '
 
 " Opens an existing note with Notelog
 command! -nargs=1 -complete=custom,NotesList NLOpen execute ':e ' NotesFullPath(<f-args>)
+
+" Adds quick record to existing note with Notelog
+command! -nargs=+ -complete=custom,NotesList NLQuickLog :!notelog <args>
 
 " Calls an external command to search info on a person
 autocmd FileType org nnoremap <Localleader>gd :call NotesBrowseGroupDirectory()<CR>
