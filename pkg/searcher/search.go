@@ -3,6 +3,7 @@ package searcher
 import (
 	"bufio"
 	"io"
+	"log"
 	"os"
 	"os/exec"
 	"strings"
@@ -12,7 +13,7 @@ import (
 )
 
 const (
-	defaultGrep     = "egrep"
+	defaultGrep     = "grep -E"
 	defaultGrepArgs = "-rni"
 
 	lastResultsFile = "last_search"
@@ -69,7 +70,7 @@ func (s *Searcher) Search(terms ...string) error {
 		defer f.Close()
 		cmd.Stdout = io.MultiWriter(s.out, f)
 	}
-
+	log.Println(cmd)
 	return cmd.Run()
 }
 
