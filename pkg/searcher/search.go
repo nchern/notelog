@@ -122,8 +122,6 @@ func searchCmdWithExcludeTerms(cmd string, args []string, req *request, homeDir 
 }
 
 func parseToCmdAndExtraArgs(s string) (cmd string, args []string, err error) {
-	cmd = defaultGrep
-
 	toks, err := shlex.Split(strings.TrimSpace(s))
 	if err != nil {
 		return
