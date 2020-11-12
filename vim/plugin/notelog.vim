@@ -69,13 +69,15 @@ endfun
 
 
 " Creates a new note with Notelog
-command! -nargs=1 NLNew execute ':silent !notelog -c touch <f-args>' | execute ':e ' NotesFullPath(<f-args>)
+command! -nargs=1 -complete=custom,NotesList NLNew execute ':silent !notelog -c touch <f-args>' | execute ':e ' NotesFullPath(<f-args>)
 
 " Opens an existing note with Notelog
 command! -nargs=1 -complete=custom,NotesList NLOpen execute ':e ' NotesFullPath(<f-args>)
 
 " Adds quick record to existing note with Notelog
 command! -nargs=+ -complete=custom,NotesList NLQuickLog :!notelog <args>
+" Alias for NLQuickLog to see what works better
+command! -nargs=+ -complete=custom,NotesList NLLog :NLQuickLog <args>
 
 " Calls an external command to search info on a person
 autocmd FileType org nnoremap <Localleader>gd :call NotesBrowseGroupDirectory()<CR>
