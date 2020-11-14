@@ -1,7 +1,7 @@
 package searcher
 
 import (
-	"bufio"
+	"bytes"
 	"io"
 	"os"
 	"os/exec"
@@ -53,46 +53,39 @@ func NewSearcher(notes Notes, out io.Writer) *Searcher {
 func (s *Searcher) Search(terms ...string) error {
 	req := parseRequest(terms...)
 
-	cmd, err := makeCmd(s.grepCmd, s.notes, req)
+	cmd, err := buildSearchCmd(s.grepCmd, s.notes, req)
 	if err != nil {
 		return err
 	}
 
+	cmd.Stdout = s.out
 	cmd.Stderr = os.Stderr
 
-	cmd.Stdout = s.out
 	if s.SaveResults {
-		f, err := os.Create(s.notes.MetadataFilename(lastResultsFile))
-		if err != nil {
-			return err
-		}
-		defer f.Close()
-		cmd.Stdout = io.MultiWriter(s.out, f)
+		return s.runSearchAndSaveResults(cmd)
 	}
 	return cmd.Run()
 }
 
-// GetLastNthResult returns nth result from last saved search results
-func GetLastNthResult(notes Notes, n int) (string, error) {
-	f, err := os.Open(notes.MetadataFilename(lastResultsFile))
+func (s *Searcher) runSearchAndSaveResults(cmd *exec.Cmd) error {
+	buf := &bytes.Buffer{}
+	cmd.Stdout = io.MultiWriter(s.out, buf)
+
+	err := cmd.Run()
 	if err != nil {
-		if os.IsNotExist(err) {
-			return "", nil // just an empty result same if we asked for non-existing item
-		}
-		return "", err
+		return err
 	}
-	i := 1
-	scanner := bufio.NewScanner(f)
-	for scanner.Scan() {
-		if i == n {
-			return scanner.Text(), nil
-		}
-		i++
+
+	f, err := os.Create(s.notes.MetadataFilename(lastResultsFile))
+	if err != nil {
+		return err
 	}
-	return "", scanner.Err()
+	defer f.Close()
+
+	return stripTermColors(buf, f)
 }
 
-func makeCmd(grepCmd string, notes Notes, req *request) (*exec.Cmd, error) {
+func buildSearchCmd(grepCmd string, notes Notes, req *request) (*exec.Cmd, error) {
 	cmd, extraArgs, err := parseToCmdAndExtraArgs(grepCmd)
 	if err != nil {
 		return nil, err

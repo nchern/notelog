@@ -73,6 +73,25 @@ func TestSearchShoudWriteLastSearchResults(t *testing.T) {
 	})
 }
 
+func TestSearchShoudWriteLastSearchResultsWithoutTermColor(t *testing.T) {
+	withFiles(func() {
+		actual := &bytes.Buffer{}
+
+		underTest := NewSearcher(&mock{}, actual)
+		underTest.SaveResults = true
+		underTest.grepCmd = "grep -E --colour=always"
+
+		assert.NoError(t, underTest.Search("foo bar"))
+
+		resultsFilename := filepath.Join(homeDir, lastResultsFile)
+		body, err := ioutil.ReadFile(resultsFilename)
+
+		expected := "/tmp/test_notes/a.txt:1:foo bar buzz\n"
+		assert.NoError(t, err) // file must exist
+		assert.Equal(t, expected, string(body))
+	})
+}
+
 func TestSearchShoudReturnOneIfFoundNothing(t *testing.T) {
 	withFiles(func() {
 		actual := &bytes.Buffer{}
