@@ -3,7 +3,6 @@ package searcher
 import (
 	"bufio"
 	"io"
-	"log"
 	"os"
 	"os/exec"
 	"strings"
@@ -54,7 +53,7 @@ func NewSearcher(notes Notes, out io.Writer) *Searcher {
 func (s *Searcher) Search(terms ...string) error {
 	req := parseRequest(terms...)
 
-	cmd, err := s.makeCmd(s.notes, req)
+	cmd, err := makeCmd(s.grepCmd, s.notes, req)
 	if err != nil {
 		return err
 	}
@@ -70,7 +69,6 @@ func (s *Searcher) Search(terms ...string) error {
 		defer f.Close()
 		cmd.Stdout = io.MultiWriter(s.out, f)
 	}
-	log.Println(cmd)
 	return cmd.Run()
 }
 
@@ -94,8 +92,8 @@ func GetLastNthResult(notes Notes, n int) (string, error) {
 	return "", scanner.Err()
 }
 
-func (s *Searcher) makeCmd(notes Notes, req *request) (*exec.Cmd, error) {
-	cmd, extraArgs, err := parseToCmdAndExtraArgs(s.grepCmd)
+func makeCmd(grepCmd string, notes Notes, req *request) (*exec.Cmd, error) {
+	cmd, extraArgs, err := parseToCmdAndExtraArgs(grepCmd)
 	if err != nil {
 		return nil, err
 	}
@@ -114,10 +112,10 @@ func (s *Searcher) makeCmd(notes Notes, req *request) (*exec.Cmd, error) {
 }
 
 func searchCmdWithExcludeTerms(cmd string, args []string, req *request, homeDir string) *exec.Cmd {
-	args = append(args, quote(regexOr(req.terms)), homeDir)
-	findCmd := c(append([]string{cmd}, args...)...)
+	findArgs := append(args, quote(regexOr(req.terms)), homeDir)
+	findCmd := c(append([]string{cmd}, findArgs...)...)
 
-	excludeCmd := c(cmd, "-vi", quote(regexOr(req.excludeTerms)))
+	excludeCmd := c(cmd, strings.Join(args, " "), "-vi", quote(regexOr(req.excludeTerms)))
 
 	return exec.Command("sh", "-c", pipe(findCmd, excludeCmd))
 }
