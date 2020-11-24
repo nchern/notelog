@@ -91,21 +91,16 @@ func buildSearchCmd(grepCmd string, notes Notes, req *request) (*exec.Cmd, error
 		return nil, err
 	}
 
-	args := []string{defaultGrepArgs}
-	if len(extraArgs) > 0 {
-		args = append(extraArgs, args...)
-	}
-
 	if len(req.excludeTerms) > 0 {
-		return searchCmdWithExcludeTerms(cmd, args, req, notes.HomeDir()), nil
+		return searchCmdWithExcludeTerms(cmd, extraArgs, req, notes.HomeDir()), nil
 	}
 
-	args = append(args, regexOr(req.terms), notes.HomeDir())
+	args := append(extraArgs, defaultGrepArgs, regexOr(req.terms), notes.HomeDir())
 	return exec.Command(cmd, args...), nil
 }
 
 func searchCmdWithExcludeTerms(cmd string, args []string, req *request, homeDir string) *exec.Cmd {
-	findArgs := append(args, quote(regexOr(req.terms)), homeDir)
+	findArgs := append(args, defaultGrepArgs, quote(regexOr(req.terms)), homeDir)
 	findCmd := c(append([]string{cmd}, findArgs...)...)
 
 	excludeCmd := c(cmd, strings.Join(args, " "), "-vi", quote(regexOr(req.excludeTerms)))
