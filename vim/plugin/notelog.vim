@@ -25,8 +25,8 @@ endfun
 
 " Executes notleg search
 fun NotesDoSearch(terms)
-   execute '! notelog -c search ' . a:terms
-   copen
+   let cmd = 'sh -c "notelog -c search ' . a:terms . ' | notermcolor"'
+   cexpr system(l:cmd)
 endfun
 
 " Inserts org-mode link to another note under the cursor
