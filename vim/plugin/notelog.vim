@@ -25,7 +25,7 @@ endfun
 
 " Executes notleg search
 fun NotesDoSearch(terms)
-   execute 'grep ' . a:terms
+   execute 'notelog -c search ' . a:terms
    copen
 endfun
 
@@ -89,7 +89,7 @@ autocmd FileType org command! -range=% NLSortCheckList :<line1>,<line2>!notelog 
 autocmd FileType org command! -nargs=1 -complete=custom,NotesList NLInsertLink :call NotesDoInsertLink(<f-args>)
 
 " Performs search
-autocmd FileType org command! -nargs=1 NLSearch :call NotesDoSearch(<f-args>)
+autocmd FileType org command! -nargs=1 NLSearch :call NotesDoSearch(<q-args>)
 
 " Syncs notes
 autocmd FileType org command! -nargs=0 NLSync :!notelog -c sync
