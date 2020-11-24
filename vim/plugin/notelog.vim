@@ -25,7 +25,7 @@ endfun
 
 " Executes notleg search
 fun NotesDoSearch(terms)
-   execute 'notelog -c search ' . a:terms
+   execute '! notelog -c search ' . a:terms
    copen
 endfun
 
