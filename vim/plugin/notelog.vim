@@ -25,7 +25,7 @@ endfun
 
 " Executes notleg search
 fun NotesDoSearch(terms)
-   let cmd = 'sh -c "notelog -c search ' . a:terms . ' | notermcolor"'
+   let cmd = 'sh -c "notelog -c search ' . escape(a:terms, '"') . ' | notermcolor"'
    cexpr system(l:cmd)
 endfun
 
@@ -89,7 +89,7 @@ autocmd FileType org command! -range=% NLSortCheckList :<line1>,<line2>!notelog 
 autocmd FileType org command! -nargs=1 -complete=custom,NotesList NLInsertLink :call NotesDoInsertLink(<f-args>)
 
 " Performs search
-autocmd FileType org command! -nargs=1 NLSearch :call NotesDoSearch(<q-args>)
+autocmd FileType org command! -nargs=1 NLSearch :call NotesDoSearch(<f-args>)
 
 " Syncs notes
 autocmd FileType org command! -nargs=0 NLSync :!notelog -c sync
