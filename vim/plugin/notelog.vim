@@ -73,6 +73,8 @@ command! -nargs=1 -complete=custom,NotesList NLNew execute ':silent !notelog -c 
 
 " Opens an existing note with Notelog
 command! -nargs=1 -complete=custom,NotesList NLOpen execute ':e ' NotesFullPath(<f-args>)
+" Opens Notelog's scratchpad
+command! -nargs=0 NLOpenScratch execute ':e ' NotesFullPath("")
 
 " Adds quick record to existing note with Notelog
 command! -nargs=+ -complete=custom,NotesList NLQuickLog :!notelog <args>
