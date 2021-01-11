@@ -25,7 +25,7 @@ func (l List) Note(name string) *Note {
 
 // MetadataFilename returns full path to the notelog metadata for a given file
 func (l List) MetadataFilename(name string) string {
-	return filepath.Join(l.HomeDir(), ".notelog", name)
+	return filepath.Join(l.HomeDir(), DotNotelogDir, name)
 }
 
 // Remove removes a note by name

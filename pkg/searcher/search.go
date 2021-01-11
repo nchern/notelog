@@ -64,7 +64,11 @@ func (s *Searcher) Search(terms ...string) error {
 	if s.SaveResults {
 		return s.runSearchAndSaveResults(cmd)
 	}
-	return cmd.Run()
+
+	if err := cmd.Run(); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (s *Searcher) runSearchAndSaveResults(cmd *exec.Cmd) error {
@@ -86,17 +90,17 @@ func (s *Searcher) runSearchAndSaveResults(cmd *exec.Cmd) error {
 }
 
 func buildSearchCmd(grepCmd string, notes Notes, req *request) (*exec.Cmd, error) {
-	cmd, extraArgs, err := parseToCmdAndExtraArgs(grepCmd)
+	cmdName, extraArgs, err := parseToCmdAndExtraArgs(grepCmd)
 	if err != nil {
 		return nil, err
 	}
 
 	if len(req.excludeTerms) > 0 {
-		return searchCmdWithExcludeTerms(cmd, extraArgs, req, notes.HomeDir()), nil
+		return searchCmdWithExcludeTerms(cmdName, extraArgs, req, notes.HomeDir()), nil
 	}
 
 	args := append(extraArgs, defaultGrepArgs, regexOr(req.terms), notes.HomeDir())
-	return exec.Command(cmd, args...), nil
+	return exec.Command(cmdName, args...), nil
 }
 
 func searchCmdWithExcludeTerms(cmd string, args []string, req *request, homeDir string) *exec.Cmd {

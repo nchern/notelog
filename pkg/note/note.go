@@ -10,6 +10,8 @@ import (
 const (
 	defaultNotesDir = "notes"
 	defaultFilename = "main.org"
+
+	DotNotelogDir = ".notelog"
 )
 
 var notesRootPath = env.Get("NOTELOG_HOME", filepath.Join(os.Getenv("HOME"), defaultNotesDir))

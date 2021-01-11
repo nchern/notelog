@@ -10,7 +10,9 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/nchern/notelog/pkg/note"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const (
@@ -47,9 +49,9 @@ func TestShoudSearch(t *testing.T) {
 			tt := tt
 			t.Run(tt.name, func(t *testing.T) {
 				actual := &bytes.Buffer{}
-				underTest := NewSearcher(&mock{}, actual)
+				underTest := NewSearcher(note.List(homeDir), actual)
 
-				assert.NoError(t, underTest.Search(tt.given...))
+				require.NoError(t, underTest.Search(tt.given...))
 				assert.Equal(t, tt.expected, len(toLines(actual.String())))
 			})
 		}
@@ -60,15 +62,15 @@ func TestSearchShoudWriteLastSearchResults(t *testing.T) {
 	withFiles(func() {
 		actual := &bytes.Buffer{}
 
-		underTest := NewSearcher(&mock{}, actual)
+		underTest := NewSearcher(note.List(homeDir), actual)
 		underTest.SaveResults = true
 
-		assert.NoError(t, underTest.Search("foobar"))
+		require.NoError(t, underTest.Search("foobar"))
 
-		resultsFilename := filepath.Join(homeDir, lastResultsFile)
+		resultsFilename := filepath.Join(homeDir, note.DotNotelogDir, lastResultsFile)
 		body, err := ioutil.ReadFile(resultsFilename)
 
-		assert.NoError(t, err) // file must exist
+		require.NoError(t, err) // file must exist
 		assert.Equal(t, actual.Bytes(), body)
 	})
 }
@@ -77,17 +79,17 @@ func TestSearchShoudWriteLastSearchResultsWithoutTermColor(t *testing.T) {
 	withFiles(func() {
 		actual := &bytes.Buffer{}
 
-		underTest := NewSearcher(&mock{}, actual)
+		underTest := NewSearcher(note.List(homeDir), actual)
 		underTest.SaveResults = true
 		underTest.grepCmd = "grep -E --colour=always"
 
-		assert.NoError(t, underTest.Search("foo bar"))
+		require.NoError(t, underTest.Search("foo bar"))
 
-		resultsFilename := filepath.Join(homeDir, lastResultsFile)
+		resultsFilename := filepath.Join(homeDir, note.DotNotelogDir, lastResultsFile)
 		body, err := ioutil.ReadFile(resultsFilename)
 
 		expected := "/tmp/test_notes/a.txt:1:foo bar buzz\n"
-		assert.NoError(t, err) // file must exist
+		require.NoError(t, err) // file must exist
 		assert.Equal(t, expected, string(body))
 	})
 }
@@ -95,7 +97,7 @@ func TestSearchShoudWriteLastSearchResultsWithoutTermColor(t *testing.T) {
 func TestSearchShoudReturnExitErrorOneIfFoundNothing(t *testing.T) {
 	withFiles(func() {
 		actual := &bytes.Buffer{}
-		underTest := NewSearcher(&mock{}, actual)
+		underTest := NewSearcher(note.List(homeDir), actual)
 
 		err := underTest.Search("you will not find me")
 
@@ -105,26 +107,38 @@ func TestSearchShoudReturnExitErrorOneIfFoundNothing(t *testing.T) {
 }
 
 func TestSearchShouldCorrectlyHandleCommandOverride(t *testing.T) {
-	m := &mock{}
+	n := note.List(homeDir)
 	actual := &bytes.Buffer{}
-	underTest := NewSearcher(m, actual)
+	underTest := NewSearcher(n, actual)
 	underTest.grepCmd = "echo --bar" // use echo to get args as output
 
 	err := underTest.Search("foo")
 
-	assert.NoError(t, err)
-	assert.Equal(t, fmt.Sprintf("--bar -rni (foo) %s\n", m.HomeDir()), actual.String())
+	require.NoError(t, err)
+	assert.Equal(t, fmt.Sprintf("--bar -rni (foo) %s\n", n.HomeDir()), actual.String())
 }
 
-type mock struct{}
+func TestSearchShouldNotGetResultsFromLastResutsFile(t *testing.T) {
+	// withFiles(func() {
+	// 	// search 2 times so that last_results will be filled
+	// 	for i := 0; i < 2; i++ {
+	// 		actual := &bytes.Buffer{}
+	// 		underTest := NewSearcher(note.List(homeDir), actual)
+	// 		underTest.SaveResults = true
 
-func (m *mock) HomeDir() string { return homeDir }
+	// 		expected := "/tmp/test_notes/b.txt:1:foobar bar addd buzz\n/tmp/test_notes/a.txt:1:foo bar buzz\n"
 
-func (m *mock) MetadataFilename(name string) string { return filepath.Join(homeDir, name) }
+	// 		require.NoError(t, underTest.Search("foo"))
+	// 		assert.Equal(t, expected, actual.String())
+	// 	}
+	// })
+}
 
 func withFiles(fn func()) {
 	must(os.MkdirAll(homeDir, 0755))
 	defer os.RemoveAll(homeDir)
+
+	must(os.MkdirAll(filepath.Join(homeDir, note.DotNotelogDir), 0755))
 
 	for name, body := range files {
 		must(ioutil.WriteFile(filepath.Join(homeDir, name), []byte(body), mode))

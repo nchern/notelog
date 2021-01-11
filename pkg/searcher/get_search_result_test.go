@@ -7,14 +7,15 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/nchern/notelog/pkg/note"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestGetLastNthResult(t *testing.T) {
 	withFiles(func() {
-		m := &mock{}
+		n := note.List(homeDir)
 		buf := &bytes.Buffer{}
-		underTest := NewSearcher(m, buf)
+		underTest := NewSearcher(n, buf)
 		underTest.SaveResults = true
 
 		// perform search to generate last results file
@@ -38,7 +39,7 @@ func TestGetLastNthResult(t *testing.T) {
 		for _, tt := range tests {
 			tt := tt
 			t.Run(tt.name, func(t *testing.T) {
-				actual, err := GetLastNthResult(m, tt.given)
+				actual, err := GetLastNthResult(n, tt.given)
 				fmt.Println(actual)
 				assert.NoError(t, err)
 				assert.Equal(t, actual, tt.expected)
@@ -49,12 +50,12 @@ func TestGetLastNthResult(t *testing.T) {
 
 func TestGetLastNthResultShouldReturnEmptyStringIfNoResultsFound(t *testing.T) {
 	withFiles(func() {
-		m := &mock{}
+		n := note.List(homeDir)
 		// make sure last results file does not exist
-		_, err := os.Stat(m.MetadataFilename(lastResultsFile))
+		_, err := os.Stat(n.MetadataFilename(lastResultsFile))
 		assert.True(t, os.IsNotExist(err))
 
-		actual, err := GetLastNthResult(m, 1)
+		actual, err := GetLastNthResult(n, 1)
 
 		assert.NoError(t, err)
 		assert.Empty(t, actual)
