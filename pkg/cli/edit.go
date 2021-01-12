@@ -12,7 +12,7 @@ const (
 	skipLines uint = 2
 )
 
-func edit() error {
+func edit(readOnly bool) error {
 	notes := note.NewList()
 
 	noteName, instantRecord, err := parseArgs(flag.Args())
@@ -22,5 +22,5 @@ func edit() error {
 	if instantRecord != "" {
 		return editor.WriteInstantRecord(notes.Note(noteName), instantRecord, skipLines)
 	}
-	return editor.Edit(notes.Note(noteName))
+	return editor.Edit(notes.Note(noteName), readOnly)
 }

@@ -31,14 +31,20 @@ type Note interface {
 }
 
 // Edit calls an editor to interactively edit given note
-func Edit(note Note) error {
+func Edit(note Note, readOnly bool) error {
 	defer removeDirIfNotesFileNotExists(note.Dir(), note.FullPath())
 
 	if err := os.MkdirAll(note.Dir(), DefaultDirPerms); err != nil {
 		return err
 	}
 
-	ed := Shellout(note.FullPath())
+	args := []string{}
+	if readOnly {
+		// TODO: customize, this works in vim only
+		args = append(args, "-R")
+	}
+	args = append(args, note.FullPath())
+	ed := Shellout(args...)
 	return ed.Run()
 }
 

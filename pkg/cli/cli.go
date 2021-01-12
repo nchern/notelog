@@ -41,6 +41,8 @@ var (
 
 	// Command is a user subcommand
 	Command = flag.String(subCommand, cmdEdit, fmt.Sprintf("One of: %s", commands))
+
+	readOnly = flag.Bool("r", false, "opens note in read-only mode")
 )
 
 // Execute runs specified command
@@ -57,7 +59,7 @@ func Execute(cmd string) error {
 		pos-- // bash sets position as 1- array based
 		return autoComplete(note.NewList(), os.Getenv("COMP_LINE"), pos, os.Stdout)
 	case cmdEdit:
-		return edit()
+		return edit(*readOnly)
 	case cmdLs:
 		return listNotes(note.NewList(), os.Stdout)
 	case cmdLsCmds:
