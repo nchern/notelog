@@ -5,13 +5,14 @@ import (
 	"os"
 	"os/exec"
 	"os/user"
+	"strings"
 
 	"github.com/nchern/notelog/pkg/note"
 )
 
 // Sync syncs git repo in current $NOTELOG_HOME if the repo exists
-func Sync(notes note.List) error {
-	msg := createMessage()
+func Sync(notes note.List, customMsg string) error {
+	msg := createMessage(customMsg)
 
 	logName := notes.MetadataFilename(gitErrorLog)
 	logFile, err := openErrorLog(logName)
@@ -40,7 +41,9 @@ func Sync(notes note.List) error {
 	return err
 }
 
-func createMessage() string {
+func createMessage(msg string) string {
+	msg = strings.TrimSpace(msg)
+
 	username := "unknown"
 	if u, err := user.Current(); err == nil {
 		username = u.Username
@@ -50,5 +53,10 @@ func createMessage() string {
 		hostname = name
 	}
 
-	return fmt.Sprintf("notelog: sync called by %s@%s", username, hostname)
+	res := fmt.Sprintf("notelog: sync called by %s@%s", username, hostname)
+
+	if msg != "" {
+		res += "; " + msg
+	}
+	return res
 }

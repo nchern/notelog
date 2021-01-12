@@ -96,7 +96,7 @@ func Execute(cmd string) error {
 	case cmdInitRepo:
 		return repo.Init(notes)
 	case cmdSync:
-		return repo.Sync(notes)
+		return repo.Sync(notes, flag.Arg(0))
 	case cmdTouch:
 		return touch(notes)
 	case cmdVersion:
