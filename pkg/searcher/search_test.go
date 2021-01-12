@@ -119,19 +119,19 @@ func TestSearchShouldCorrectlyHandleCommandOverride(t *testing.T) {
 }
 
 func TestSearchShouldNotGetResultsFromLastResutsFile(t *testing.T) {
-	// withFiles(func() {
-	// 	// search 2 times so that last_results will be filled
-	// 	for i := 0; i < 2; i++ {
-	// 		actual := &bytes.Buffer{}
-	// 		underTest := NewSearcher(note.List(homeDir), actual)
-	// 		underTest.SaveResults = true
+	withFiles(func() {
+		// search 2 times so that last_results will be filled
+		for i := 0; i < 2; i++ {
+			actual := &bytes.Buffer{}
+			underTest := NewSearcher(note.List(homeDir), actual)
+			underTest.SaveResults = true
 
-	// 		expected := "/tmp/test_notes/b.txt:1:foobar bar addd buzz\n/tmp/test_notes/a.txt:1:foo bar buzz\n"
+			expected := "/tmp/test_notes/b.txt:1:foobar bar addd buzz\n/tmp/test_notes/a.txt:1:foo bar buzz\n"
 
-	// 		require.NoError(t, underTest.Search("foo"))
-	// 		assert.Equal(t, expected, actual.String())
-	// 	}
-	// })
+			require.NoError(t, underTest.Search("foo"))
+			assert.Equal(t, expected, actual.String())
+		}
+	})
 }
 
 func withFiles(fn func()) {

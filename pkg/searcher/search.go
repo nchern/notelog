@@ -2,6 +2,7 @@ package searcher
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"os"
 	"os/exec"
@@ -9,6 +10,7 @@ import (
 
 	"github.com/google/shlex"
 	"github.com/nchern/notelog/pkg/env"
+	"github.com/nchern/notelog/pkg/note"
 )
 
 const (
@@ -99,8 +101,10 @@ func buildSearchCmd(grepCmd string, notes Notes, req *request) (*exec.Cmd, error
 		return searchCmdWithExcludeTerms(cmdName, extraArgs, req, notes.HomeDir()), nil
 	}
 
-	args := append(extraArgs, defaultGrepArgs, regexOr(req.terms), notes.HomeDir())
-	return exec.Command(cmdName, args...), nil
+	args := append(extraArgs, defaultGrepArgs, quote(regexOr(req.terms)), notes.HomeDir())
+	findCmd := c(append([]string{cmdName}, args...)...)
+
+	return exec.Command("sh", "-c", pipe(findCmd)), nil
 }
 
 func searchCmdWithExcludeTerms(cmd string, args []string, req *request, homeDir string) *exec.Cmd {
@@ -128,6 +132,8 @@ func parseToCmdAndExtraArgs(s string) (cmd string, args []string, err error) {
 }
 
 func pipe(s ...string) string {
+	// HACK: super unobvious, needs refactoring.
+	s = append(s, fmt.Sprintf("grep -v '/%s/'", note.DotNotelogDir))
 	return strings.Join(s, " | ")
 }
 
