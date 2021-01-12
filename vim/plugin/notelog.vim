@@ -67,6 +67,11 @@ fun NotesBrowseGroupDirectory()
     execute ':silent !' . g:nl_gd_browse_command . ' "' . l:name . '"'
 endfun
 
+" NotesGoGet runs go get command on notelog util to install or update it
+fun NotesGoGet(force_update)
+    let up = a:force_update ? '-u' : ''
+    execute ':!go get ' . l:up . ' github.com/nchern/notelog/...'
+endfun
 
 " Creates a new note with Notelog
 command! -nargs=1 -complete=custom,NotesList NLNew execute ':silent !notelog -c touch <f-args>' | execute ':e ' NotesFullPath(<f-args>)
@@ -97,6 +102,6 @@ autocmd FileType org command! -nargs=1 NLSearch :call NotesDoSearch(<f-args>)
 autocmd FileType org command! -nargs=? NLSync :!notelog -c sync <q-args>
 
 " Installs notelog binaries
-autocmd FileType org command! NLInstallBinaries :!go get github.com/nchern/notelog/...
+autocmd FileType org command! NLInstallBinaries :call NotesGoGet(0)
 " Updates notelog binaries
-autocmd FileType org command! NLUpdateBinaries :!go get -u github.com/nchern/notelog/...
+autocmd FileType org command! NLUpdateBinaries :call NotesGoGet(1)
