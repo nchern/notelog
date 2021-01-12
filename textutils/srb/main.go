@@ -17,6 +17,9 @@ import (
 const (
 	dotFile       = ".srb"
 	defaultEditor = "vi"
+
+	cmdEdit  = "edit"
+	cmdPrint = "print"
 )
 
 var (
@@ -25,6 +28,8 @@ var (
 	// [0-9;]*			is the color value(s) regex
 	// m				is the last character of the escape sequence
 	termEscapeSequence = regexp.MustCompile(`\x1b\[[0-9;]*m`)
+
+	cmd = flag.String("c", cmdEdit, "command to perform")
 )
 
 // srb - Search Results (Console) Browser
@@ -37,7 +42,33 @@ func main() {
 	}
 
 	n, _ := strconv.Atoi(os.Args[1])
-	must(edit(n))
+
+	switch *cmd {
+	case cmdEdit:
+		must(edit(n))
+	case cmdPrint:
+		must(printLine(n))
+	default:
+		fmt.Fprintf(os.Stderr, "wrong command: %s\n\n", *cmd)
+		usage()
+		os.Exit(2)
+	}
+}
+
+func printLine(n int) error {
+	f, err := os.Open(dotFileFullPath())
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	e, err := getNthFilename(n, f)
+	if err != nil {
+		return err
+	}
+
+	_, err = fmt.Println(e.Row)
+	return err
 }
 
 func usage() {
@@ -45,6 +76,9 @@ func usage() {
 	fmt.Fprintf(os.Stderr, "	when no arguments provided, reads stdin line by line, outputs numbered lines and stores it in cache\n")
 	fmt.Fprintf(os.Stderr, "	when [number] is given, fetches the line with this number, treats it as '<filename>:<lineno>: ...'\n")
 	fmt.Fprintf(os.Stderr, "		and tries to open <filename> in your $EDITOR at line #lineno\n")
+	fmt.Fprintf(os.Stderr, "\nAdditional params:\n")
+
+	flag.PrintDefaults()
 }
 
 func dotFileFullPath() string {
@@ -129,6 +163,7 @@ func (e *entry) fullPath() string {
 
 func (e *entry) parse(s string) {
 	// example: ../pkg/checklist/sort.go:24:type kind int
+	e.Row = s
 
 	toks := strings.Split(s, ":")
 	e.Filename = toks[0]

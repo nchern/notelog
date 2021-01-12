@@ -25,6 +25,7 @@ $ notelog -h
 ```
 
 ## Roadmap
+ - [ ] have notes on `.md` format and not only in `.org`
  - [ ] create dir structure in one go during init phase. Consider fixing existing incomplete structure.
  - [ ] archive: a note can:
    - [ ] be put into archive, so it will not stay in the main note list
