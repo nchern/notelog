@@ -88,7 +88,7 @@ autocmd FileType org nnoremap <Localleader>gd :call NotesBrowseGroupDirectory()<
 autocmd FileType org command! -range=% NLSortCheckList :<line1>,<line2>!notelog -c sort-checklist
 
 " Inserts link to another note under the cursor pos
-autocmd FileType org command! -nargs=1 -complete=custom,NotesList NLInsertLink :call NotesDoInsertLink(<f-args>)
+autocmd FileType org command! -nargs=1 -complete=custom,NotesList NLLinkNote :call NotesDoInsertLink(<f-args>)
 
 " Performs search
 autocmd FileType org command! -nargs=1 NLSearch :call NotesDoSearch(<f-args>)
