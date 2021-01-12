@@ -20,14 +20,32 @@ const (
 )
 
 var (
-	nth = flag.Int("j", 1, "Jump to a specified result")
-
 	// \x1b(or \x1B)	is the escape special character (sed does not support alternatives \e and \033)
 	// \[				is the second character of the escape sequence
 	// [0-9;]*			is the color value(s) regex
 	// m				is the last character of the escape sequence
 	termEscapeSequence = regexp.MustCompile(`\x1b\[[0-9;]*m`)
 )
+
+// srb - Search Results (Console) Browser
+func main() {
+	flag.Usage = usage
+	flag.Parse()
+	if len(os.Args) < 2 {
+		must(save())
+		return
+	}
+
+	n, _ := strconv.Atoi(os.Args[1])
+	must(edit(n))
+}
+
+func usage() {
+	fmt.Fprintf(os.Stderr, "Usage: %s [number]\n", os.Args[0])
+	fmt.Fprintf(os.Stderr, "	when no arguments provided, reads stdin line by line, outputs numbered lines and stores it in cache\n")
+	fmt.Fprintf(os.Stderr, "	when [number] is given, fetches the line with this number, treats it as '<filename>:<lineno>: ...'\n")
+	fmt.Fprintf(os.Stderr, "		and tries to open <filename> in your $EDITOR at line #lineno\n")
+}
 
 func dotFileFullPath() string {
 	home, err := os.UserHomeDir()
@@ -53,31 +71,19 @@ func save() error {
 	return readAndSave(os.Stdin, os.Stdout, f)
 }
 
-func edit() error {
+func edit(n int) error {
 	f, err := os.Open(dotFileFullPath())
 	if err != nil {
 		return err
 	}
 	defer f.Close()
 
-	e, err := getNthFilename(*nth, f)
+	e, err := getNthFilename(n, f)
 	if err != nil {
 		return err
 	}
 
 	return openEditor(getEditor(), e.fullPath(), e.RowNum)
-}
-
-// srb - Search Results (Console) Browser
-// option: srp stands for Search results page
-func main() {
-	if len(os.Args) < 2 {
-		must(save())
-		return
-	}
-
-	flag.Parse()
-	must(edit())
 }
 
 func readAndSave(src io.Reader, dst io.Writer, file io.Writer) error {
