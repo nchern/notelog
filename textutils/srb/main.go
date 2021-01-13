@@ -36,12 +36,14 @@ var (
 func main() {
 	flag.Usage = usage
 	flag.Parse()
-	if len(os.Args) < 2 {
+
+	if len(flag.Args()) < 1 {
 		must(save())
 		return
 	}
 
-	n, _ := strconv.Atoi(os.Args[1])
+	n, err := strconv.Atoi(flag.Args()[0])
+	dieIf(err)
 
 	switch *cmd {
 	case cmdEdit:
