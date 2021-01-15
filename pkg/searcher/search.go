@@ -1,9 +1,11 @@
 package searcher
 
 import (
+	"bufio"
 	"bytes"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"strings"
@@ -53,45 +55,54 @@ func NewSearcher(notes Notes, out io.Writer) *Searcher {
 // Search runs the search over all notes in notes home and prints results to stdout
 // Terms grammar looks like: "foo bar -buzz -fuzz" where -xxx means exclude xxx matches from the output
 func (s *Searcher) Search(terms ...string) error {
+	buf := &bytes.Buffer{}
 	req := parseRequest(terms...)
 
-	cmd, err := buildSearchCmd(s.grepCmd, s.notes, req)
+	cmdArgs, err := buildSearchCmdAndArgs(s.grepCmd, s.notes, req)
 	if err != nil {
 		return err
 	}
 
-	cmd.Stdout = s.out
+	// Exclude notelog's dot dir from results
+	cmdArgs = append(cmdArgs, fmt.Sprintf("grep -v '/%s/'", note.DotNotelogDir))
+
+	cmd := exec.Command("sh", "-c", pipe(cmdArgs...))
+	cmd.Stdout = buf
 	cmd.Stderr = os.Stderr
 
+	var resF io.Writer = ioutil.Discard
+
 	if s.SaveResults {
-		return s.runSearchAndSaveResults(cmd)
+		f, err := os.Create(s.notes.MetadataFilename(lastResultsFile))
+		if err != nil {
+			return err
+		}
+		defer f.Close()
+		resF = f
 	}
 
 	if err := cmd.Run(); err != nil {
 		return err
 	}
-	return nil
+
+	return readAndOutputResults(bufio.NewScanner(buf), s.out, resF)
 }
 
-func (s *Searcher) runSearchAndSaveResults(cmd *exec.Cmd) error {
-	buf := &bytes.Buffer{}
-	cmd.Stdout = io.MultiWriter(s.out, buf)
-
-	err := cmd.Run()
-	if err != nil {
-		return err
+func readAndOutputResults(scn *bufio.Scanner, w io.Writer, persistentW io.Writer) error {
+	for scn.Scan() {
+		res := scn.Text()
+		if _, err := fmt.Fprintln(w, res); err != nil {
+			return err
+		}
+		uncolored := termEscapeSequence.ReplaceAllString(res, "")
+		if _, err := fmt.Fprintln(persistentW, uncolored); err != nil {
+			return err
+		}
 	}
-
-	f, err := os.Create(s.notes.MetadataFilename(lastResultsFile))
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-
-	return stripTermColors(buf, f)
+	return scn.Err()
 }
 
-func buildSearchCmd(grepCmd string, notes Notes, req *request) (*exec.Cmd, error) {
+func buildSearchCmdAndArgs(grepCmd string, notes Notes, req *request) ([]string, error) {
 	cmdName, extraArgs, err := parseToCmdAndExtraArgs(grepCmd)
 	if err != nil {
 		return nil, err
@@ -104,16 +115,16 @@ func buildSearchCmd(grepCmd string, notes Notes, req *request) (*exec.Cmd, error
 	args := append(extraArgs, defaultGrepArgs, quote(regexOr(req.terms)), notes.HomeDir())
 	findCmd := c(append([]string{cmdName}, args...)...)
 
-	return exec.Command("sh", "-c", pipe(findCmd)), nil
+	return []string{findCmd}, nil
 }
 
-func searchCmdWithExcludeTerms(cmd string, args []string, req *request, homeDir string) *exec.Cmd {
+func searchCmdWithExcludeTerms(cmd string, args []string, req *request, homeDir string) []string {
 	findArgs := append(args, defaultGrepArgs, quote(regexOr(req.terms)), homeDir)
 	findCmd := c(append([]string{cmd}, findArgs...)...)
 
 	excludeCmd := c(cmd, strings.Join(args, " "), "-vi", quote(regexOr(req.excludeTerms)))
 
-	return exec.Command("sh", "-c", pipe(findCmd, excludeCmd))
+	return []string{findCmd, excludeCmd}
 }
 
 func parseToCmdAndExtraArgs(s string) (cmd string, args []string, err error) {
@@ -132,8 +143,6 @@ func parseToCmdAndExtraArgs(s string) (cmd string, args []string, err error) {
 }
 
 func pipe(s ...string) string {
-	// HACK: super unobvious, needs refactoring.
-	s = append(s, fmt.Sprintf("grep -v '/%s/'", note.DotNotelogDir))
 	return strings.Join(s, " | ")
 }
 
