@@ -119,15 +119,15 @@ func (s *Searcher) outputResults(results []string, persistentOut io.Writer) erro
 }
 
 func searchInNames(notes Notes, req *request) ([]string, error) {
-	terms, err := regexp.Compile(regexOr(req.terms))
+	terms, err := regexp.Compile("(?i)" + regexOr(req.terms))
 	if err != nil {
 		return nil, err
 	}
 
-	// excludeTerms, err := regexp.Compile(regexOr(req.excludeTerms))
-	// if err != nil {
-	// 	return nil, err
-	// }
+	excludeTerms, err := regexp.Compile("(?i)" + regexOr(req.excludeTerms))
+	if err != nil {
+		return nil, err
+	}
 
 	res := []string{}
 	items, err := notes.All()
@@ -137,6 +137,10 @@ func searchInNames(notes Notes, req *request) ([]string, error) {
 
 	for _, it := range items {
 		if terms.MatchString(it.Name()) {
+			if len(req.excludeTerms) != 0 && excludeTerms.MatchString(it.Name()) {
+				// filter out excludeTerms if provided
+				continue
+			}
 			res = append(res, fmt.Sprintf("%s:1", it.FullPath()))
 		}
 	}
