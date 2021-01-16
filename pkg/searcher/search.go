@@ -64,7 +64,7 @@ func NewSearcher(notes Notes, out io.Writer) *Searcher {
 // Terms grammar looks like: "foo bar -buzz -fuzz" where -xxx means exclude xxx matches from the output
 func (s *Searcher) Search(terms ...string) error {
 	req := parseRequest(terms...)
-	var resF io.Writer = ioutil.Discard
+	var resF = ioutil.Discard
 
 	if s.SaveResults {
 		f, err := os.Create(s.notes.MetadataFilename(lastResultsFile))
@@ -75,12 +75,20 @@ func (s *Searcher) Search(terms ...string) error {
 		resF = f
 	}
 
+	matchedNames := []string{}
+	matchedNamesErr := make(chan error)
+	go func() {
+		var err error
+		matchedNames, err = searchInNames(s.notes, req)
+		matchedNamesErr <- err
+	}()
+
 	results, err := s.searchInNotes(req)
 	if err != nil {
 		return err
 	}
-	matchedNames, err := searchInNames(s.notes, req)
-	if err != nil {
+
+	if err := <-matchedNamesErr; err != nil {
 		return err
 	}
 
