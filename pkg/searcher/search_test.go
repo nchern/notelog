@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"sort"
 	"strings"
 	"testing"
 
@@ -133,6 +134,31 @@ func TestSearchShouldNotGetResultsFromLastResutsFile(t *testing.T) {
 			require.NoError(t, underTest.Search("foo"))
 			assert.Equal(t, expected, actual.String())
 		}
+	})
+}
+
+func TestSearcShouldSearchNamesOnlyIfSet(t *testing.T) {
+	notes := map[string]string{
+		"a.txt": "abc\nfoo\nfoo bar",
+		"b.txt": "fuzz",
+		"c.txt": "bar foo",
+	}
+	withFiles(notes, func() {
+		actual := &bytes.Buffer{}
+		underTest := NewSearcher(note.List(homeDir), actual)
+
+		err := underTest.OnlyNames().Search("foo")
+		require.NoError(t, err)
+
+		expected := []string{
+			"/tmp/test_notes/a.txt:1:",
+			"/tmp/test_notes/c.txt:1:",
+		}
+
+		actualLines := strings.Split(strings.Trim(actual.String(), "\n"), "\n")
+		sort.Strings(actualLines)
+
+		assert.Equal(t, expected, actualLines)
 	})
 }
 

@@ -35,6 +35,8 @@ type request struct {
 
 // Searcher represents a search engine over notes
 type Searcher struct {
+	onlyNames bool
+
 	SaveResults bool
 
 	notes   Notes
@@ -52,24 +54,15 @@ func NewSearcher(notes Notes, out io.Writer) *Searcher {
 	}
 }
 
+func (s *Searcher) OnlyNames() *Searcher {
+	s.onlyNames = true
+	return s
+}
+
 // Search runs the search over all notes in notes home and prints results to stdout
 // Terms grammar looks like: "foo bar -buzz -fuzz" where -xxx means exclude xxx matches from the output
 func (s *Searcher) Search(terms ...string) error {
-	buf := &bytes.Buffer{}
 	req := parseRequest(terms...)
-
-	cmdArgs, err := buildSearchCmdAndArgs(s.grepCmd, s.notes, req)
-	if err != nil {
-		return err
-	}
-
-	// Exclude notelog's dot dir from results
-	cmdArgs = append(cmdArgs, fmt.Sprintf("grep -v '/%s/'", note.DotNotelogDir))
-
-	cmd := exec.Command("sh", "-c", pipe(cmdArgs...))
-	cmd.Stdout = buf
-	cmd.Stderr = os.Stderr
-
 	var resF io.Writer = ioutil.Discard
 
 	if s.SaveResults {
@@ -81,25 +74,70 @@ func (s *Searcher) Search(terms ...string) error {
 		resF = f
 	}
 
-	if err := cmd.Run(); err != nil {
+	results, err := s.searchInNotes(req)
+	if err != nil {
 		return err
 	}
 
-	return readAndOutputResults(bufio.NewScanner(buf), s.out, resF)
+	return s.outputResults(results, resF)
 }
 
-func readAndOutputResults(scn *bufio.Scanner, w io.Writer, persistentW io.Writer) error {
-	for scn.Scan() {
-		res := scn.Text()
-		if _, err := fmt.Fprintln(w, res); err != nil {
+func (s *Searcher) outputResults(results []string, persistentOut io.Writer) error {
+	names := map[string]bool{}
+	for _, res := range results {
+		if s.onlyNames {
+			toks := strings.Split(res, ":")
+			if len(toks) < 1 {
+				continue
+			}
+			fileName := toks[0]
+			if names[fileName] {
+				continue
+			}
+			names[fileName] = true
+			res = fileName + ":1:"
+		}
+
+		if _, err := fmt.Fprintln(s.out, res); err != nil {
 			return err
 		}
 		uncolored := termEscapeSequence.ReplaceAllString(res, "")
-		if _, err := fmt.Fprintln(persistentW, uncolored); err != nil {
+		if _, err := fmt.Fprintln(persistentOut, uncolored); err != nil {
 			return err
 		}
 	}
-	return scn.Err()
+	return nil
+}
+
+func (s *Searcher) searchInNotes(req *request) ([]string, error) {
+	buf := &bytes.Buffer{}
+	cmdArgs, err := buildSearchCmdAndArgs(s.grepCmd, s.notes, req)
+	if err != nil {
+		return nil, err
+	}
+
+	// Exclude notelog's dot dir from results
+	cmdArgs = append(cmdArgs, fmt.Sprintf("grep -v '/%s/'", note.DotNotelogDir))
+
+	cmd := exec.Command("sh", "-c", pipe(cmdArgs...))
+	cmd.Stdout = buf
+	cmd.Stderr = os.Stderr
+
+	if err := cmd.Run(); err != nil {
+		return nil, err
+	}
+
+	results := []string{}
+
+	scn := bufio.NewScanner(buf)
+	for scn.Scan() {
+		results = append(results, scn.Text())
+	}
+	if err := scn.Err(); err != nil {
+		return nil, err
+	}
+
+	return results, nil
 }
 
 func buildSearchCmdAndArgs(grepCmd string, notes Notes, req *request) ([]string, error) {
