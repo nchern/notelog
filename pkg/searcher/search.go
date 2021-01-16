@@ -3,6 +3,7 @@ package searcher
 import (
 	"bufio"
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -22,6 +23,8 @@ const (
 
 	lastResultsFile = "last_search"
 )
+
+var ErrNoResults = errors.New("search: nothing found")
 
 // Notes abstracts note collection to search in
 type Notes interface {
@@ -79,7 +82,11 @@ func (s *Searcher) Search(terms ...string) error {
 	if err != nil {
 		return err
 	}
+
 	results = append(results, matchedNames...)
+	if len(results) == 0 {
+		return ErrNoResults
+	}
 
 	return s.outputResults(results, resF)
 }
@@ -152,6 +159,11 @@ func (s *Searcher) searchInNotes(req *request) ([]string, error) {
 	cmd.Stderr = os.Stderr
 
 	if err := cmd.Run(); err != nil {
+		if exitErr, ok := err.(*exec.ExitError); ok {
+			if exitErr.ExitCode() == 1 {
+				return []string{}, nil
+			}
+		}
 		return nil, err
 	}
 

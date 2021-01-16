@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -103,9 +102,9 @@ func TestSearchShoudReturnExitErrorOneIfFoundNothing(t *testing.T) {
 		underTest := NewSearcher(note.List(homeDir), actual)
 
 		err := underTest.Search("you will not find me")
+		require.NotNil(t, err)
 
-		assert.NotNil(t, err)
-		assert.Equal(t, 1, (err.(*exec.ExitError)).ExitCode())
+		assert.Equal(t, ErrNoResults, err)
 	})
 }
 
@@ -193,6 +192,12 @@ func TestSearchShouldSearchInNoteNames(t *testing.T) {
 					"/tmp/test_notes/findme2/main.org:1",
 				},
 				[]string{"findme"}},
+			{"two terms",
+				[]string{
+					"/tmp/test_notes/findme2/main.org:1",
+					"/tmp/test_notes/foo/main.org:1",
+				},
+				[]string{"findme2", "fo"}},
 		}
 		for _, tt := range tests {
 			tt := tt

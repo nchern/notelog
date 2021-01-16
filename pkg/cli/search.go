@@ -5,7 +5,6 @@ import (
 	"flag"
 	"io"
 	"os"
-	"os/exec"
 
 	"github.com/nchern/notelog/pkg/note"
 	"github.com/nchern/notelog/pkg/searcher"
@@ -41,12 +40,9 @@ func search() error {
 	s.SaveResults = *interactive
 
 	err := s.Search(flag.Args()...)
-
-	switch e := err.(type) {
-	case *exec.ExitError:
-		if e.ExitCode() == 1 {
-			os.Exit(1)
-		}
+	if err == searcher.ErrNoResults {
+		os.Exit(1)
 	}
+
 	return err
 }
