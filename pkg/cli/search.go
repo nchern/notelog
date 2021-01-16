@@ -17,7 +17,7 @@ var (
 		"(search only) if set, search results are saved to a file under NOTELOG_HOME dir. Search results in output get numbered.")
 
 	titlesOnly = flag.Bool(
-		"title",
+		"titles-only",
 		false,
 		"(search only) if set, outputs note titles of search results only",
 	)

@@ -34,18 +34,18 @@ $ notelog -h
    - [ ] notelog -c attach <notename> <filepath> - puts <filepath> into note directory
    - [ ] notelog -c attach-open <notename> <attach-name> - opens attach
    - [ ] integrate with search?
- - [x] smart bash auto-completion for subcommands
  - [ ] note templates (?)
  - [ ] cross-linking: you can fetch all the references from other notes to a given note
    - [ ] embed cross links in notes?
- - [ ] search capabilities
-   - [x] search browsing: quick jump to search results from command line
-   - [ ] search aggregations:  - group by files(—notes-only)  (? - do we need to return all lines or just docs?)
-   - [ ] search over note names
- - [ ] vim plugin
-   - [x] mvp
-   - [ ] with ftdetect to '.note' (???)
  - [ ] migrate to cobra subcommand parser (?)
+ - [ ] vim plugin
+   - [x] MVP
+   - [ ] with ftdetect to '.note' (???)
+ - [x] smart bash auto-completion for subcommands
+ - [x] search capabilities
+   - [x] search browsing: quick jump to search results from command line
+   - [x] search aggregations:  - group by files(—titles-only)  (? - do we need to return all lines or just docs?)
+   - [x] search over note names
  - [x] search: add simple query language, e.g. "foo bar -buzz" == "foo OR bar EXCLUDE buzz"
  - [x] add rm feature
  - [x] add rename feature
