@@ -94,8 +94,9 @@ func (s *Searcher) Search(terms ...string) error {
 func (s *Searcher) outputResults(results []string, persistentOut io.Writer) error {
 	names := map[string]bool{}
 	for _, res := range results {
+		uncolored := termEscapeSequence.ReplaceAllString(res, "")
 		if s.OnlyNames {
-			toks := strings.Split(res, ":")
+			toks := strings.Split(uncolored, ":")
 			if len(toks) < 1 {
 				continue
 			}
@@ -110,7 +111,6 @@ func (s *Searcher) outputResults(results []string, persistentOut io.Writer) erro
 		if _, err := fmt.Fprintln(s.out, res); err != nil {
 			return err
 		}
-		uncolored := termEscapeSequence.ReplaceAllString(res, "")
 		if _, err := fmt.Fprintln(persistentOut, uncolored); err != nil {
 			return err
 		}

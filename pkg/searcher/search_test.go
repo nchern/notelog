@@ -2,9 +2,11 @@ package searcher
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -225,6 +227,37 @@ func TestSearchShouldSearchInNoteNames(t *testing.T) {
 				assert.Equal(t, tt.expected, actual)
 			})
 		}
+	})
+}
+
+func TestSearchNoteNamesOnlyShouldEnsureNoTermColorsInOutput(t *testing.T) {
+	// this test requires sift command to present in the system
+	if err := exec.Command("sift", "--version").Run(); errors.Is(err, exec.ErrNotFound) {
+		t.Skip("can not run this test: sift is not installed")
+	}
+
+	notes := map[string]string{
+		"a/main.org":   "foo",
+		"b/main.org":   "fuzz",
+		"foo/main.org": "bar\nbuzz",
+	}
+	withFiles(notes, func() {
+		out := &bytes.Buffer{}
+		underTest := NewSearcher(note.List(homeDir), out)
+		underTest.OnlyNames = true
+		underTest.grepCmd = "sift --color"
+
+		err := underTest.Search("foo", "buzz")
+		require.NoError(t, err)
+
+		expected := []string{
+			"/tmp/test_notes/a/main.org:1:",
+			"/tmp/test_notes/foo/main.org:1:",
+		}
+
+		actual := toLines(out.String())
+		sort.Strings(actual)
+		assert.Equal(t, expected, actual)
 	})
 }
 
