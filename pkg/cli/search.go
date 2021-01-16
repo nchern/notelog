@@ -11,10 +11,18 @@ import (
 	"github.com/nchern/notelog/pkg/searcher"
 )
 
-var interactive = flag.Bool(
-	"interactive",
-	false,
-	"(search only) if set, search results are saved to a file under NOTELOG_HOME dir. Search results in output get numbered.")
+var (
+	interactive = flag.Bool(
+		"interactive",
+		false,
+		"(search only) if set, search results are saved to a file under NOTELOG_HOME dir. Search results in output get numbered.")
+
+	titlesOnly = flag.Bool(
+		"title",
+		false,
+		"(search only) if set, outputs note titles of search results only",
+	)
+)
 
 func search() error {
 	if len(flag.Args()) < 1 {
@@ -28,6 +36,8 @@ func search() error {
 		out = &nlWriter{inner: out}
 	}
 	s := searcher.NewSearcher(notes, out)
+
+	s.OnlyNames = *titlesOnly
 	s.SaveResults = *interactive
 
 	err := s.Search(flag.Args()...)

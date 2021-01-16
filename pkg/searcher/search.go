@@ -35,7 +35,7 @@ type request struct {
 
 // Searcher represents a search engine over notes
 type Searcher struct {
-	onlyNames bool
+	OnlyNames bool
 
 	SaveResults bool
 
@@ -52,11 +52,6 @@ func NewSearcher(notes Notes, out io.Writer) *Searcher {
 		notes:   notes,
 		grepCmd: env.Get("NOTELOG_GREP", defaultGrep),
 	}
-}
-
-func (s *Searcher) OnlyNames() *Searcher {
-	s.onlyNames = true
-	return s
 }
 
 // Search runs the search over all notes in notes home and prints results to stdout
@@ -85,7 +80,7 @@ func (s *Searcher) Search(terms ...string) error {
 func (s *Searcher) outputResults(results []string, persistentOut io.Writer) error {
 	names := map[string]bool{}
 	for _, res := range results {
-		if s.onlyNames {
+		if s.OnlyNames {
 			toks := strings.Split(res, ":")
 			if len(toks) < 1 {
 				continue

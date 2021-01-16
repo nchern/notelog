@@ -146,8 +146,10 @@ func TestSearcShouldSearchNamesOnlyIfSet(t *testing.T) {
 	withFiles(notes, func() {
 		actual := &bytes.Buffer{}
 		underTest := NewSearcher(note.List(homeDir), actual)
+		underTest.OnlyNames = true
 
-		err := underTest.OnlyNames().Search("foo")
+		err := underTest.Search("foo")
+
 		require.NoError(t, err)
 
 		expected := []string{
