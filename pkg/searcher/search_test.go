@@ -24,9 +24,9 @@ const (
 
 var (
 	files = m{
-		"a.txt": "foo bar buzz",
-		"b.txt": "foobar bar addd buzz",
-		"c.txt": "fuzz bar xx buzz",
+		"a/main.org": "foo bar buzz",
+		"b/main.org": "foobar bar addd buzz",
+		"c/main.org": "fuzz bar xx buzz",
 	}
 )
 
@@ -91,7 +91,7 @@ func TestSearchShoudWriteLastSearchResultsWithoutTermColor(t *testing.T) {
 		resultsFilename := filepath.Join(homeDir, note.DotNotelogDir, lastResultsFile)
 		body, err := ioutil.ReadFile(resultsFilename)
 
-		expected := "/tmp/test_notes/a.txt:1:foo bar buzz\n"
+		expected := "/tmp/test_notes/a/main.org:1:foo bar buzz\n"
 		require.NoError(t, err) // file must exist
 		assert.Equal(t, expected, string(body))
 	})
@@ -125,23 +125,30 @@ func TestSearchShouldNotGetResultsFromLastResutsFile(t *testing.T) {
 	withFiles(files, func() {
 		// search 2 times so that last_results will be filled
 		for i := 0; i < 2; i++ {
-			actual := &bytes.Buffer{}
-			underTest := NewSearcher(note.List(homeDir), actual)
+			out := &bytes.Buffer{}
+			underTest := NewSearcher(note.List(homeDir), out)
 			underTest.SaveResults = true
 
-			expected := "/tmp/test_notes/b.txt:1:foobar bar addd buzz\n/tmp/test_notes/a.txt:1:foo bar buzz\n"
+			err := underTest.Search("foo")
+			require.NoError(t, err)
 
-			require.NoError(t, underTest.Search("foo"))
-			assert.Equal(t, expected, actual.String())
+			expected := []string{
+				"/tmp/test_notes/a/main.org:1:foo bar buzz",
+				"/tmp/test_notes/b/main.org:1:foobar bar addd buzz",
+			}
+			actual := toLines(out.String())
+			sort.Strings(actual)
+
+			assert.Equal(t, expected, actual)
 		}
 	})
 }
 
 func TestSearcShouldSearchNamesOnlyIfSet(t *testing.T) {
 	notes := map[string]string{
-		"a.txt": "abc\nfoo\nfoo bar",
-		"b.txt": "fuzz",
-		"c.txt": "bar foo",
+		"a/main.org": "abc\nfoo\nfoo bar",
+		"b/main.org": "fuzz",
+		"c/main.org": "bar foo",
 	}
 	withFiles(notes, func() {
 		actual := &bytes.Buffer{}
@@ -153,8 +160,8 @@ func TestSearcShouldSearchNamesOnlyIfSet(t *testing.T) {
 		require.NoError(t, err)
 
 		expected := []string{
-			"/tmp/test_notes/a.txt:1:",
-			"/tmp/test_notes/c.txt:1:",
+			"/tmp/test_notes/a/main.org:1:",
+			"/tmp/test_notes/c/main.org:1:",
 		}
 
 		actualLines := strings.Split(strings.Trim(actual.String(), "\n"), "\n")
@@ -171,7 +178,10 @@ func withFiles(files m, fn func()) {
 	must(os.MkdirAll(filepath.Join(homeDir, note.DotNotelogDir), 0755))
 
 	for name, body := range files {
-		must(ioutil.WriteFile(filepath.Join(homeDir, name), []byte(body), mode))
+		fullName := filepath.Join(homeDir, name)
+		dir, _ := filepath.Split(fullName)
+		must(os.MkdirAll(dir, 0755))
+		must(ioutil.WriteFile(fullName, []byte(body), mode))
 	}
 
 	fn()

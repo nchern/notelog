@@ -8,6 +8,7 @@ import (
 
 	"github.com/nchern/notelog/pkg/note"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGetLastNthResult(t *testing.T) {
@@ -19,7 +20,7 @@ func TestGetLastNthResult(t *testing.T) {
 
 		// perform search to generate last results file
 		err := underTest.Search("foo")
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		var tests = []struct {
 			name     string
@@ -27,9 +28,9 @@ func TestGetLastNthResult(t *testing.T) {
 			given    int
 		}{
 			{"should return first result",
-				filepath.Join(homeDir, "b.txt") + ":1:foobar bar addd buzz", 1},
+				filepath.Join(homeDir, "a/main.org") + ":1:foo bar buzz", 1},
 			{"should return second result",
-				filepath.Join(homeDir, "a.txt") + ":1:foo bar buzz", 2},
+				filepath.Join(homeDir, "b/main.org") + ":1:foobar bar addd buzz", 2},
 			{"should return empty on out of bounds",
 				"", 100500},
 			{"should return empty on negative",
