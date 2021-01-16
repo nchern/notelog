@@ -15,6 +15,7 @@ func TestGetLastNthResult(t *testing.T) {
 	withFiles(files, func() {
 		n := note.List(homeDir)
 		buf := &bytes.Buffer{}
+
 		underTest := NewSearcher(n, buf)
 		underTest.SaveResults = true
 
@@ -55,8 +56,8 @@ func TestGetLastNthResultShouldReturnEmptyStringIfNoResultsFound(t *testing.T) {
 		assert.True(t, os.IsNotExist(err))
 
 		actual, err := GetLastNthResult(n, 1)
+		require.NoError(t, err)
 
-		assert.NoError(t, err)
 		assert.Empty(t, actual)
 	})
 }

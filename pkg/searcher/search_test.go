@@ -110,15 +110,18 @@ func TestSearchShoudReturnExitErrorOneIfFoundNothing(t *testing.T) {
 }
 
 func TestSearchShouldCorrectlyHandleCommandOverride(t *testing.T) {
-	n := note.List(homeDir)
-	actual := &bytes.Buffer{}
-	underTest := NewSearcher(n, actual)
-	underTest.grepCmd = "echo --bar" // use echo to get args as output
+	withFiles(files, func() { // search requires NOTELOG_HOME to exist
+		n := note.List(homeDir)
+		actual := &bytes.Buffer{}
 
-	err := underTest.Search("foo")
+		underTest := NewSearcher(n, actual)
+		underTest.grepCmd = "echo --bar" // use echo to get args as output
 
-	require.NoError(t, err)
-	assert.Equal(t, fmt.Sprintf("--bar -rni (foo) %s\n", n.HomeDir()), actual.String())
+		err := underTest.Search("foo")
+		require.NoError(t, err)
+
+		assert.Equal(t, fmt.Sprintf("--bar -rni (foo) %s\n", n.HomeDir()), actual.String())
+	})
 }
 
 func TestSearchShouldNotGetResultsFromLastResutsFile(t *testing.T) {
@@ -156,7 +159,6 @@ func TestSearcShouldSearchNamesOnlyIfSet(t *testing.T) {
 		underTest.OnlyNames = true
 
 		err := underTest.Search("foo")
-
 		require.NoError(t, err)
 
 		expected := []string{
@@ -164,10 +166,48 @@ func TestSearcShouldSearchNamesOnlyIfSet(t *testing.T) {
 			"/tmp/test_notes/c/main.org:1:",
 		}
 
-		actualLines := strings.Split(strings.Trim(actual.String(), "\n"), "\n")
+		actualLines := toLines(actual.String())
 		sort.Strings(actualLines)
 
 		assert.Equal(t, expected, actualLines)
+	})
+}
+
+func TestSearchShouldSearchInNoteNames(t *testing.T) {
+	notes := map[string]string{
+		"foo/main.org":     "bar",
+		"findme/main.org":  "abc",
+		"findme2/main.org": "dfg",
+		"find/main.org":    "findme",
+	}
+	withFiles(notes, func() {
+		var tests = []struct {
+			name     string
+			expected []string
+			given    []string
+		}{
+			{"simple query",
+				[]string{
+					"/tmp/test_notes/find/main.org:1:findme",
+					"/tmp/test_notes/findme/main.org:1",
+					"/tmp/test_notes/findme2/main.org:1",
+				},
+				[]string{"findme"}},
+		}
+		for _, tt := range tests {
+			tt := tt
+			t.Run(tt.name, func(t *testing.T) {
+				out := &bytes.Buffer{}
+				underTest := NewSearcher(note.List(homeDir), out)
+
+				err := underTest.Search(tt.given...)
+				require.NoError(t, err)
+
+				actual := toLines(out.String())
+				sort.Strings(actual)
+				assert.Equal(t, tt.expected, actual)
+			})
+		}
 	})
 }
 

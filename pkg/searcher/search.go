@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"regexp"
 	"strings"
 
 	"github.com/google/shlex"
@@ -25,6 +26,7 @@ const (
 // Notes abstracts note collection to search in
 type Notes interface {
 	HomeDir() string
+	All() ([]*note.Note, error)
 	MetadataFilename(name string) string
 }
 
@@ -73,6 +75,11 @@ func (s *Searcher) Search(terms ...string) error {
 	if err != nil {
 		return err
 	}
+	matchedNames, err := searchInNames(s.notes, req)
+	if err != nil {
+		return err
+	}
+	results = append(results, matchedNames...)
 
 	return s.outputResults(results, resF)
 }
@@ -102,6 +109,32 @@ func (s *Searcher) outputResults(results []string, persistentOut io.Writer) erro
 		}
 	}
 	return nil
+}
+
+func searchInNames(notes Notes, req *request) ([]string, error) {
+	terms, err := regexp.Compile(regexOr(req.terms))
+	if err != nil {
+		return nil, err
+	}
+
+	// excludeTerms, err := regexp.Compile(regexOr(req.excludeTerms))
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	res := []string{}
+	items, err := notes.All()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, it := range items {
+		if terms.MatchString(it.Name()) {
+			res = append(res, fmt.Sprintf("%s:1", it.FullPath()))
+		}
+	}
+
+	return res, nil
 }
 
 func (s *Searcher) searchInNotes(req *request) ([]string, error) {
