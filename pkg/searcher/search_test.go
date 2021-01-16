@@ -22,19 +22,21 @@ const (
 )
 
 var (
-	files = map[string]string{
+	files = m{
 		"a.txt": "foo bar buzz",
 		"b.txt": "foobar bar addd buzz",
 		"c.txt": "fuzz bar xx buzz",
 	}
 )
 
+type m map[string]string
+
 func init() {
 	must(os.Setenv("NOTELOG_GREP", defaultGrep)) // make sure we always use defaultGrep in tests
 }
 
 func TestShoudSearch(t *testing.T) {
-	withFiles(func() {
+	withFiles(files, func() {
 		var tests = []struct {
 			name     string
 			expected int
@@ -59,7 +61,7 @@ func TestShoudSearch(t *testing.T) {
 }
 
 func TestSearchShoudWriteLastSearchResults(t *testing.T) {
-	withFiles(func() {
+	withFiles(files, func() {
 		actual := &bytes.Buffer{}
 
 		underTest := NewSearcher(note.List(homeDir), actual)
@@ -76,7 +78,7 @@ func TestSearchShoudWriteLastSearchResults(t *testing.T) {
 }
 
 func TestSearchShoudWriteLastSearchResultsWithoutTermColor(t *testing.T) {
-	withFiles(func() {
+	withFiles(files, func() {
 		actual := &bytes.Buffer{}
 
 		underTest := NewSearcher(note.List(homeDir), actual)
@@ -95,7 +97,7 @@ func TestSearchShoudWriteLastSearchResultsWithoutTermColor(t *testing.T) {
 }
 
 func TestSearchShoudReturnExitErrorOneIfFoundNothing(t *testing.T) {
-	withFiles(func() {
+	withFiles(files, func() {
 		actual := &bytes.Buffer{}
 		underTest := NewSearcher(note.List(homeDir), actual)
 
@@ -119,7 +121,7 @@ func TestSearchShouldCorrectlyHandleCommandOverride(t *testing.T) {
 }
 
 func TestSearchShouldNotGetResultsFromLastResutsFile(t *testing.T) {
-	withFiles(func() {
+	withFiles(files, func() {
 		// search 2 times so that last_results will be filled
 		for i := 0; i < 2; i++ {
 			actual := &bytes.Buffer{}
@@ -134,7 +136,7 @@ func TestSearchShouldNotGetResultsFromLastResutsFile(t *testing.T) {
 	})
 }
 
-func withFiles(fn func()) {
+func withFiles(files m, fn func()) {
 	must(os.MkdirAll(homeDir, 0755))
 	defer os.RemoveAll(homeDir)
 

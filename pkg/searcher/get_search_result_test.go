@@ -2,7 +2,6 @@ package searcher
 
 import (
 	"bytes"
-	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -12,7 +11,7 @@ import (
 )
 
 func TestGetLastNthResult(t *testing.T) {
-	withFiles(func() {
+	withFiles(files, func() {
 		n := note.List(homeDir)
 		buf := &bytes.Buffer{}
 		underTest := NewSearcher(n, buf)
@@ -40,7 +39,6 @@ func TestGetLastNthResult(t *testing.T) {
 			tt := tt
 			t.Run(tt.name, func(t *testing.T) {
 				actual, err := GetLastNthResult(n, tt.given)
-				fmt.Println(actual)
 				assert.NoError(t, err)
 				assert.Equal(t, actual, tt.expected)
 			})
@@ -49,7 +47,7 @@ func TestGetLastNthResult(t *testing.T) {
 }
 
 func TestGetLastNthResultShouldReturnEmptyStringIfNoResultsFound(t *testing.T) {
-	withFiles(func() {
+	withFiles(files, func() {
 		n := note.List(homeDir)
 		// make sure last results file does not exist
 		_, err := os.Stat(n.MetadataFilename(lastResultsFile))
