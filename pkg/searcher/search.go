@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
+	"sort"
 	"strings"
 
 	"github.com/google/shlex"
@@ -93,6 +94,9 @@ func (s *Searcher) Search(terms ...string) error {
 
 func (s *Searcher) outputResults(results []string, persistentOut io.Writer) error {
 	names := map[string]bool{}
+	if s.OnlyNames {
+		sort.Strings(results)
+	}
 	for _, res := range results {
 		uncolored := termEscapeSequence.ReplaceAllString(res, "")
 		if s.OnlyNames {
