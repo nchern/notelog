@@ -17,9 +17,6 @@ import (
 const (
 	dotFile       = ".srb"
 	defaultEditor = "vi"
-
-	cmdEdit  = "edit"
-	cmdPrint = "print"
 )
 
 var (
@@ -29,7 +26,9 @@ var (
 	// m				is the last character of the escape sequence
 	termEscapeSequence = regexp.MustCompile(`\x1b\[[0-9;]*m`)
 
-	cmd = flag.String("c", cmdEdit, "command to perform")
+	flagPrint = flag.Bool("p", false, "prints a given row. Row must be given as a 1st positional argument")
+
+	delimeter = ":"
 )
 
 // srb - Search Results (Console) Browser
@@ -42,35 +41,46 @@ func main() {
 		return
 	}
 
-	row, err := strconv.Atoi(flag.Args()[0])
+	row, err := parseArg(0)
 	dieIf(err)
 
-	switch *cmd {
-	case cmdEdit:
+	if *flagPrint {
+		col, _ := parseArg(1)
+		must(printRowOrField(row, col))
+	} else {
 		must(edit(row))
-	case cmdPrint:
-		must(printLine(row))
-	default:
-		fmt.Fprintf(os.Stderr, "wrong command: %s\n\n", *cmd)
-		usage()
-		os.Exit(2)
 	}
 }
 
-func printLine(n int) error {
-	f, err := os.Open(dotFileFullPath())
+func parseArg(i int) (int, error) {
+	x, err := strconv.Atoi(flag.Arg(i))
+	if err != nil {
+		return -1, err
+	}
+	return x, nil
+}
+
+func printRowOrField(row int, col int) error {
+	e, err := getNthEntry(row)
 	if err != nil {
 		return err
 	}
-	defer f.Close()
 
-	e, err := getNthFilename(n, f)
-	if err != nil {
-		return err
+	if col > -1 {
+		_, err = fmt.Println(e.getField(col))
+	} else {
+		_, err = fmt.Println(e.Row)
 	}
-
-	_, err = fmt.Println(e.Row)
 	return err
+}
+
+func edit(n int) error {
+	e, err := getNthEntry(n)
+	if err != nil {
+		return err
+	}
+
+	return openEditor(getEditor(), e.fullPath(), e.RowNum)
 }
 
 func usage() {
@@ -107,21 +117,6 @@ func save() error {
 	return readAndSave(os.Stdin, os.Stdout, f)
 }
 
-func edit(n int) error {
-	f, err := os.Open(dotFileFullPath())
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-
-	e, err := getNthFilename(n, f)
-	if err != nil {
-		return err
-	}
-
-	return openEditor(getEditor(), e.fullPath(), e.RowNum)
-}
-
 func readAndSave(src io.Reader, dst io.Writer, file io.Writer) error {
 	cwd, err := os.Getwd()
 	if err != nil {
@@ -154,6 +149,15 @@ type entry struct {
 	Row      string
 	Root     string
 	Filename string
+
+	tokenized []string
+}
+
+func (e *entry) getField(col int) string {
+	if col < 0 || col >= len(e.tokenized) {
+		return ""
+	}
+	return e.tokenized[col]
 }
 
 func (e *entry) fullPath() string {
@@ -167,18 +171,28 @@ func (e *entry) parse(s string) {
 	// example: ../pkg/checklist/sort.go:24:type kind int
 	e.Row = s
 
-	toks := strings.Split(s, ":")
-	e.Filename = toks[0]
-	if len(toks) > 1 {
-		e.RowNum, _ = strconv.ParseInt(toks[1], 0, 64)
+	e.tokenized = strings.Split(s, delimeter)
+	if len(e.tokenized) < 1 {
+		return
+	}
+
+	e.Filename = e.tokenized[0]
+	if len(e.tokenized) > 1 {
+		e.RowNum, _ = strconv.ParseInt(e.tokenized[1], 0, 64)
 	}
 }
 
-func getNthFilename(n int, file io.Reader) (entry, error) {
+func getNthEntry(n int) (entry, error) {
 	i := 0
 	var res entry
 
-	scanner := bufio.NewScanner(file)
+	f, err := os.Open(dotFileFullPath())
+	if err != nil {
+		return res, err
+	}
+	defer f.Close()
+
+	scanner := bufio.NewScanner(f)
 	for scanner.Scan() {
 		l := scanner.Text()
 		if strings.HasPrefix(l, "#") {
