@@ -5,7 +5,7 @@ build: vet
 	go build ./...
 
 .PHONY: install
-install: test
+install: test gen-version
 	go get ./...
 
 .PHONY: lint
