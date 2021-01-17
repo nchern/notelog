@@ -29,6 +29,7 @@ $ notelog -h
  - [ ] create dir structure in one go during init phase. Consider fixing existing incomplete structure.
  - [ ] archive: a note can:
    - [ ] be put into archive, so it will not stay in the main note list
+   - [ ] what should be the search behaviour? Should it be available or not for the search?
    - [ ] be restored from the archive (eventually)
  - [ ] attachments to notes (?)
    - [ ] notelog -c attach <notename> <filepath> - puts <filepath> into note directory
