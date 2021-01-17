@@ -42,14 +42,14 @@ func main() {
 		return
 	}
 
-	n, err := strconv.Atoi(flag.Args()[0])
+	row, err := strconv.Atoi(flag.Args()[0])
 	dieIf(err)
 
 	switch *cmd {
 	case cmdEdit:
-		must(edit(n))
+		must(edit(row))
 	case cmdPrint:
-		must(printLine(n))
+		must(printLine(row))
 	default:
 		fmt.Fprintf(os.Stderr, "wrong command: %s\n\n", *cmd)
 		usage()
@@ -75,9 +75,9 @@ func printLine(n int) error {
 
 func usage() {
 	fmt.Fprintf(os.Stderr, "Usage: %s [number]\n", os.Args[0])
-	fmt.Fprintf(os.Stderr, "	when no arguments provided, reads stdin line by line, outputs numbered lines and stores it in cache\n")
-	fmt.Fprintf(os.Stderr, "	when [number] is given, fetches the line with this number, treats it as '<filename>:<lineno>: ...'\n")
-	fmt.Fprintf(os.Stderr, "		and tries to open <filename> in your $EDITOR at line #lineno\n")
+	fmt.Fprintf(os.Stderr, "	when no arguments provided, reads stdin line by line, outputs numbered lines and stores them in cache\n")
+	fmt.Fprintf(os.Stderr, "	when [number] is given, fetches the line with this ordinal number, treats it as '<filename>:<lineno>: ...'\n")
+	fmt.Fprintf(os.Stderr, "		and tries to open <filename> in your $EDITOR at the line #lineno\n")
 	fmt.Fprintf(os.Stderr, "\nAdditional params:\n")
 
 	flag.PrintDefaults()
