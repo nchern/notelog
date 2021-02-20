@@ -190,26 +190,26 @@ func TestSearchShouldSearchInNoteNames(t *testing.T) {
 			{"simple query",
 				[]string{
 					"/tmp/test_notes/buzz/main.org:1:findme",
-					"/tmp/test_notes/findme/main.org:1",
-					"/tmp/test_notes/findme2/main.org:1",
+					"/tmp/test_notes/findme/main.org:1: ",
+					"/tmp/test_notes/findme2/main.org:1: ",
 				},
 				[]string{"findme"}},
 			{"two terms",
 				[]string{
-					"/tmp/test_notes/findme2/main.org:1",
-					"/tmp/test_notes/foo/main.org:1",
+					"/tmp/test_notes/findme2/main.org:1: ",
+					"/tmp/test_notes/foo/main.org:1: ",
 				},
 				[]string{"findme2", "fo"}},
 			{"with terms and excluded terms",
 				[]string{
 					"/tmp/test_notes/buzz/main.org:1:findme",
-					"/tmp/test_notes/findme/main.org:1",
+					"/tmp/test_notes/findme/main.org:1: ",
 				},
 				[]string{"find", "-findme2"}},
 			{"terms and exclude terms are case insensitive",
 				[]string{
 					"/tmp/test_notes/buzz/main.org:1:findme",
-					"/tmp/test_notes/findme/main.org:1",
+					"/tmp/test_notes/findme/main.org:1: ",
 				},
 				[]string{"finD", "-FindmE2"}},
 		}

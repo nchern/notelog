@@ -153,7 +153,7 @@ func searchInNames(notes Notes, req *request) ([]string, error) {
 				// filter out excludeTerms if provided
 				continue
 			}
-			res = append(res, fmt.Sprintf("%s:1", it.FullPath()))
+			res = append(res, fmt.Sprintf("%s:1: ", it.FullPath()))
 		}
 	}
 
