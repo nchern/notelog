@@ -1,4 +1,4 @@
-package editor
+package note
 
 import (
 	"io/ioutil"
@@ -11,7 +11,7 @@ import (
 
 func TestWriteInstantRecord(t *testing.T) {
 	const sample = "instant"
-	n := &noteMock{}
+	n := &Note{homeDir: "/tmp", name: "test-note"}
 
 	initial := text(
 		"foo",
@@ -63,10 +63,11 @@ func TestWriteInstantRecord(t *testing.T) {
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
-			must(ioutil.WriteFile(n.FullPath(), []byte(initial), DefaultFilePerms))
+			must(n.Init())
+			must(ioutil.WriteFile(n.FullPath(), []byte(initial), defaultFilePerms))
 			defer os.Remove(n.FullPath())
 
-			assert.NoError(t, WriteInstantRecord(n, sample, tt.givenSkipLines))
+			assert.NoError(t, n.WriteInstantRecord(sample, tt.givenSkipLines))
 
 			actual, err := ioutil.ReadFile(n.FullPath())
 
@@ -83,13 +84,3 @@ func must(err error) {
 }
 
 func text(lines ...string) string { return strings.Join(lines, "\n") }
-
-type noteMock struct{}
-
-func (n *noteMock) Dir() string {
-	return "/tmp/"
-}
-
-func (n *noteMock) FullPath() string {
-	return "/tmp/test-note.txt"
-}

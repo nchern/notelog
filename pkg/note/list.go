@@ -45,7 +45,7 @@ func (l List) Rename(oldName string, newName string) error {
 		return err
 	}
 
-	return os.Rename(path, l.Note(newName).Dir())
+	return os.Rename(path, l.Note(newName).dir())
 }
 
 // All returns all notes from this list
@@ -71,7 +71,7 @@ func NewList() List {
 }
 
 func getExistingNotePath(note *Note) (string, error) {
-	path := note.Dir()
+	path := note.dir()
 	if _, err := os.Stat(path); err != nil {
 		if os.IsNotExist(err) {
 			return "", fmt.Errorf("%s does not exist", note.name)

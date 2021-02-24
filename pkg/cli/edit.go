@@ -19,8 +19,9 @@ func edit(readOnly bool) error {
 	if err != nil {
 		return err
 	}
+	nt := notes.Note(noteName)
 	if instantRecord != "" {
-		return editor.WriteInstantRecord(notes.Note(noteName), instantRecord, skipLines)
+		return nt.WriteInstantRecord(instantRecord, skipLines)
 	}
-	return editor.Edit(notes.Note(noteName), readOnly)
+	return editor.Edit(nt, readOnly)
 }

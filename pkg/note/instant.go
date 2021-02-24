@@ -1,4 +1,4 @@
-package editor
+package note
 
 import (
 	"bufio"
@@ -41,10 +41,10 @@ func (w *writer) writeRecord(record string) error {
 }
 
 // WriteInstantRecord directly writes an `instant` string to a given note
-func WriteInstantRecord(note Note, record string, skipLines uint) error {
-	filename := note.FullPath()
+func (n *Note) WriteInstantRecord(record string, skipLines uint) error {
+	filename := n.FullPath()
 
-	srcFile, err := os.OpenFile(filename, os.O_RDWR|os.O_CREATE, DefaultFilePerms)
+	srcFile, err := os.OpenFile(filename, os.O_RDWR|os.O_CREATE, defaultFilePerms)
 	if err != nil {
 		return err
 	}

@@ -9,12 +9,6 @@ import (
 )
 
 const (
-	// DefaultDirPerms
-	DefaultDirPerms = 0700
-
-	// DefaultFilePerms
-	DefaultFilePerms = 0644
-
 	defaultEditor = "vim"
 )
 
@@ -26,15 +20,16 @@ var (
 
 // Note abstracts the note to edit
 type Note interface {
-	Dir() string
+	Init() error
 	FullPath() string
+	RemoveIfEmpty() error
 }
 
 // Edit calls an editor to interactively edit given note
 func Edit(note Note, readOnly bool) error {
-	defer removeDirIfNotesFileNotExists(note.Dir(), note.FullPath())
+	defer note.RemoveIfEmpty()
 
-	if err := os.MkdirAll(note.Dir(), DefaultDirPerms); err != nil {
+	if err := note.Init(); err != nil {
 		return err
 	}
 
@@ -61,27 +56,4 @@ func Shellout(flags ...string) *exec.Cmd {
 	cmd.Stderr = os.Stderr
 
 	return cmd
-}
-
-// Touch creates given note if it does not exist otherwise does nothing
-func Touch(note Note) error {
-	if err := os.MkdirAll(note.Dir(), DefaultDirPerms); err != nil {
-		return err
-	}
-	_, err := os.Stat(note.FullPath())
-	if os.IsNotExist(err) {
-		f, err := os.OpenFile(note.FullPath(), os.O_RDWR|os.O_CREATE, DefaultFilePerms)
-		if err != nil {
-			return err
-		}
-		return f.Close()
-	}
-	return nil
-}
-
-func removeDirIfNotesFileNotExists(dirName string, filename string) {
-	_, err := os.Stat(filename)
-	if os.IsNotExist(err) {
-		os.Remove(dirName)
-	}
 }
