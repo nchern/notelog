@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 )
@@ -63,6 +64,22 @@ func (l List) All() ([]*Note, error) {
 	}
 
 	return res, nil
+}
+
+// Archive puts a given note into archive
+func (l List) Archive(name string) error {
+	path, err := getExistingNotePath(l.Note(name))
+	if err != nil {
+		return err
+	}
+
+	archiveDir := filepath.Join(l.HomeDir(), archiveNoteDir)
+	if err := os.MkdirAll(archiveDir, defaultDirPerms); err != nil {
+		return err
+	}
+	// This does not work: os.Rename(path, archiveDir)
+	// fails with "rename $path $archiveDir file exists"
+	return exec.Command("mv", path, archiveDir).Run()
 }
 
 // NewList returns a list of notes

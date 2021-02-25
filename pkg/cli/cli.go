@@ -20,6 +20,7 @@ const (
 )
 
 var (
+	cmdArchive       = c("archive")
 	cmdAutoComplete  = c("autocomplete")
 	cmdBashComplete  = c("bash-complete")
 	cmdEnv           = c("env")
@@ -103,6 +104,8 @@ func Execute(cmd string) error {
 		return touch(notes)
 	case cmdVersion:
 		return printVersion()
+	case cmdArchive:
+		return archive()
 	default:
 		return fmt.Errorf("Bad cmd: '%s'", cmd)
 	}

@@ -14,6 +14,8 @@ const (
 	// DotNotelogDir is a dir where notelog store its files
 	DotNotelogDir = ".notelog"
 
+	archiveNoteDir = ".archive"
+
 	defaultDirPerms = 0700
 
 	defaultFilePerms = 0644
