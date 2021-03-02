@@ -1,6 +1,7 @@
 package note
 
 import (
+	"io"
 	"os"
 	"path/filepath"
 
@@ -72,6 +73,18 @@ func (n *Note) Touch() error {
 		return f.Close()
 	}
 	return nil
+}
+
+// Dump writes this note contents to a given writer
+func (n *Note) Dump(w io.Writer) error {
+	f, err := os.Open(n.FullPath())
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	_, err = io.Copy(w, f)
+	return err
 }
 
 func (n *Note) dir() string {

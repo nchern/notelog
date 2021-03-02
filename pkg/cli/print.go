@@ -2,7 +2,6 @@ package cli
 
 import (
 	"flag"
-	"io"
 	"os"
 
 	"github.com/nchern/notelog/pkg/note"
@@ -18,11 +17,5 @@ func printNote() error {
 
 	n := notes.Note(noteName)
 
-	f, err := os.Open(n.FullPath())
-	if err != nil {
-		return err
-	}
-
-	_, err = io.Copy(os.Stdout, f)
-	return err
+	return n.Dump(os.Stdout)
 }
