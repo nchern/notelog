@@ -3,7 +3,6 @@ package cli
 import (
 	"flag"
 	"fmt"
-	"os"
 
 	"github.com/nchern/notelog/pkg/note"
 )
@@ -16,10 +15,15 @@ func printFullPath() error {
 		return err
 	}
 	n := notes.Note(noteName)
-	path := n.FullPath()
-	if _, err := os.Stat(path); err != nil {
-		return err
+
+	if ok, err := n.Exists(); !ok {
+		if err != nil {
+			return err
+		}
+
+		return fmt.Errorf("'%s' does not exist", noteName)
 	}
-	_, err = fmt.Print(path)
+
+	_, err = fmt.Print(n.FullPath())
 	return err
 }

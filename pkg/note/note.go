@@ -45,13 +45,25 @@ func (n *Note) Name() string {
 	return n.name
 }
 
-// RemoveIfEmpty cleans up note resources if the note is empty
-func (n *Note) RemoveIfEmpty() error {
+// Exists tells if this note exists
+func (n *Note) Exists() (bool, error) {
 	_, err := os.Stat(n.FullPath())
 	if os.IsNotExist(err) {
-		return os.Remove(n.dir())
+		return false, nil
 	}
-	return nil
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+// RemoveIfEmpty cleans up note resources if the note is empty
+func (n *Note) RemoveIfEmpty() error {
+	if ok, _ := n.Exists(); ok {
+		return nil
+	}
+
+	return os.Remove(n.dir())
 }
 
 // Init initializes this note
@@ -64,15 +76,15 @@ func (n *Note) Touch() error {
 	if err := n.Init(); err != nil {
 		return err
 	}
-	_, err := os.Stat(n.FullPath())
-	if os.IsNotExist(err) {
-		f, err := os.OpenFile(n.FullPath(), os.O_RDWR|os.O_CREATE, defaultFilePerms)
-		if err != nil {
-			return err
-		}
-		return f.Close()
+	if ok, _ := n.Exists(); ok {
+		return nil
 	}
-	return nil
+
+	f, err := os.OpenFile(n.FullPath(), os.O_RDWR|os.O_CREATE, defaultFilePerms)
+	if err != nil {
+		return err
+	}
+	return f.Close()
 }
 
 // Dump writes this note contents to a given writer
