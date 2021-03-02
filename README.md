@@ -31,8 +31,9 @@ $ notelog -h
  - [ ] have notes on `.md` format and not only in `.org`
  - [ ] create dir structure in one go during init phase. Consider fixing existing incomplete structure.
  - [ ] archive: a note can:
-   - [ ] be put into archive, so it will not stay in the main note list
-   - [ ] what should be the search behaviour? Should it be available or not for the search?
+   - [X] be put into archive, so it will not stay in the main note list
+         the curren search behaviour depends on a search command. E.g. `sift` does not search in .directories
+         question still is: should it be available or not for the search?
    - [ ] be restored from the archive (eventually)
  - [ ] sub-notes: notes that exist only in a context of a main note (?)
    - example notelog -c subnote <notename> <sub-notename>
