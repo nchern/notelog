@@ -21,7 +21,7 @@ func (l List) HomeDir() string {
 
 // Note returns a node from the current collection with a given name
 func (l List) Note(name string) *Note {
-	return &Note{name: name, homeDir: l.HomeDir()}
+	return NewNote(name, l.HomeDir())
 }
 
 // MetadataFilename returns full path to the notelog metadata for a given file
@@ -80,6 +80,23 @@ func (l List) Archive(name string) error {
 	// This does not work: os.Rename(path, archiveDir)
 	// fails with "rename $path $archiveDir file exists"
 	return exec.Command("mv", path, archiveDir).Run()
+}
+
+// Add creates a note in this list if it does not exist otherwise does nothing
+func (l List) Add(name string) (*Note, error) {
+	nt := NewNote(name, l.HomeDir())
+	if err := nt.Init(); err != nil {
+		return nil, err
+	}
+	if ok, _ := nt.Exists(); ok {
+		return nt, nil
+	}
+
+	f, err := os.OpenFile(nt.FullPath(), os.O_RDWR|os.O_CREATE, defaultFilePerms)
+	if err != nil {
+		return nil, err
+	}
+	return nt, f.Close()
 }
 
 // NewList returns a list of notes

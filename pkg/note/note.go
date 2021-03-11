@@ -30,6 +30,14 @@ type Note struct {
 	homeDir string
 }
 
+// NewNote creates a new instance of a Note
+func NewNote(name string, homeDir string) *Note {
+	return &Note{
+		name:    name,
+		homeDir: homeDir,
+	}
+}
+
 // FullPath returns full path to the notes file
 func (n *Note) FullPath() string {
 	return filepath.Join(n.homeDir, n.name, defaultFilename)
@@ -69,22 +77,6 @@ func (n *Note) RemoveIfEmpty() error {
 // Init initializes this note
 func (n *Note) Init() error {
 	return os.MkdirAll(n.dir(), defaultDirPerms)
-}
-
-// Touch creates given note if it does not exist otherwise does nothing
-func (n *Note) Touch() error {
-	if err := n.Init(); err != nil {
-		return err
-	}
-	if ok, _ := n.Exists(); ok {
-		return nil
-	}
-
-	f, err := os.OpenFile(n.FullPath(), os.O_RDWR|os.O_CREATE, defaultFilePerms)
-	if err != nil {
-		return err
-	}
-	return f.Close()
 }
 
 // Dump writes this note contents to a given writer

@@ -23,8 +23,8 @@ func withNotes(t *testing.T, fn func(notes List)) {
 }
 
 func makeNote(t *testing.T, notes List, name string) *Note {
-	nt := notes.Note(name)
-	require.NoError(t, nt.Touch())
+	nt, err := notes.Add(name)
+	require.NoError(t, err)
 	found, _ := nt.Exists()
 	require.True(t, found)
 	return nt
