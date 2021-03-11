@@ -87,14 +87,13 @@ func NewList() List {
 	return List(notesRootPath)
 }
 
-func getExistingNotePath(note *Note) (string, error) {
-	path := note.dir()
-	if _, err := os.Stat(path); err != nil {
-		if os.IsNotExist(err) {
-			return "", fmt.Errorf("%s does not exist", note.name)
-		}
+func getExistingNotePath(nt *Note) (string, error) {
+	found, err := nt.Exists()
+	if err != nil {
 		return "", err
 	}
-
-	return path, nil
+	if !found {
+		return "", fmt.Errorf("%s does not exist", nt.name)
+	}
+	return nt.dir(), nil
 }
