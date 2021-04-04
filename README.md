@@ -25,11 +25,14 @@ $ notelog -h
 ```
 
 ## Roadmap
+ - [ ] integration with fzf: search results
  - [ ] in-note macros:
    - [ ] when adding lines, format them according to a given template
  - [ ] multiple temporary drafts - when open a draft, this should not be the same file every time
  - [ ] have notes on `.md` format and not only in `.org`
+ - [ ] create and populate .gitignore if NOTELOG_HOME is considered as a git repo
  - [ ] create dir structure in one go during init phase. Consider fixing existing incomplete structure.
+   - [ ] create .notelog at least
  - [ ] archive: a note can:
    - [X] be put into archive, so it will not stay in the main note list
          the curren search behaviour depends on a search command. E.g. `sift` does not search in .directories
