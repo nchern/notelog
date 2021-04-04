@@ -14,16 +14,11 @@ func printFullPath() error {
 	if err != nil {
 		return err
 	}
-	n := notes.Note(noteName)
-
-	if ok, err := n.Exists(); !ok {
-		if err != nil {
-			return err
-		}
-
-		return fmt.Errorf("'%s' does not exist", noteName)
+	nt, err := notes.Get(noteName)
+	if err != nil {
+		return err
 	}
 
-	_, err = fmt.Print(n.FullPath())
+	_, err = fmt.Print(nt.FullPath())
 	return err
 }

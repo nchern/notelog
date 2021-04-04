@@ -19,9 +19,18 @@ func (l List) HomeDir() string {
 	return string(l)
 }
 
-// Note returns a node from the current collection with a given name
-func (l List) Note(name string) *Note {
-	return NewNote(name, l.HomeDir())
+// Get returns an existing node from the current collection with a given name
+// If the note with a given name does not exit an error is returned
+func (l List) Get(name string) (*Note, error) {
+	nt := NewNote(name, l.HomeDir())
+	found, err := nt.Exists()
+	if err != nil {
+		return nil, err
+	}
+	if !found {
+		return nil, fmt.Errorf("%s does not exist", name)
+	}
+	return nt, nil
 }
 
 // MetadataFilename returns full path to the notelog metadata for a given file
@@ -31,22 +40,22 @@ func (l List) MetadataFilename(name string) string {
 
 // Remove removes a note by name
 func (l List) Remove(name string) error {
-	path, err := getExistingNotePath(l.Note(name))
+	nt, err := l.Get(name)
 	if err != nil {
 		return err
 	}
 
-	return os.RemoveAll(path)
+	return os.RemoveAll(nt.dir())
 }
 
 // Rename renames a note
 func (l List) Rename(oldName string, newName string) error {
-	path, err := getExistingNotePath(l.Note(oldName))
+	nt, err := l.Get(oldName)
 	if err != nil {
 		return err
 	}
 
-	return os.Rename(path, l.Note(newName).dir())
+	return os.Rename(nt.dir(), NewNote(newName, l.HomeDir()).dir())
 }
 
 // All returns all notes from this list
@@ -60,7 +69,7 @@ func (l List) All() ([]*Note, error) {
 		if strings.HasPrefix(dir.Name(), ".") {
 			continue
 		}
-		res = append(res, l.Note(dir.Name()))
+		res = append(res, NewNote(dir.Name(), l.HomeDir()))
 	}
 
 	return res, nil
@@ -68,7 +77,7 @@ func (l List) All() ([]*Note, error) {
 
 // Archive puts a given note into archive
 func (l List) Archive(name string) error {
-	path, err := getExistingNotePath(l.Note(name))
+	nt, err := l.Get(name)
 	if err != nil {
 		return err
 	}
@@ -77,9 +86,9 @@ func (l List) Archive(name string) error {
 	if err := os.MkdirAll(archiveDir, defaultDirPerms); err != nil {
 		return err
 	}
-	// This does not work: os.Rename(path, archiveDir)
-	// fails with "rename $path $archiveDir file exists"
-	return exec.Command("mv", path, archiveDir).Run()
+	// os.Rename(path, archiveDir) does not work:
+	// it fails with "rename $path $archiveDir file exists"
+	return exec.Command("mv", nt.dir(), archiveDir).Run()
 }
 
 // Add creates a note in this list if it does not exist otherwise does nothing
@@ -102,15 +111,4 @@ func (l List) Add(name string) (*Note, error) {
 // NewList returns a list of notes
 func NewList() List {
 	return List(notesRootPath)
-}
-
-func getExistingNotePath(nt *Note) (string, error) {
-	found, err := nt.Exists()
-	if err != nil {
-		return "", err
-	}
-	if !found {
-		return "", fmt.Errorf("%s does not exist", nt.name)
-	}
-	return nt.dir(), nil
 }

@@ -52,7 +52,7 @@ func TestRename(t *testing.T) {
 		found, _ := underTest.Exists()
 		assert.False(t, found)
 
-		found, _ = notes.Note("bar").Exists()
+		found, _ = NewNote("bar", notes.HomeDir()).Exists()
 		assert.True(t, found)
 	})
 }

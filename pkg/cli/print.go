@@ -15,7 +15,10 @@ func printNote() error {
 		return err
 	}
 
-	n := notes.Note(noteName)
+	nt, err := notes.Get(noteName)
+	if err != nil {
+		return err
+	}
 
-	return n.Dump(os.Stdout)
+	return nt.Dump(os.Stdout)
 }
