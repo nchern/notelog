@@ -67,7 +67,11 @@ func (n *Note) Exists() (bool, error) {
 
 // RemoveIfEmpty cleans up note resources if the note is empty
 func (n *Note) RemoveIfEmpty() error {
-	if ok, _ := n.Exists(); ok {
+	ok, err := n.Exists()
+	if err != nil {
+		return err
+	}
+	if ok {
 		return nil
 	}
 
