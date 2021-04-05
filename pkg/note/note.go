@@ -80,7 +80,7 @@ func (n *Note) RemoveIfEmpty() error {
 
 // Init initializes this note
 func (n *Note) Init() error {
-	return os.MkdirAll(n.dir(), defaultDirPerms)
+	return os.Mkdir(n.dir(), defaultDirPerms)
 }
 
 // Dump writes this note contents to a given writer

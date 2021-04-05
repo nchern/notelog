@@ -115,10 +115,10 @@ func (l List) Archive(name string) error {
 	return exec.Command("mv", nt.dir(), archiveDir).Run()
 }
 
-// Add creates a note in this list if it does not exist otherwise does nothing
+// Add creates a note in this list if it does not exist and returns this note
 func (l List) Add(name string) (*Note, error) {
 	nt := NewNote(name, l.HomeDir())
-	if err := nt.Init(); err != nil {
+	if err := nt.Init(); err != nil && !errors.Is(err, os.ErrExist) {
 		return nil, err
 	}
 	if ok, _ := nt.Exists(); ok {

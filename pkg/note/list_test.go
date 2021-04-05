@@ -88,3 +88,18 @@ func TestInit(t *testing.T) {
 		}
 	})
 }
+
+func TestAdd(t *testing.T) {
+	withNotes(t, func(notes List) {
+		underTest, err := notes.Add("new-one")
+		assert.NoError(t, err)
+		found, err := underTest.Exists()
+		assert.NoError(t, err)
+		assert.True(t, found)
+
+		// subsequent calls should return os.ErrExist
+		underTest2, err := notes.Add("new-one")
+		assert.NoError(t, err)
+		assert.Equal(t, underTest.FullPath(), underTest2.FullPath())
+	})
+}

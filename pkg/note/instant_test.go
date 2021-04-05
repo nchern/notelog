@@ -1,17 +1,22 @@
 package note
 
 import (
+	"errors"
 	"io/ioutil"
 	"os"
 	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestWriteInstantRecord(t *testing.T) {
 	const sample = "instant"
 	n := &Note{homeDir: "/tmp", name: "test-note"}
+	if err := n.Init(); err != nil && !errors.Is(err, os.ErrExist) {
+		require.NoError(t, err)
+	}
 
 	initial := text(
 		"foo",
@@ -63,7 +68,6 @@ func TestWriteInstantRecord(t *testing.T) {
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
-			must(n.Init())
 			must(ioutil.WriteFile(n.FullPath(), []byte(initial), defaultFilePerms))
 			defer os.Remove(n.FullPath())
 
