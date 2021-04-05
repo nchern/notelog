@@ -71,3 +71,20 @@ func TestArchive(t *testing.T) {
 		assert.NoError(t, err)
 	})
 }
+
+func TestInit(t *testing.T) {
+
+	withNotes(t, func(notes List) {
+		assert.NoError(t, notes.Init())
+		_, err := os.Stat(notes.metadataRoot())
+		assert.NoError(t, err)
+
+		_, err = os.Stat(filepath.Join(notes.HomeDir(), archiveNoteDir))
+		assert.NoError(t, err)
+
+		// any subsequent calls to init should also be successful
+		for i := 0; i < 11; i++ {
+			assert.NoError(t, notes.Init())
+		}
+	})
+}

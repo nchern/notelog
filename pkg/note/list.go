@@ -1,6 +1,7 @@
 package note
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -17,6 +18,25 @@ type List string
 // HomeDir returns notes home dir
 func (l List) HomeDir() string {
 	return string(l)
+}
+
+// Init creates initial resources required for this node collection
+func (l List) Init() error {
+	dirs := []string{
+		l.HomeDir(),
+		filepath.Join(l.HomeDir(), DotNotelogDir),
+		filepath.Join(l.HomeDir(), archiveNoteDir),
+	}
+	for _, d := range dirs {
+		err := os.Mkdir(d, defaultDirPerms)
+		if errors.Is(err, os.ErrExist) {
+			continue
+		}
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // Get returns an existing node from the current collection with a given name
@@ -36,6 +56,10 @@ func (l List) Get(name string) (*Note, error) {
 // MetadataFilename returns full path to the notelog metadata for a given file
 func (l List) MetadataFilename(name string) string {
 	return filepath.Join(l.HomeDir(), DotNotelogDir, name)
+}
+
+func (l List) metadataRoot() string {
+	return filepath.Join(l.HomeDir(), DotNotelogDir)
 }
 
 // Remove removes a note by name
