@@ -1,7 +1,6 @@
 package cli
 
 import (
-	"errors"
 	"flag"
 	"fmt"
 	"os"
@@ -123,14 +122,4 @@ func parseArgs(args []string) (noteName string, instantRecord string, err error)
 	}
 	instantRecord = strings.TrimSpace(strings.Join(args[1:], " "))
 	return
-}
-
-func validateNoteName(name string) error {
-	if name == "" {
-		return errors.New("Empty note name. Specify the real name")
-	}
-	if strings.HasPrefix(name, ".") {
-		return errors.New("Note name can not start with '.'")
-	}
-	return nil
 }
