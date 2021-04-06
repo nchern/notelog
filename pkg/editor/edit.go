@@ -1,6 +1,7 @@
 package editor
 
 import (
+	"errors"
 	"os"
 	"os/exec"
 	"strings"
@@ -29,7 +30,7 @@ type Note interface {
 func Edit(note Note, readOnly bool) error {
 	defer note.RemoveIfEmpty()
 
-	if err := note.Init(); err != nil {
+	if err := note.Init(); err != nil && !errors.Is(err, os.ErrExist) {
 		return err
 	}
 
