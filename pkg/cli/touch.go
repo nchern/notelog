@@ -11,6 +11,6 @@ func touch(notes note.List) error {
 	if err != nil {
 		return err
 	}
-	_, err = notes.Add(name)
+	_, err = notes.GetOrCreate(name)
 	return err
 }

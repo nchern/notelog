@@ -115,21 +115,24 @@ func (l List) Archive(name string) error {
 	return exec.Command("mv", nt.dir(), archiveDir).Run()
 }
 
-// Add creates a note in this list if it does not exist and returns this note
-func (l List) Add(name string) (*Note, error) {
+// GetOrCreate returns a note with a given name. If the note does not exist it creates it.
+func (l List) GetOrCreate(name string) (*Note, error) {
 	nt := NewNote(name, l.HomeDir())
-	if err := nt.Init(); err != nil && !errors.Is(err, os.ErrExist) {
-		return nil, err
-	}
-	if ok, _ := nt.Exists(); ok {
+
+	// Init call ensures atomic note dir creation
+	err := nt.Init()
+	if errors.Is(err, os.ErrExist) {
 		return nt, nil
 	}
-
-	f, err := os.OpenFile(nt.FullPath(), os.O_RDWR|os.O_CREATE, defaultFilePerms)
 	if err != nil {
 		return nil, err
 	}
-	return nt, f.Close()
+	f, err := os.OpenFile(nt.FullPath(), os.O_RDWR|os.O_CREATE, defaultFilePerms)
+	defer f.Close()
+	if err != nil {
+		return nil, err
+	}
+	return nt, nil
 }
 
 // NewList returns a list of notes

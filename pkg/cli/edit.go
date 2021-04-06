@@ -19,7 +19,12 @@ func edit(readOnly bool) error {
 	if err != nil {
 		return err
 	}
-	nt := note.NewNote(noteName, notes.HomeDir())
+
+	nt, err := notes.GetOrCreate(noteName)
+	if err != nil {
+		return err
+	}
+
 	if instantRecord != "" {
 		return nt.WriteInstantRecord(instantRecord, skipLines)
 	}

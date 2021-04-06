@@ -23,7 +23,7 @@ func withNotes(t *testing.T, fn func(notes List)) {
 }
 
 func makeNote(t *testing.T, notes List, name string) *Note {
-	nt, err := notes.Add(name)
+	nt, err := notes.GetOrCreate(name)
 	require.NoError(t, err)
 	found, _ := nt.Exists()
 	require.True(t, found)
@@ -89,16 +89,16 @@ func TestInit(t *testing.T) {
 	})
 }
 
-func TestAdd(t *testing.T) {
+func TestGetOrCreate(t *testing.T) {
 	withNotes(t, func(notes List) {
-		underTest, err := notes.Add("new-one")
+		underTest, err := notes.GetOrCreate("new-one")
 		assert.NoError(t, err)
+
 		found, err := underTest.Exists()
 		assert.NoError(t, err)
 		assert.True(t, found)
 
-		// subsequent calls should return os.ErrExist
-		underTest2, err := notes.Add("new-one")
+		underTest2, err := notes.GetOrCreate("new-one")
 		assert.NoError(t, err)
 		assert.Equal(t, underTest.FullPath(), underTest2.FullPath())
 	})
