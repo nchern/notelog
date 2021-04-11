@@ -8,10 +8,17 @@ import (
 	"github.com/nchern/notelog/pkg/note"
 )
 
-const gitErrorLog = "git-errors.log"
+const (
+	defaultFilePerms = 0644
+
+	gitIgnoreFile = ".gitignore"
+	gitErrorLog   = "git-errors.log"
+)
+
+var gitCmd = "git"
 
 func git(notes note.List, logFile io.Writer, args ...string) *exec.Cmd {
-	cmd := exec.Command("git", args...)
+	cmd := exec.Command(gitCmd, args...)
 
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = logFile

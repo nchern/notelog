@@ -25,12 +25,12 @@ $ notelog -h
 ```
 
 ## Roadmap
+ - [ ] migrate to cobra subcommand parser (?)
  - [ ] integration with fzf: search results
  - [ ] in-note macros:
    - [ ] when adding lines, format them according to a given template
  - [ ] multiple temporary drafts - when open a draft, this should not be the same file every time
  - [ ] have notes on `.md` format and not only in `.org`
- - [ ] create and populate .gitignore if NOTELOG_HOME is considered as a git repo
  - [ ] add more examples, hints, use cases and script recipes
  - [X] create dir structure in one go during init phase. Consider fixing existing incomplete structure.
    - [X] create .notelog at least
@@ -48,10 +48,10 @@ $ notelog -h
  - [ ] note templates (?)
  - [ ] cross-linking: you can fetch all the references from other notes to a given note
    - [ ] embed cross links in notes?
- - [ ] migrate to cobra subcommand parser (?)
  - [ ] vim plugin
    - [x] MVP
    - [ ] with ftdetect to '.note' (???)
+ - [X] create and populate .gitignore if NOTELOG_HOME is considered as a git repo
  - [x] smart bash auto-completion for subcommands
  - [x] search capabilities
    - [x] search browsing: quick jump to search results from command line

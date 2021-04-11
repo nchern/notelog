@@ -96,7 +96,7 @@ func Execute(cmd string) error {
 		_, err = fmt.Println(env.Vars())
 		return err
 	case cmdInitRepo:
-		return repo.Init(notes)
+		return repo.Init(notes, os.Stderr)
 	case cmdSync:
 		return repo.Sync(notes, flag.Arg(0))
 	case cmdTouch:
