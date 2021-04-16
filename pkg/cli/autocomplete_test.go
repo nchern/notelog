@@ -21,6 +21,9 @@ func TestAutoComplete(t *testing.T) {
 		"buzz",
 		"foo"}
 
+	allCommands := bytes.Buffer{}
+	listCommands(&allCommands)
+
 	withDirs(names, func() {
 		var tests = []struct {
 			name     string
@@ -31,22 +34,28 @@ func TestAutoComplete(t *testing.T) {
 				"notelog ",
 				text(names...)},
 			{"should complete subcommands",
-				"notelog -c ",
-				text(commands...)},
+				"notelog do ",
+				strings.TrimSuffix(allCommands.String(), "\n")},
 			{"should complete flag",
-				"notelog -",
-				text("-c")},
+				"notelog d",
+				text("do")},
 			{"should complete flag 2",
-				"notelog -c",
-				text("-c")},
+				"notelog do",
+				text("do")},
 			{"should complete subcommands with common prefix only",
-				"notelog -c li",
+				"notelog do li",
 				text("list", "list-cmds")},
 			{"should complete subcommands with common prefix only-2",
-				"notelog -c p",
+				"notelog do p",
 				text("path", "print", "print-home")},
 			{"should complete names with common prefix only",
 				"notelog b",
+				text("bar", "buzz")},
+			{"should complete names after subcommands",
+				"notelog do edit b",
+				text("bar", "buzz")},
+			{"should complete names after subcommands and already given names",
+				"notelog do edit foo b",
 				text("bar", "buzz")},
 		}
 		for _, tt := range tests {

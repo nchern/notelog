@@ -2,18 +2,36 @@ package cli
 
 import (
 	"errors"
-	"flag"
 	"strconv"
 	"strings"
 
 	"github.com/nchern/notelog/pkg/editor"
 	"github.com/nchern/notelog/pkg/note"
 	"github.com/nchern/notelog/pkg/searcher"
+	"github.com/spf13/cobra"
 )
 
-func browseSearch() error {
+var browseSearchCmd = &cobra.Command{
+	Use:   "search-browse",
+	Short: "runs search over notes collection",
+
+	Args: cobra.ExactArgs(1),
+
+	SilenceErrors: true,
+	SilenceUsage:  true,
+
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return browseSearch(args)
+	},
+}
+
+func init() {
+	doCmd.AddCommand(browseSearchCmd)
+}
+
+func browseSearch(args []string) error {
 	notes := note.NewList()
-	n, err := parseNumber(flag.Args())
+	n, err := parseNumber(args)
 	if err != nil {
 		return err
 	}

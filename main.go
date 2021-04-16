@@ -16,7 +16,7 @@ func init() {
 }
 
 func main() {
-	must(cli.Execute(*cli.Command))
+	must(cli.Execute())
 }
 
 func must(err error) {

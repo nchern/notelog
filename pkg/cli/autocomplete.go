@@ -3,11 +3,54 @@ package cli
 import (
 	"fmt"
 	"io"
+	"log"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/nchern/notelog/pkg/note"
+	"github.com/spf13/cobra"
 )
+
+var bashCompleteCmd = &cobra.Command{
+	Use:   "bash-complete",
+	Short: "returns autocompete initialization script for bashrc",
+
+	Args: cobra.NoArgs,
+
+	SilenceErrors: true,
+	SilenceUsage:  true,
+
+	RunE: func(cmd *cobra.Command, args []string) error {
+		_, err := fmt.Println(autoCompleteScript())
+		return err
+	},
+}
+
+var autocompleteCmd = &cobra.Command{
+	Use:   "autocomplete",
+	Short: "uses by bash to return autocompletions",
+
+	Args: cobra.NoArgs,
+
+	SilenceErrors: true,
+	SilenceUsage:  true,
+
+	RunE: func(cmd *cobra.Command, args []string) error {
+		pos, err := strconv.Atoi(os.Getenv("COMP_POINT"))
+		if err != nil {
+			return err
+		}
+		pos-- // bash sets position as 1- array based
+		return autoComplete(note.NewList(), os.Getenv("COMP_LINE"), pos, os.Stdout)
+	},
+}
+
+func init() {
+	doCmd.AddCommand(bashCompleteCmd)
+
+	doCmd.AddCommand(autocompleteCmd)
+}
 
 func autoCompleteScript() string {
 	name := os.Args[0]
@@ -16,18 +59,18 @@ func autoCompleteScript() string {
 }
 
 func autoComplete(list note.List, line string, i int, w io.Writer) error {
-	const cmdFlag = "-" + subCommand
+	const cmdDo = "do"
 
 	beforeCursor := line[0 : i+1]
 	curTok := getCurrentCompletingToken(beforeCursor)
 	prevToks := strings.TrimSpace(strings.TrimSuffix(strings.TrimSpace(beforeCursor), curTok))
-
-	if strings.HasPrefix(curTok, "-") {
-		_, err := fmt.Fprintln(w, cmdFlag)
+	log.Println(line, "[", curTok, "]", "{", prevToks, "}")
+	if strings.HasPrefix(curTok, "d") {
+		_, err := fmt.Fprintln(w, cmdDo)
 		return err
 	}
 
-	if strings.HasSuffix(prevToks, cmdFlag) {
+	if strings.HasSuffix(prevToks, cmdDo) {
 		return printCommandsWithPrefix(curTok, w)
 	}
 
@@ -39,11 +82,11 @@ func autoComplete(list note.List, line string, i int, w io.Writer) error {
 }
 
 func printCommandsWithPrefix(prefix string, w io.Writer) error {
-	for _, c := range commands {
-		if !strings.HasPrefix(c, prefix) {
+	for _, c := range doCmd.Commands() {
+		if !strings.HasPrefix(c.Use, prefix) {
 			continue
 		}
-		if _, err := fmt.Fprintln(w, c); err != nil {
+		if _, err := fmt.Fprintln(w, c.Use); err != nil {
 			return err
 		}
 	}
