@@ -1,11 +1,11 @@
-        " Notelog plugin
+" Notelog plugin
 " currently integrated with OrgMode by sharing the same file extention: org
 
-autocmd FileType org set grepprg=notelog\ -c\ search
+autocmd FileType org set grepprg=notelog\ do\ search
 
 " Notes autocomplete for Notelog
 fun NotesList(A,L,P)
-    let res = system("notelog -c list")
+    let res = system("notelog do list")
     if v:shell_error != 0
        echoerr l:red
        return ''
@@ -15,7 +15,7 @@ endfun
 
 " Returns full path to notes in Notelog
 fun NotesFullPath(name)
-    let res = system('notelog -c path ' . a:name)
+    let res = system('notelog do path ' . a:name)
     if v:shell_error != 0
        echoerr l:res
        return ''
@@ -25,7 +25,7 @@ endfun
 
 " Executes notleg search
 fun NotesDoSearch(terms)
-   let cmd = 'sh -c "notelog -c search ' . escape(a:terms, '"') . ' | notermcolor"'
+   let cmd = 'sh -c "notelog do search ' . escape(a:terms, '"') . ' | notermcolor"'
    cexpr system(l:cmd)
 endfun
 
@@ -74,7 +74,7 @@ fun NotesGoGet(force_update)
 endfun
 
 " Creates a new note with Notelog
-command! -nargs=1 -complete=custom,NotesList NLNew execute ':silent !notelog -c touch <f-args>' | execute ':e ' NotesFullPath(<f-args>)
+command! -nargs=1 -complete=custom,NotesList NLNew execute ':silent !notelog do touch <f-args>' | execute ':e ' NotesFullPath(<f-args>)
 
 " Opens an existing note with Notelog
 command! -nargs=1 -complete=custom,NotesList NLOpen execute ':e ' NotesFullPath(<f-args>)
@@ -82,16 +82,16 @@ command! -nargs=1 -complete=custom,NotesList NLOpen execute ':e ' NotesFullPath(
 command! -nargs=0 NLOpenScratch execute ':e ' NotesFullPath("")
 
 " Adds quick record to existing note with Notelog
-command! -nargs=+ -complete=custom,NotesList NLQuickLog :!notelog <args>
+command! -nargs=+ -complete=custom,NotesList NLQuickLog :!notelog do edit <args>
 
 " Alias for NLQuickLog to see what works better
 command! -nargs=+ -complete=custom,NotesList NLLog :NLQuickLog <args>
 
 " Replaces selection with contents of a given note
-command! -range -nargs=1 -complete=custom,NotesList NLPasteNote :<line1>,<line2>!notelog -c print <q-args>
+command! -range -nargs=1 -complete=custom,NotesList NLPasteNote :<line1>,<line2>!notelog do print <q-args>
 
 " Sorts checkboxed items with notelog
-autocmd FileType org command! -range=% NLSortCheckList :<line1>,<line2>!notelog -c sort-checklist
+autocmd FileType org command! -range=% NLSortCheckList :<line1>,<line2>!notelog do sort-checklist
 
 " Inserts link to another note under the cursor pos
 autocmd FileType org command! -nargs=1 -complete=custom,NotesList NLLinkNote :call NotesDoInsertLink(<f-args>)
@@ -100,7 +100,7 @@ autocmd FileType org command! -nargs=1 -complete=custom,NotesList NLLinkNote :ca
 autocmd FileType org command! -nargs=1 NLSearch :call NotesDoSearch(<f-args>)
 
 " Syncs notes
-autocmd FileType org command! -nargs=? NLSync :!notelog -c sync <q-args>
+autocmd FileType org command! -nargs=? NLSync :!notelog do sync <q-args>
 
 " Installs notelog binaries
 autocmd FileType org command! NLInstallBinaries :call NotesGoGet(0)

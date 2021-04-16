@@ -1,113 +1,76 @@
 package cli
 
 import (
-	"flag"
 	"fmt"
 	"os"
-	"strconv"
 	"strings"
 
-	"github.com/nchern/notelog/pkg/checklist"
-	"github.com/nchern/notelog/pkg/env"
 	"github.com/nchern/notelog/pkg/note"
-	"github.com/nchern/notelog/pkg/repo"
+	"github.com/spf13/cobra"
 )
 
 const (
-	subCommand     = "c"
 	scratchpadName = ".scratchpad"
 )
 
 var (
-	cmdArchive       = c("archive")
-	cmdAutoComplete  = c("autocomplete")
-	cmdBashComplete  = c("bash-complete")
-	cmdEnv           = c("env")
-	cmdEdit          = c("edit")
-	cmdLs            = c("list")
-	cmdLsCmds        = c("list-cmds")
-	cmdGetFullPath   = c("path")
-	cmdPrint         = c("print")
-	cmdPrintHome     = c("print-home")
-	cmdSync          = c("sync")
-	cmdInitRepo      = c("init-repo")
-	cmdRemove        = c("rm")
-	cmdRename        = c("rename")
-	cmdSearch        = c("search")
-	cmdSearchBrowse  = c("search-browse")
-	cmdSortCheckList = c("sort-checklist")
-	cmdTouch         = c("touch")
-	cmdVersion       = c("version")
+	notes = note.NewList()
 
-	// Command is a user subcommand
-	Command = flag.String(subCommand, cmdEdit, fmt.Sprintf("One of: %s", commands))
+	doCmd = &cobra.Command{
+		Use:   "do",
+		Short: "runs a given command to manipulate notes",
+		Args:  cobra.ExactArgs(1),
 
-	readOnly = flag.Bool("r", false, "opens note in read-only mode")
+		SilenceErrors: true,
+		SilenceUsage:  false,
+
+		Run: func(cmd *cobra.Command, args []string) {
+			cmd.Help()
+		},
+	}
+
+	rootCmd = &cobra.Command{
+		Use:   "notelog",
+		Short: "Efficient CLI personal note manager",
+		Args:  cobra.MinimumNArgs(0),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return edit(args, false)
+		},
+	}
+
+	// HACK
+	lsCmdsCmd = &cobra.Command{
+		Use:   "list-cmds",
+		Short: "lists all subcommands",
+		Args:  cobra.NoArgs,
+
+		SilenceErrors: true,
+		SilenceUsage:  false,
+
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return listCommands(os.Stdout)
+		},
+	}
+
+	defaultHelp = rootCmd.HelpFunc()
 )
 
-// Execute runs specified command
-func Execute(cmd string) error {
-	var err error
-	notes := note.NewList()
+func init() {
+	doCmd.AddCommand(lsCmdsCmd)
 
-	switch cmd {
-	case cmdAutoComplete:
-		pos, err := strconv.Atoi(os.Getenv("COMP_POINT"))
-		if err != nil {
-			return err
-		}
-		pos-- // bash sets position as 1- array based
-		return autoComplete(note.NewList(), os.Getenv("COMP_LINE"), pos, os.Stdout)
-	case cmdEdit:
-		return edit(*readOnly)
-	case cmdLs:
-		return listNotes(note.NewList(), os.Stdout)
-	case cmdLsCmds:
-		return listCommands(os.Stdout)
-	case cmdBashComplete:
-		_, err = fmt.Println(autoCompleteScript())
-		return err
-	case cmdPrint:
-		return printNote()
-	case cmdPrintHome:
-		_, err = fmt.Print(notes.HomeDir())
-		return err
-	case cmdGetFullPath:
-		return printFullPath()
-	case cmdRemove:
-		name, _, err := parseArgs(flag.Args())
-		if err != nil {
-			return err
-		}
-		return notes.Remove(name)
-	case cmdRename:
-		name, newName, err := parseArgs(flag.Args())
-		if err != nil {
-			return err
-		}
-		return notes.Rename(name, newName)
-	case cmdSortCheckList:
-		return checklist.Sort(os.Stdin, os.Stdout)
-	case cmdSearch:
-		return search()
-	case cmdSearchBrowse:
-		return browseSearch()
-	case cmdEnv:
-		_, err = fmt.Println(env.Vars())
-		return err
-	case cmdInitRepo:
-		return repo.Init(notes, os.Stderr)
-	case cmdSync:
-		return repo.Sync(notes, flag.Arg(0))
-	case cmdTouch:
-		return touch(notes)
-	case cmdVersion:
-		return printVersion()
-	case cmdArchive:
-		return archive()
-	default:
-		return fmt.Errorf("Bad cmd: '%s'", cmd)
-	}
+	rootCmd.SetHelpFunc(func(cmd *cobra.Command, s []string) {
+		defaultHelp(cmd, s)
+
+		fmt.Println()
+		fmt.Println("Use \"notelog <note-name>\" as a shortcut of \"notelog do edit <note-name>\"")
+	})
+
+	rootCmd.AddCommand(doCmd)
+}
+
+// Execute is an entry point of CLI
+func Execute() error {
+	return rootCmd.Execute()
 }
 
 func parseArgs(args []string) (noteName string, instantRecord string, err error) {

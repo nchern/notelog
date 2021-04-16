@@ -1,3 +1,3 @@
 # notelog search alias
-alias notesearch='notelog -interactive -c search'
-alias notesearch-jump='notelog -c search-browse'
+alias notesearch='notelog do search -i'
+alias notesearch-jump='notelog do search-browse'

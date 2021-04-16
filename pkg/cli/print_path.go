@@ -1,16 +1,33 @@
 package cli
 
 import (
-	"flag"
 	"fmt"
 
 	"github.com/nchern/notelog/pkg/note"
+	"github.com/spf13/cobra"
 )
 
-func printFullPath() error {
+var printPathCmd = &cobra.Command{
+	Use:   "path",
+	Short: "shows full path to a given note",
+
+	Args: cobra.MaximumNArgs(1),
+
+	SilenceErrors: true,
+	SilenceUsage:  true,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return printFullPath(args)
+	},
+}
+
+func init() {
+	doCmd.AddCommand(printPathCmd)
+}
+
+func printFullPath(args []string) error {
 	notes := note.NewList()
 
-	noteName, _, err := parseArgs(flag.Args())
+	noteName, _, err := parseArgs(args)
 	if err != nil {
 		return err
 	}
