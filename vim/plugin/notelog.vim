@@ -83,11 +83,12 @@ command! -nargs=0 NLOpenScratch execute ':e ' NotesFullPath("")
 
 " Adds quick record to existing note with Notelog
 command! -nargs=+ -complete=custom,NotesList NLQuickLog :!notelog <args>
+
 " Alias for NLQuickLog to see what works better
 command! -nargs=+ -complete=custom,NotesList NLLog :NLQuickLog <args>
 
-" Calls an external command to search info on a person
-autocmd FileType org nnoremap <Localleader>gd :call NotesBrowseGroupDirectory()<CR>
+" Replaces selection with contents of a given note
+command! -range -nargs=1 -complete=custom,NotesList NLPasteNote :<line1>,<line2>!notelog -c print <q-args>
 
 " Sorts checkboxed items with notelog
 autocmd FileType org command! -range=% NLSortCheckList :<line1>,<line2>!notelog -c sort-checklist
@@ -105,3 +106,6 @@ autocmd FileType org command! -nargs=? NLSync :!notelog -c sync <q-args>
 autocmd FileType org command! NLInstallBinaries :call NotesGoGet(0)
 " Updates notelog binaries
 autocmd FileType org command! NLUpdateBinaries :call NotesGoGet(1)
+
+" Calls an external command to search info on a person
+autocmd FileType org nnoremap <Localleader>gd :call NotesBrowseGroupDirectory()<CR>
