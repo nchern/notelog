@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"fmt"
 	"os"
 	"strings"
 
@@ -50,10 +51,19 @@ var (
 			return listCommands(os.Stdout)
 		},
 	}
+
+	defaultHelp = rootCmd.HelpFunc()
 )
 
 func init() {
 	doCmd.AddCommand(lsCmdsCmd)
+
+	rootCmd.SetHelpFunc(func(cmd *cobra.Command, s []string) {
+		defaultHelp(cmd, s)
+
+		fmt.Println()
+		fmt.Println("Use \"notelog <note-name>\" as a shortcut of \"notelog do edit <note-name>\"")
+	})
 
 	rootCmd.AddCommand(doCmd)
 }
