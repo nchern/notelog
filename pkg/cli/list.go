@@ -10,9 +10,10 @@ import (
 )
 
 var listCmd = &cobra.Command{
-	Use:   "list",
-	Short: "lists all notes",
-	Args:  cobra.NoArgs,
+	Use:     "list",
+	Aliases: []string{"ls"},
+	Short:   "lists all notes",
+	Args:    cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return listNotes(note.NewList(), os.Stdout)
 	},
