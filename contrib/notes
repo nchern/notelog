@@ -1,0 +1,8 @@
+#!/bin/sh -ue
+
+# Allows to browse notes with fuzzy search
+# Usage: notes
+
+# depends on: https://github.com/junegunn/fzf
+
+exec notelog -c list | fzf --preview 'notelog -c print {}' --bind 'enter:execute(notelog {})'

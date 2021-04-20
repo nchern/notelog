@@ -1,0 +1,37 @@
+#!/bin/sh -ue
+
+# This script helps to dynamically switch between different notelog colletions
+# by setting NOTELOG_HOME in the child shell. Provides an integrations with bash prompt
+# Usage: notes-select <note-collection>
+
+
+NOTES_ROOT=${NOTES_ROOT:-"$HOME/notes"}
+
+NOTES=${1:-""}
+
+if [ -z "$NOTES" ]; then
+    echo "empty notes collection: [$NOTES_ROOT]"
+    exit 1
+fi
+
+if [ "$NOTES" = "-ls" ]; then
+    ls -1 "$NOTES_ROOT"
+    exit 0
+fi
+
+# use this variable to customize your bash prompt
+export __NOTES_PS1="notes: $NOTES "
+
+export NOTELOG_HOME="$NOTES_ROOT/$NOTES"
+
+if [ ! -d "$NOTELOG_HOME" ]; then
+    echo "$NOTELOG_HOME does not exist"
+    exit 1
+fi
+
+BASHRC=".bashrc"
+if uname | grep -q "Darwin" ; then
+    BASHRC=".profile"
+fi
+
+exec bash --init-file "$HOME/$BASHRC"
