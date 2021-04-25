@@ -40,10 +40,10 @@ $ notelog -h
          question still is: should it be available or not for the search?
    - [ ] be restored from the archive (eventually)
  - [ ] sub-notes: notes that exist only in a context of a main note (?)
-   - example notelog -c subnote <notename> <sub-notename>
+   - example notelog do subnote <notename> <sub-notename>
  - [ ] attachments to notes (?)
-   - [ ] notelog -c attach <notename> <filepath> - puts <filepath> into note directory
-   - [ ] notelog -c attach-open <notename> <attach-name> - opens attach
+   - [ ] notelog do attach <notename> <filepath> - puts <filepath> into note directory
+   - [ ] notelog do attach-open <notename> <attach-name> - opens attach
    - [ ] integrate with search?
  - [ ] note templates (?)
  - [ ] cross-linking: you can fetch all the references from other notes to a given note
