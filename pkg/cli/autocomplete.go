@@ -3,7 +3,6 @@ package cli
 import (
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -31,7 +30,7 @@ var autocompleteCmd = &cobra.Command{
 	Use:   "autocomplete",
 	Short: "uses by bash to return autocompletions",
 
-	Args: cobra.NoArgs,
+	Args: cobra.ArbitraryArgs,
 
 	SilenceErrors: true,
 	SilenceUsage:  true,
@@ -64,7 +63,6 @@ func autoComplete(list note.List, line string, i int, w io.Writer) error {
 	beforeCursor := line[0 : i+1]
 	curTok := getCurrentCompletingToken(beforeCursor)
 	prevToks := strings.TrimSpace(strings.TrimSuffix(strings.TrimSpace(beforeCursor), curTok))
-	log.Println(line, "[", curTok, "]", "{", prevToks, "}")
 	if strings.HasPrefix(curTok, "d") {
 		_, err := fmt.Fprintln(w, cmdDo)
 		return err
