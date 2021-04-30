@@ -11,21 +11,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var bashCompleteCmd = &cobra.Command{
-	Use:   "bash-complete",
-	Short: "returns autocompete initialization script for bashrc",
-
-	Args: cobra.NoArgs,
-
-	SilenceErrors: true,
-	SilenceUsage:  true,
-
-	RunE: func(cmd *cobra.Command, args []string) error {
-		_, err := fmt.Println(autoCompleteScript())
-		return err
-	},
-}
-
 var autocompleteCmd = &cobra.Command{
 	Use:   "autocomplete",
 	Short: "uses by bash to return autocompletions",
@@ -47,14 +32,6 @@ var autocompleteCmd = &cobra.Command{
 
 func init() {
 	doCmd.AddCommand(bashCompleteCmd)
-
-	doCmd.AddCommand(autocompleteCmd)
-}
-
-func autoCompleteScript() string {
-	name := os.Args[0]
-	return fmt.Sprintf("# Bash autocompletion for %s. Completes notes\ncomplete -C \"`%s -c=autocomplete`\" %s",
-		name, name, name)
 }
 
 func autoComplete(list note.List, line string, i int, w io.Writer) error {
