@@ -1,4 +1,4 @@
-package checklist
+package main
 
 import (
 	"bufio"

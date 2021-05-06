@@ -91,7 +91,7 @@ command! -nargs=+ -complete=custom,NotesList NLLog :NLQuickLog <args>
 command! -range -nargs=1 -complete=custom,NotesList NLPasteNote :<line1>,<line2>!notelog do print <q-args>
 
 " Sorts checkboxed items with notelog
-autocmd FileType org command! -range=% NLSortCheckList :<line1>,<line2>!notelog do sort-checklist
+autocmd FileType org command! -range=% NLSortCheckList :<line1>,<line2>!notelog do org-checklist-sort
 
 " Inserts link to another note under the cursor pos
 autocmd FileType org command! -nargs=1 -complete=custom,NotesList NLLinkNote :call NotesDoInsertLink(<f-args>)
