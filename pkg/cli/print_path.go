@@ -11,7 +11,7 @@ var printPathCmd = &cobra.Command{
 	Use:   "path",
 	Short: "shows full path to a given note",
 
-	Args: cobra.ExactArgs(1),
+	Args: cobra.MaximumNArgs(1),
 
 	SilenceErrors: true,
 	SilenceUsage:  true,
