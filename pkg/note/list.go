@@ -82,6 +82,26 @@ func (l List) Rename(oldName string, newName string) error {
 	return os.Rename(nt.dir(), NewNote(newName, l.HomeDir()).dir())
 }
 
+// Copy copies a note
+func (l List) Copy(srcName string, dstName string) error {
+	src, err := l.Get(srcName)
+	if err != nil {
+		return err
+	}
+
+	dst, err := l.GetOrCreate(dstName)
+	if err != nil {
+		return err
+	}
+
+	w, err := dst.writer()
+	if err != nil {
+		return err
+	}
+
+	return src.Dump(w)
+}
+
 // All returns all notes from this list
 func (l List) All() ([]*Note, error) {
 	res := []*Note{}

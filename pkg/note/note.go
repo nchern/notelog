@@ -95,6 +95,10 @@ func (n *Note) Dump(w io.Writer) error {
 	return err
 }
 
+func (n *Note) writer() (io.WriteCloser, error) {
+	return os.OpenFile(n.FullPath(), os.O_WRONLY, defaultFilePerms)
+}
+
 func (n *Note) dir() string {
 	return filepath.Join(n.homeDir, n.name)
 }
