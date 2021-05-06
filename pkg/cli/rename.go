@@ -5,8 +5,9 @@ import (
 )
 
 var renameCmd = &cobra.Command{
-	Use:   "rename",
-	Short: "renames a given note",
+	Use:     "rename",
+	Aliases: []string{"mv"},
+	Short:   "renames a given note",
 
 	Args: cobra.ExactArgs(2),
 
