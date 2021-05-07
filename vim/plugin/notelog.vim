@@ -73,6 +73,12 @@ fun NotesGoGet(force_update)
     execute ':!go get ' . l:up . ' github.com/nchern/notelog/...'
 endfun
 
+fun NotesArchive()
+    w
+    silent !notelog do archive -f '%'
+    bd
+endfun
+
 " Creates a new note with Notelog
 command! -nargs=1 -complete=custom,NotesList NLNew execute ':silent !notelog do touch <f-args>' | execute ':e ' NotesFullPath(<f-args>)
 
@@ -109,3 +115,6 @@ autocmd FileType org command! NLUpdateBinaries :call NotesGoGet(1)
 
 " Calls an external command to search info on a person
 autocmd FileType org nnoremap <Localleader>gd :call NotesBrowseGroupDirectory()<CR>
+
+" Archives current note
+autocmd FileType org command! NLArchive : call NotesArchive()

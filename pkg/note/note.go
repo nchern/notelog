@@ -102,3 +102,8 @@ func (n *Note) writer() (io.WriteCloser, error) {
 func (n *Note) dir() string {
 	return filepath.Join(n.homeDir, n.name)
 }
+
+// NameFromFilename returns a note name from a given filename
+func NameFromFilename(path string) string {
+	return filepath.Base(filepath.Dir(path))
+}
