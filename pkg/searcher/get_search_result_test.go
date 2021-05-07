@@ -2,8 +2,9 @@ package searcher
 
 import (
 	"bytes"
+	"io/ioutil"
 	"os"
-	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/nchern/notelog/pkg/note"
@@ -23,15 +24,19 @@ func TestGetLastNthResult(t *testing.T) {
 		err := underTest.Search("foo")
 		require.NoError(t, err)
 
+		b, err := ioutil.ReadFile(n.MetadataFilename(lastResultsFile))
+		require.NoError(t, err)
+		persistedResults := strings.Split(string(b), "\n")
+
 		var tests = []struct {
 			name     string
 			expected string
 			given    int
 		}{
 			{"should return first result",
-				filepath.Join(homeDir, "a/main.org") + ":1:foo bar buzz", 1},
+				persistedResults[0], 1},
 			{"should return second result",
-				filepath.Join(homeDir, "b/main.org") + ":1:foobar bar addd buzz", 2},
+				persistedResults[1], 2},
 			{"should return empty on out of bounds",
 				"", 100500},
 			{"should return empty on negative",
@@ -42,7 +47,7 @@ func TestGetLastNthResult(t *testing.T) {
 			t.Run(tt.name, func(t *testing.T) {
 				actual, err := GetLastNthResult(n, tt.given)
 				assert.NoError(t, err)
-				assert.Equal(t, actual, tt.expected)
+				assert.Equal(t, tt.expected, actual)
 			})
 		}
 	})
