@@ -118,3 +118,6 @@ autocmd FileType org nnoremap <Localleader>gd :call NotesBrowseGroupDirectory()<
 
 " Archives current note
 autocmd FileType org command! NLArchive : call NotesArchive()
+
+"
+autocmd FileType org command! NLDelete :w | execute "!notelog do rm -f '%'" | bd

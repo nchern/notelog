@@ -1,6 +1,9 @@
 package cli
 
-import "github.com/spf13/cobra"
+import (
+	"github.com/nchern/notelog/pkg/note"
+	"github.com/spf13/cobra"
+)
 
 var removeCmd = &cobra.Command{
 	Use:   "rm",
@@ -12,7 +15,15 @@ var removeCmd = &cobra.Command{
 	SilenceUsage:  true,
 
 	RunE: func(cmd *cobra.Command, args []string) error {
-		name, _, err := parseArgs(args)
+		var err error
+		var name string
+
+		if filename {
+			name = note.NameFromFilename(args[0])
+			err = validateNoteName(name)
+		} else {
+			name, _, err = parseArgs(args)
+		}
 		if err != nil {
 			return err
 		}
@@ -21,5 +32,11 @@ var removeCmd = &cobra.Command{
 }
 
 func init() {
+	removeCmd.Flags().BoolVarP(&filename,
+		"filename",
+		"f",
+		false,
+		"addresses a note by filename")
+
 	doCmd.AddCommand(removeCmd)
 }
