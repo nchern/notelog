@@ -53,7 +53,7 @@ func TestShoudSearch(t *testing.T) {
 				underTest := NewSearcher(note.List(homeDir), actual)
 
 				require.NoError(t, underTest.Search(tt.given...))
-				assert.Equal(t, tt.expected, len(toLines(actual.String())))
+				assert.Equal(t, tt.expected, len(toSortedLines(actual.String())))
 			})
 		}
 	})
@@ -121,10 +121,8 @@ func TestSearchShouldNotGetResultsFromLastResutsFile(t *testing.T) {
 				"/tmp/test_notes/a/main.org:1:foo bar buzz",
 				"/tmp/test_notes/b/main.org:1:foobar bar addd buzz",
 			}
-			actual := toLines(out.String())
-			sort.Strings(actual)
 
-			assert.Equal(t, expected, actual)
+			assert.Equal(t, expected, toSortedLines(out.String()))
 		}
 	})
 }
@@ -148,10 +146,7 @@ func TestSearcShouldSearchNamesOnlyIfSet(t *testing.T) {
 			"/tmp/test_notes/c/main.org:1: ",
 		}
 
-		actualLines := toLines(actual.String())
-		sort.Strings(actualLines)
-
-		assert.Equal(t, expected, actualLines)
+		assert.Equal(t, expected, toSortedLines(actual.String()))
 	})
 }
 
@@ -203,9 +198,7 @@ func TestSearchShouldSearchInNoteNames(t *testing.T) {
 				err := underTest.Search(tt.given...)
 				require.NoError(t, err)
 
-				actual := toLines(out.String())
-				sort.Strings(actual)
-				assert.Equal(t, tt.expected, actual)
+				assert.Equal(t, tt.expected, toSortedLines(out.String()))
 			})
 		}
 	})
@@ -225,13 +218,11 @@ func disTestSearchShouldLookInArchive(t *testing.T) {
 		err := underTest.Search("abc")
 		require.NoError(t, err)
 
-		actual := toLines(out.String())
-		sort.Strings(actual)
 		expected := []string{
 			fmt.Sprintf("%s/.archive/andme/main.org:1:abc d", homeDir),
 			fmt.Sprintf("%s/findme/main.org:1:abc", homeDir),
 		}
-		assert.Equal(t, expected, actual)
+		assert.Equal(t, expected, toSortedLines(out.String()))
 	})
 }
 
@@ -256,9 +247,7 @@ func TestSearchNoteNamesOnlyShouldEnsureNoTermColorsInOutput(t *testing.T) {
 			"/tmp/test_notes/foo/main.org:1: ",
 		}
 
-		actual := toLines(out.String())
-		sort.Strings(actual)
-		assert.Equal(t, expected, actual)
+		assert.Equal(t, expected, toSortedLines(out.String()))
 	})
 }
 
@@ -296,10 +285,7 @@ func TestSearcShouldSearchCaseSensitiveIfSet(t *testing.T) {
 				err := underTest.Search(tt.given...)
 				require.NoError(t, err)
 
-				actualLines := toLines(actual.String())
-				sort.Strings(actualLines)
-
-				assert.Equal(t, tt.expected, actualLines)
+				assert.Equal(t, tt.expected, toSortedLines(actual.String()))
 			})
 		}
 	})
@@ -327,6 +313,8 @@ func must(err error) {
 	}
 }
 
-func toLines(s string) []string {
-	return strings.Split(strings.Trim(s, "\n"), "\n")
+func toSortedLines(s string) []string {
+	lines := strings.Split(strings.Trim(s, "\n"), "\n")
+	sort.Strings(lines)
+	return lines
 }
