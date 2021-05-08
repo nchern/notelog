@@ -2,11 +2,9 @@ package searcher
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -34,7 +32,6 @@ var (
 type m map[string]string
 
 func init() {
-	must(os.Setenv("NOTELOG_GREP", defaultGrep)) // make sure we always use defaultGrep in tests
 }
 
 func TestShoudSearch(t *testing.T) {
@@ -85,7 +82,6 @@ func TestSearchShoudWriteLastSearchResultsWithoutTermColor(t *testing.T) {
 
 		underTest := NewSearcher(note.List(homeDir), actual)
 		underTest.SaveResults = true
-		underTest.grepCmd = "grep -E --colour=always"
 
 		require.NoError(t, underTest.Search("foo bar"))
 
@@ -107,21 +103,6 @@ func TestSearchShoudReturnExitErrorOneIfFoundNothing(t *testing.T) {
 		require.NotNil(t, err)
 
 		assert.Equal(t, ErrNoResults, err)
-	})
-}
-
-func TestSearchShouldCorrectlyHandleCommandOverride(t *testing.T) {
-	withFiles(files, func() { // search requires NOTELOG_HOME to exist
-		n := note.List(homeDir)
-		actual := &bytes.Buffer{}
-
-		underTest := NewSearcher(n, actual)
-		underTest.grepCmd = "echo --bar" // use echo to get args as output
-
-		err := underTest.Search("foo")
-		require.NoError(t, err)
-
-		assert.Equal(t, fmt.Sprintf("--bar -rni (foo) %s\n", n.HomeDir()), actual.String())
 	})
 }
 
@@ -163,8 +144,8 @@ func TestSearcShouldSearchNamesOnlyIfSet(t *testing.T) {
 		require.NoError(t, err)
 
 		expected := []string{
-			"/tmp/test_notes/a/main.org:1:",
-			"/tmp/test_notes/c/main.org:1:",
+			"/tmp/test_notes/a/main.org:1: ",
+			"/tmp/test_notes/c/main.org:1: ",
 		}
 
 		actualLines := toLines(actual.String())
@@ -230,11 +211,32 @@ func TestSearchShouldSearchInNoteNames(t *testing.T) {
 	})
 }
 
-func TestSearchNoteNamesOnlyShouldEnsureNoTermColorsInOutput(t *testing.T) {
-	// this test requires sift command to present in the system
-	if err := exec.Command("sift", "--version").Run(); errors.Is(err, exec.ErrNotFound) {
-		t.Skip("can not run this test: sift is not installed")
+func disTestSearchShouldLookInArchive(t *testing.T) {
+	// TODO: enable
+	notes := map[string]string{
+		".archive/andme/main.org": "abc d",
+		"findme/main.org":         "abc",
+		"foo/main.org":            "bar",
 	}
+	withFiles(notes, func() {
+		out := &bytes.Buffer{}
+		underTest := NewSearcher(note.List(homeDir), out)
+
+		err := underTest.Search("abc")
+		require.NoError(t, err)
+
+		actual := toLines(out.String())
+		sort.Strings(actual)
+		expected := []string{
+			fmt.Sprintf("%s/.archive/andme/main.org:1:abc d", homeDir),
+			fmt.Sprintf("%s/findme/main.org:1:abc", homeDir),
+		}
+		assert.Equal(t, expected, actual)
+	})
+}
+
+func TestSearchNoteNamesOnlyShouldEnsureNoTermColorsInOutput(t *testing.T) {
+	// TODO: remove if no term colors will be used
 
 	notes := map[string]string{
 		"a/main.org":   "foo",
@@ -245,14 +247,13 @@ func TestSearchNoteNamesOnlyShouldEnsureNoTermColorsInOutput(t *testing.T) {
 		out := &bytes.Buffer{}
 		underTest := NewSearcher(note.List(homeDir), out)
 		underTest.OnlyNames = true
-		underTest.grepCmd = "sift --color"
 
 		err := underTest.Search("foo", "buzz")
 		require.NoError(t, err)
 
 		expected := []string{
-			"/tmp/test_notes/a/main.org:1:",
-			"/tmp/test_notes/foo/main.org:1:",
+			"/tmp/test_notes/a/main.org:1: ",
+			"/tmp/test_notes/foo/main.org:1: ",
 		}
 
 		actual := toLines(out.String())

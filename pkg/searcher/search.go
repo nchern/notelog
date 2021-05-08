@@ -1,27 +1,19 @@
 package searcher
 
 import (
-	"bufio"
-	"bytes"
 	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
-	"os/exec"
 	"regexp"
 	"sort"
 	"strings"
 
-	"github.com/google/shlex"
-	"github.com/nchern/notelog/pkg/env"
 	"github.com/nchern/notelog/pkg/note"
 )
 
 const (
-	defaultGrep     = "grep -E"
-	defaultGrepArgs = "-rni"
-
 	lastResultsFile = "last_search"
 )
 
@@ -39,14 +31,30 @@ type request struct {
 	excludeTerms []string
 }
 
+func (r *request) termsToRegexp() (terms *regexp.Regexp, excludeTerms *regexp.Regexp, err error) {
+	terms, err = regexp.Compile("(?i)" + regexOr(r.terms))
+	if err != nil {
+		return
+	}
+
+	if len(r.excludeTerms) < 1 {
+		return
+	}
+
+	excludeTerms, err = regexp.Compile("(?i)" + regexOr(r.excludeTerms))
+	if err != nil {
+		return
+	}
+	return
+}
+
 // Searcher represents a search engine over notes
 type Searcher struct {
 	OnlyNames bool
 
 	SaveResults bool
 
-	notes   Notes
-	grepCmd string
+	notes Notes
 
 	out io.Writer
 }
@@ -54,9 +62,8 @@ type Searcher struct {
 // NewSearcher returns a new Searcher instance
 func NewSearcher(notes Notes, out io.Writer) *Searcher {
 	return &Searcher{
-		out:     out,
-		notes:   notes,
-		grepCmd: env.Get("NOTELOG_GREP", defaultGrep),
+		out:   out,
+		notes: notes,
 	}
 }
 
@@ -75,7 +82,7 @@ func (s *Searcher) Search(terms ...string) error {
 		resF = f
 	}
 
-	matchedNames := []string{}
+	matchedNames := []*result{}
 	matchedNamesErr := make(chan error)
 	go func() {
 		var err error
@@ -83,7 +90,7 @@ func (s *Searcher) Search(terms ...string) error {
 		matchedNamesErr <- err
 	}()
 
-	results, err := s.searchInNotes(req)
+	res, err := searchInNotes(s.notes, req)
 	if err != nil {
 		return err
 	}
@@ -92,160 +99,38 @@ func (s *Searcher) Search(terms ...string) error {
 		return err
 	}
 
-	results = append(results, matchedNames...)
-	if len(results) == 0 {
+	res = append(res, matchedNames...)
+	if len(res) == 0 {
 		return ErrNoResults
 	}
 
-	return s.outputResults(results, resF)
+	return s.outputResults(res, resF)
 }
 
-func (s *Searcher) outputResults(results []string, persistentOut io.Writer) error {
+func (s *Searcher) outputResults(results []*result, persistentOut io.Writer) error {
 	names := map[string]bool{}
 	if s.OnlyNames {
-		sort.Strings(results)
+		sort.Sort(byPath(results))
 	}
 	for _, res := range results {
-		uncolored := termEscapeSequence.ReplaceAllString(res, "")
+		orig := *res
 		if s.OnlyNames {
-			toks := strings.Split(uncolored, ":")
-			if len(toks) < 1 {
+			if names[res.path] {
 				continue
 			}
-			fileName := toks[0]
-			if names[fileName] {
-				continue
-			}
-			names[fileName] = true
-			res = fileName + ":1:"
+			names[res.path] = true
+			res.text = " "
+			res.lineNum = 1
 		}
 
 		if _, err := fmt.Fprintln(s.out, res); err != nil {
 			return err
 		}
-		if _, err := fmt.Fprintln(persistentOut, uncolored); err != nil {
+		if _, err := fmt.Fprintln(persistentOut, &orig); err != nil {
 			return err
 		}
 	}
 	return nil
-}
-
-func searchInNames(notes Notes, req *request) ([]string, error) {
-	terms, err := regexp.Compile("(?i)" + regexOr(req.terms))
-	if err != nil {
-		return nil, err
-	}
-
-	excludeTerms, err := regexp.Compile("(?i)" + regexOr(req.excludeTerms))
-	if err != nil {
-		return nil, err
-	}
-
-	res := []string{}
-	items, err := notes.All()
-	if err != nil {
-		return nil, err
-	}
-
-	for _, it := range items {
-		if terms.MatchString(it.Name()) {
-			if len(req.excludeTerms) != 0 && excludeTerms.MatchString(it.Name()) {
-				// filter out excludeTerms if provided
-				continue
-			}
-			res = append(res, fmt.Sprintf("%s:1: ", it.FullPath()))
-		}
-	}
-
-	return res, nil
-}
-
-func (s *Searcher) searchInNotes(req *request) ([]string, error) {
-	buf := &bytes.Buffer{}
-	cmdArgs, err := buildSearchCmdAndArgs(s.grepCmd, s.notes, req)
-	if err != nil {
-		return nil, err
-	}
-
-	// Exclude notelog's dot dir from results
-	cmdArgs = append(cmdArgs, fmt.Sprintf("grep -v '/%s/'", note.DotNotelogDir))
-
-	cmd := exec.Command("sh", "-c", pipe(cmdArgs...))
-	cmd.Stdout = buf
-	cmd.Stderr = os.Stderr
-
-	if err := cmd.Run(); err != nil {
-		if exitErr, ok := err.(*exec.ExitError); ok {
-			if exitErr.ExitCode() == 1 {
-				return []string{}, nil
-			}
-		}
-		return nil, err
-	}
-
-	results := []string{}
-
-	scn := bufio.NewScanner(buf)
-	for scn.Scan() {
-		results = append(results, scn.Text())
-	}
-	if err := scn.Err(); err != nil {
-		return nil, err
-	}
-
-	return results, nil
-}
-
-func buildSearchCmdAndArgs(grepCmd string, notes Notes, req *request) ([]string, error) {
-	cmdName, extraArgs, err := parseToCmdAndExtraArgs(grepCmd)
-	if err != nil {
-		return nil, err
-	}
-
-	if len(req.excludeTerms) > 0 {
-		return searchCmdWithExcludeTerms(cmdName, extraArgs, req, notes.HomeDir()), nil
-	}
-
-	args := append(extraArgs, defaultGrepArgs, quote(regexOr(req.terms)), notes.HomeDir())
-	findCmd := c(append([]string{cmdName}, args...)...)
-
-	return []string{findCmd}, nil
-}
-
-func searchCmdWithExcludeTerms(cmd string, args []string, req *request, homeDir string) []string {
-	findArgs := append(args, defaultGrepArgs, quote(regexOr(req.terms)), homeDir)
-	findCmd := c(append([]string{cmd}, findArgs...)...)
-
-	excludeCmd := c(cmd, strings.Join(args, " "), "-vi", quote(regexOr(req.excludeTerms)))
-
-	return []string{findCmd, excludeCmd}
-}
-
-func parseToCmdAndExtraArgs(s string) (cmd string, args []string, err error) {
-	toks, err := shlex.Split(strings.TrimSpace(s))
-	if err != nil {
-		return
-	}
-
-	if len(toks) > 0 {
-		cmd = toks[0]
-	}
-	if len(toks) > 1 {
-		args = toks[1:]
-	}
-	return
-}
-
-func pipe(s ...string) string {
-	return strings.Join(s, " | ")
-}
-
-func c(s ...string) string {
-	return strings.Join(s, " ")
-}
-
-func quote(s string) string {
-	return "'" + s + "'"
 }
 
 func regexOr(terms []string) string {
@@ -263,3 +148,9 @@ func parseRequest(args ...string) *request {
 	}
 	return res
 }
+
+type byPath []*result
+
+func (a byPath) Len() int           { return len(a) }
+func (a byPath) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a byPath) Less(i, j int) bool { return a[i].path < a[j].path }
