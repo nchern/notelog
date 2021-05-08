@@ -58,6 +58,9 @@ func searchInNotes(notes []*note.Note, req *request) ([]*result, error) {
 				errChan <- err
 				return
 			}
+			if match(nt.Name()) {
+				results = append(results, &result{path: nt.FullPath(), lineNum: 1, text: " "})
+			}
 			resChan <- results
 		}(nt)
 	}
@@ -71,21 +74,5 @@ func searchInNotes(notes []*note.Note, req *request) ([]*result, error) {
 			log.Println(err) // TODO: find better way of error handling
 		}
 	}
-	return res, nil
-}
-
-func searchInNames(notes []*note.Note, req *request) ([]*result, error) {
-	match, err := req.matcher()
-	if err != nil {
-		return nil, err
-	}
-
-	res := []*result{}
-	for _, it := range notes {
-		if match(it.Name()) {
-			res = append(res, &result{path: it.FullPath(), lineNum: 1, text: " "})
-		}
-	}
-
 	return res, nil
 }

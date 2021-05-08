@@ -106,24 +106,10 @@ func (s *Searcher) Search(terms ...string) error {
 		return err
 	}
 
-	matchedNames := []*result{}
-	matchedNamesErr := make(chan error)
-	go func() {
-		var err error
-		matchedNames, err = searchInNames(l, req)
-		matchedNamesErr <- err
-	}()
-
 	res, err := searchInNotes(l, req)
 	if err != nil {
 		return err
 	}
-
-	if err := <-matchedNamesErr; err != nil {
-		return err
-	}
-
-	res = append(res, matchedNames...)
 	if len(res) == 0 {
 		return ErrNoResults
 	}
