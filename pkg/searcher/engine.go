@@ -3,6 +3,7 @@ package searcher
 import (
 	"bufio"
 	"fmt"
+	"log"
 	"regexp"
 
 	"github.com/nchern/notelog/pkg/note"
@@ -44,7 +45,6 @@ func searchNote(nt *note.Note, terms *regexp.Regexp, excludeTerms *regexp.Regexp
 		return nil, err
 	}
 	return res, nil
-
 }
 
 func searchInNotes(notes Notes, req *request) ([]*result, error) {
@@ -54,13 +54,29 @@ func searchInNotes(notes Notes, req *request) ([]*result, error) {
 	if err != nil {
 		return nil, err
 	}
-	res := []*result{}
+
+	resChan := make(chan []*result, len(l))
+	errChan := make(chan error, len(l))
+
 	for _, nt := range l {
-		lines, err := searchNote(nt, terms, excludeTerms)
-		if err != nil {
-			return nil, err
+		go func(nt *note.Note) {
+			results, err := searchNote(nt, terms, excludeTerms)
+			if err != nil {
+				errChan <- err
+				return
+			}
+			resChan <- results
+		}(nt)
+	}
+
+	res := []*result{}
+	for i := 0; i < len(l); i++ {
+		select {
+		case found := <-resChan:
+			res = append(res, found...)
+		case err := <-errChan:
+			log.Println(err) // TODO: find better way of error handling
 		}
-		res = append(res, lines...)
 	}
 	return res, nil
 }
