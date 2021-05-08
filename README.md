@@ -36,8 +36,8 @@ $ notelog -h
    - [X] create .notelog at least
  - [ ] archive: a note can:
    - [X] be put into archive, so it will not stay in the main note list
-         the curren search behaviour depends on a search command. E.g. `sift` does not search in .directories
-         question still is: should it be available or not for the search?
+         Current behaviour: no search in the archive. Only through actual notes
+   - [ ] add search in archive?
    - [ ] be restored from the archive (eventually)
  - [ ] sub-notes: notes that exist only in a context of a main note (?)
    - example notelog do subnote <notename> <sub-notename>
