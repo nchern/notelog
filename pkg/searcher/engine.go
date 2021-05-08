@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"log"
-	"regexp"
 
 	"github.com/nchern/notelog/pkg/note"
 )
@@ -19,7 +18,7 @@ func (r *result) String() string {
 	return fmt.Sprintf("%s:%d:%s", r.path, r.lineNum, r.text)
 }
 
-func searchNote(nt *note.Note, terms *regexp.Regexp, excludeTerms *regexp.Regexp) ([]*result, error) {
+func searchNote(nt *note.Note, match matcherFunc) ([]*result, error) {
 	r, err := nt.Reader()
 	if err != nil {
 		return nil, err
@@ -32,11 +31,7 @@ func searchNote(nt *note.Note, terms *regexp.Regexp, excludeTerms *regexp.Regexp
 	for scanner.Scan() {
 		lnum++
 		l := scanner.Text()
-		if terms.MatchString(l) {
-			if excludeTerms != nil && excludeTerms.MatchString(l) {
-				// filter out excludeTerms if provided
-				continue
-			}
+		if match(l) {
 			res = append(res, &result{path: nt.FullPath(), lineNum: lnum, text: l})
 		}
 	}
@@ -47,20 +42,18 @@ func searchNote(nt *note.Note, terms *regexp.Regexp, excludeTerms *regexp.Regexp
 	return res, nil
 }
 
-func searchInNotes(notes Notes, req *request) ([]*result, error) {
-	terms, excludeTerms, err := req.termsToRegexp()
-
-	l, err := notes.All()
+func searchInNotes(notes []*note.Note, req *request) ([]*result, error) {
+	match, err := req.matcher()
 	if err != nil {
 		return nil, err
 	}
 
-	resChan := make(chan []*result, len(l))
-	errChan := make(chan error, len(l))
+	resChan := make(chan []*result, len(notes))
+	errChan := make(chan error, len(notes))
 
-	for _, nt := range l {
+	for _, nt := range notes {
 		go func(nt *note.Note) {
-			results, err := searchNote(nt, terms, excludeTerms)
+			results, err := searchNote(nt, match)
 			if err != nil {
 				errChan <- err
 				return
@@ -70,7 +63,7 @@ func searchInNotes(notes Notes, req *request) ([]*result, error) {
 	}
 
 	res := []*result{}
-	for i := 0; i < len(l); i++ {
+	for i := 0; i < len(notes); i++ {
 		select {
 		case found := <-resChan:
 			res = append(res, found...)
@@ -81,24 +74,15 @@ func searchInNotes(notes Notes, req *request) ([]*result, error) {
 	return res, nil
 }
 
-func searchInNames(notes Notes, req *request) ([]*result, error) {
-	terms, excludeTerms, err := req.termsToRegexp()
+func searchInNames(notes []*note.Note, req *request) ([]*result, error) {
+	match, err := req.matcher()
 	if err != nil {
 		return nil, err
 	}
 
 	res := []*result{}
-	items, err := notes.All()
-	if err != nil {
-		return nil, err
-	}
-
-	for _, it := range items {
-		if terms.MatchString(it.Name()) {
-			if excludeTerms != nil && excludeTerms.MatchString(it.Name()) {
-				// filter out excludeTerms if provided
-				continue
-			}
+	for _, it := range notes {
+		if match(it.Name()) {
 			res = append(res, &result{path: it.FullPath(), lineNum: 1, text: " "})
 		}
 	}

@@ -26,6 +26,8 @@ type Notes interface {
 	MetadataFilename(name string) string
 }
 
+type matcherFunc func(string) bool
+
 type request struct {
 	terms        []string
 	excludeTerms []string
@@ -46,6 +48,23 @@ func (r *request) termsToRegexp() (terms *regexp.Regexp, excludeTerms *regexp.Re
 		return
 	}
 	return
+}
+
+func (r *request) matcher() (matcherFunc, error) {
+	terms, excludeTerms, err := r.termsToRegexp()
+	if err != nil {
+		return nil, err
+	}
+	return func(s string) bool {
+		if !terms.MatchString(s) {
+			return false
+		}
+		if excludeTerms != nil && excludeTerms.MatchString(s) {
+			// filter out excludeTerms if provided
+			return false
+		}
+		return true
+	}, nil
 }
 
 // Searcher represents a search engine over notes
@@ -82,15 +101,20 @@ func (s *Searcher) Search(terms ...string) error {
 		resF = f
 	}
 
+	l, err := s.notes.All()
+	if err != nil {
+		return err
+	}
+
 	matchedNames := []*result{}
 	matchedNamesErr := make(chan error)
 	go func() {
 		var err error
-		matchedNames, err = searchInNames(s.notes, req)
+		matchedNames, err = searchInNames(l, req)
 		matchedNamesErr <- err
 	}()
 
-	res, err := searchInNotes(s.notes, req)
+	res, err := searchInNotes(l, req)
 	if err != nil {
 		return err
 	}
