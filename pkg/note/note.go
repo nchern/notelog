@@ -65,17 +65,26 @@ func (n *Note) Exists() (bool, error) {
 	return true, nil
 }
 
+// Size tells this node size in bytes
+func (n *Note) Size() (int64, error) {
+	st, err := os.Stat(n.FullPath())
+	if err != nil {
+		return 0, err
+	}
+	return st.Size(), nil
+}
+
 // RemoveIfEmpty cleans up note resources if the note is empty
 func (n *Note) RemoveIfEmpty() error {
-	ok, err := n.Exists()
+	l, err := n.Size()
 	if err != nil {
 		return err
 	}
-	if ok {
+	if l > 0 {
 		return nil
 	}
 
-	return os.Remove(n.dir())
+	return os.RemoveAll(n.dir())
 }
 
 // Init initializes this note

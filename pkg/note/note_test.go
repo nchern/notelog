@@ -11,15 +11,12 @@ import (
 func TestRemoveIfEmpty(t *testing.T) {
 	withNotes(t, func(notes List) {
 
-		underTest := NewNote("empty", notes.HomeDir())
+		underTest, err := notes.GetOrCreate("empty")
+		require.NoError(t, err)
+
 		found, err := underTest.Exists()
 		require.NoError(t, err)
-		require.False(t, found)
-
-		assert.NoError(t, underTest.Init())
-
-		_, err = os.Stat(underTest.dir())
-		require.NoError(t, err)
+		require.True(t, found)
 
 		assert.NoError(t, underTest.RemoveIfEmpty())
 

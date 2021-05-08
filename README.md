@@ -25,7 +25,7 @@ $ notelog -h
 ```
 
 ## Roadmap
- - [ ] migrate to cobra subcommand parser (?)
+ - [X] migrate to cobra subcommand parser
  - [ ] integration with fzf: search results
  - [ ] in-note macros:
    - [ ] when adding lines, format them according to a given template
