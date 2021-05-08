@@ -262,6 +262,49 @@ func TestSearchNoteNamesOnlyShouldEnsureNoTermColorsInOutput(t *testing.T) {
 	})
 }
 
+func TestSearcShouldSearchCaseSensitiveIfSet(t *testing.T) {
+	notes := map[string]string{
+		"a/main.org": "abc\nfoo\nfOo bar",
+		"b/main.org": "fuzz",
+		"c/main.org": "bar FOO",
+	}
+	withFiles(notes, func() {
+		var tests = []struct {
+			name     string
+			expected []string
+			given    []string
+		}{
+			{"simple query",
+				[]string{
+					"/tmp/test_notes/a/main.org:2:foo",
+				},
+				[]string{"foo"}},
+			{"simple query-2",
+				[]string{
+					"/tmp/test_notes/a/main.org:3:fOo bar",
+					"/tmp/test_notes/c/main.org:1:bar FOO",
+				},
+				[]string{"FOO", "fOo"}},
+		}
+		for _, tt := range tests {
+			tt := tt
+			t.Run(tt.name, func(t *testing.T) {
+				actual := &bytes.Buffer{}
+				underTest := NewSearcher(note.List(homeDir), actual)
+				underTest.CaseSensitive = true
+
+				err := underTest.Search(tt.given...)
+				require.NoError(t, err)
+
+				actualLines := toLines(actual.String())
+				sort.Strings(actualLines)
+
+				assert.Equal(t, tt.expected, actualLines)
+			})
+		}
+	})
+}
+
 func withFiles(files m, fn func()) {
 	must(os.MkdirAll(homeDir, 0755))
 	defer os.RemoveAll(homeDir)

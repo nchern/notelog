@@ -29,12 +29,14 @@ type Notes interface {
 type matcherFunc func(string) bool
 
 type request struct {
+	CaseSensitive bool
+
 	terms        []string
 	excludeTerms []string
 }
 
 func (r *request) termsToRegexp() (terms *regexp.Regexp, excludeTerms *regexp.Regexp, err error) {
-	terms, err = regexp.Compile("(?i)" + regexOr(r.terms))
+	terms, err = r.compileRegexp(r.terms)
 	if err != nil {
 		return
 	}
@@ -43,7 +45,7 @@ func (r *request) termsToRegexp() (terms *regexp.Regexp, excludeTerms *regexp.Re
 		return
 	}
 
-	excludeTerms, err = regexp.Compile("(?i)" + regexOr(r.excludeTerms))
+	excludeTerms, err = r.compileRegexp(r.excludeTerms)
 	if err != nil {
 		return
 	}
@@ -67,11 +69,21 @@ func (r *request) matcher() (matcherFunc, error) {
 	}, nil
 }
 
+func (r *request) compileRegexp(terms []string) (*regexp.Regexp, error) {
+	opts := ""
+	if !r.CaseSensitive {
+		opts = "(?i)"
+	}
+	return regexp.Compile(opts + regexOr(terms))
+}
+
 // Searcher represents a search engine over notes
 type Searcher struct {
 	OnlyNames bool
 
 	SaveResults bool
+
+	CaseSensitive bool
 
 	notes Notes
 
@@ -90,6 +102,8 @@ func NewSearcher(notes Notes, out io.Writer) *Searcher {
 // Terms grammar looks like: "foo bar -buzz -fuzz" where -xxx means exclude xxx matches from the output
 func (s *Searcher) Search(terms ...string) error {
 	req := parseRequest(terms...)
+	req.CaseSensitive = s.CaseSensitive
+
 	var resF = ioutil.Discard
 
 	if s.SaveResults {

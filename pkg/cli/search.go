@@ -14,6 +14,8 @@ var (
 	interactive bool
 
 	titlesOnly bool
+
+	caseSensitive bool
 )
 
 var searchCmd = &cobra.Command{
@@ -43,6 +45,12 @@ func init() {
 		false,
 		"if set, outputs note titles of search results only")
 
+	searchCmd.Flags().BoolVarP(&caseSensitive,
+		"case-sensitive",
+		"c",
+		false,
+		"if set, runs case sensitive search")
+
 	doCmd.AddCommand(searchCmd)
 }
 
@@ -61,7 +69,7 @@ func search(args []string) error {
 
 	s.OnlyNames = titlesOnly
 	s.SaveResults = interactive
-
+	s.CaseSensitive = caseSensitive
 	err := s.Search(args...)
 	if err == searcher.ErrNoResults {
 		os.Exit(1)
