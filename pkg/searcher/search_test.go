@@ -35,7 +35,7 @@ func init() {
 }
 
 func TestShoudSearch(t *testing.T) {
-	withFiles(files, func() {
+	withNotes(files, func(notes note.List) {
 		var tests = []struct {
 			name     string
 			expected int
@@ -50,7 +50,7 @@ func TestShoudSearch(t *testing.T) {
 			tt := tt
 			t.Run(tt.name, func(t *testing.T) {
 				actual := &bytes.Buffer{}
-				underTest := NewSearcher(note.List(homeDir), actual)
+				underTest := NewSearcher(notes, actual)
 
 				require.NoError(t, underTest.Search(tt.given...))
 				assert.Equal(t, tt.expected, len(toSortedLines(actual.String())))
@@ -60,10 +60,10 @@ func TestShoudSearch(t *testing.T) {
 }
 
 func TestSearchShoudWriteLastSearchResults(t *testing.T) {
-	withFiles(files, func() {
+	withNotes(files, func(notes note.List) {
 		actual := &bytes.Buffer{}
 
-		underTest := NewSearcher(note.List(homeDir), actual)
+		underTest := NewSearcher(notes, actual)
 		underTest.SaveResults = true
 
 		require.NoError(t, underTest.Search("foobar"))
@@ -77,10 +77,10 @@ func TestSearchShoudWriteLastSearchResults(t *testing.T) {
 }
 
 func TestSearchShoudWriteLastSearchResultsWithoutTermColor(t *testing.T) {
-	withFiles(files, func() {
+	withNotes(files, func(notes note.List) {
 		actual := &bytes.Buffer{}
 
-		underTest := NewSearcher(note.List(homeDir), actual)
+		underTest := NewSearcher(notes, actual)
 		underTest.SaveResults = true
 
 		require.NoError(t, underTest.Search("foo bar"))
@@ -95,9 +95,9 @@ func TestSearchShoudWriteLastSearchResultsWithoutTermColor(t *testing.T) {
 }
 
 func TestSearchShoudReturnExitErrorOneIfFoundNothing(t *testing.T) {
-	withFiles(files, func() {
+	withNotes(files, func(notes note.List) {
 		actual := &bytes.Buffer{}
-		underTest := NewSearcher(note.List(homeDir), actual)
+		underTest := NewSearcher(notes, actual)
 
 		err := underTest.Search("you will not find me")
 		require.NotNil(t, err)
@@ -107,11 +107,11 @@ func TestSearchShoudReturnExitErrorOneIfFoundNothing(t *testing.T) {
 }
 
 func TestSearchShouldNotGetResultsFromLastResutsFile(t *testing.T) {
-	withFiles(files, func() {
+	withNotes(files, func(notes note.List) {
 		// search 2 times so that last_results will be filled
 		for i := 0; i < 2; i++ {
 			out := &bytes.Buffer{}
-			underTest := NewSearcher(note.List(homeDir), out)
+			underTest := NewSearcher(notes, out)
 			underTest.SaveResults = true
 
 			err := underTest.Search("foo")
@@ -128,14 +128,14 @@ func TestSearchShouldNotGetResultsFromLastResutsFile(t *testing.T) {
 }
 
 func TestSearcShouldSearchNamesOnlyIfSet(t *testing.T) {
-	notes := map[string]string{
+	files := map[string]string{
 		"a/main.org": "abc\nfoo\nfoo bar",
 		"b/main.org": "fuzz",
 		"c/main.org": "bar foo",
 	}
-	withFiles(notes, func() {
+	withNotes(files, func(notes note.List) {
 		actual := &bytes.Buffer{}
-		underTest := NewSearcher(note.List(homeDir), actual)
+		underTest := NewSearcher(notes, actual)
 		underTest.OnlyNames = true
 
 		err := underTest.Search("foo")
@@ -151,13 +151,13 @@ func TestSearcShouldSearchNamesOnlyIfSet(t *testing.T) {
 }
 
 func TestSearchShouldSearchInNoteNames(t *testing.T) {
-	notes := map[string]string{
+	files := map[string]string{
 		"foo/main.org":     "bar",
 		"findme/main.org":  "abc",
 		"findme2/main.org": "dfg",
 		"buzz/main.org":    "findme",
 	}
-	withFiles(notes, func() {
+	withNotes(files, func(notes note.List) {
 		var tests = []struct {
 			name     string
 			expected []string
@@ -193,7 +193,7 @@ func TestSearchShouldSearchInNoteNames(t *testing.T) {
 			tt := tt
 			t.Run(tt.name, func(t *testing.T) {
 				out := &bytes.Buffer{}
-				underTest := NewSearcher(note.List(homeDir), out)
+				underTest := NewSearcher(notes, out)
 
 				err := underTest.Search(tt.given...)
 				require.NoError(t, err)
@@ -206,14 +206,14 @@ func TestSearchShouldSearchInNoteNames(t *testing.T) {
 
 func disTestSearchShouldLookInArchive(t *testing.T) {
 	// TODO: enable
-	notes := map[string]string{
+	files := map[string]string{
 		".archive/andme/main.org": "abc d",
 		"findme/main.org":         "abc",
 		"foo/main.org":            "bar",
 	}
-	withFiles(notes, func() {
+	withNotes(files, func(notes note.List) {
 		out := &bytes.Buffer{}
-		underTest := NewSearcher(note.List(homeDir), out)
+		underTest := NewSearcher(notes, out)
 
 		err := underTest.Search("abc")
 		require.NoError(t, err)
@@ -229,14 +229,14 @@ func disTestSearchShouldLookInArchive(t *testing.T) {
 func TestSearchNoteNamesOnlyShouldEnsureNoTermColorsInOutput(t *testing.T) {
 	// TODO: remove if no term colors will be used
 
-	notes := map[string]string{
+	files := map[string]string{
 		"a/main.org":   "foo",
 		"b/main.org":   "fuzz",
 		"foo/main.org": "bar\nbuzz",
 	}
-	withFiles(notes, func() {
+	withNotes(files, func(notes note.List) {
 		out := &bytes.Buffer{}
-		underTest := NewSearcher(note.List(homeDir), out)
+		underTest := NewSearcher(notes, out)
 		underTest.OnlyNames = true
 
 		err := underTest.Search("foo", "buzz")
@@ -252,12 +252,12 @@ func TestSearchNoteNamesOnlyShouldEnsureNoTermColorsInOutput(t *testing.T) {
 }
 
 func TestSearcShouldSearchCaseSensitiveIfSet(t *testing.T) {
-	notes := map[string]string{
+	files := map[string]string{
 		"a/main.org": "abc\nfoo\nfOo bar",
 		"b/main.org": "fuzz",
 		"c/main.org": "bar FOO",
 	}
-	withFiles(notes, func() {
+	withNotes(files, func(notes note.List) {
 		var tests = []struct {
 			name     string
 			expected []string
@@ -279,7 +279,7 @@ func TestSearcShouldSearchCaseSensitiveIfSet(t *testing.T) {
 			tt := tt
 			t.Run(tt.name, func(t *testing.T) {
 				actual := &bytes.Buffer{}
-				underTest := NewSearcher(note.List(homeDir), actual)
+				underTest := NewSearcher(notes, actual)
 				underTest.CaseSensitive = true
 
 				err := underTest.Search(tt.given...)
@@ -291,7 +291,8 @@ func TestSearcShouldSearchCaseSensitiveIfSet(t *testing.T) {
 	})
 }
 
-func withFiles(files m, fn func()) {
+func withNotes(files m, fn func(notes note.List)) {
+
 	must(os.MkdirAll(homeDir, 0755))
 	defer os.RemoveAll(homeDir)
 
@@ -304,7 +305,7 @@ func withFiles(files m, fn func()) {
 		must(ioutil.WriteFile(fullName, []byte(body), mode))
 	}
 
-	fn()
+	fn(note.List(homeDir))
 }
 
 func must(err error) {
