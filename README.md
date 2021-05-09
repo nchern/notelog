@@ -37,7 +37,7 @@ $ notelog -h
  - [ ] archive: a note can:
    - [X] be put into archive, so it will not stay in the main note list
          Current behaviour: no search in the archive. Only through actual notes
-   - [ ] add search in archive?
+   - [ ] enable search in archive?
    - [ ] be restored from the archive (eventually)
  - [ ] sub-notes: notes that exist only in a context of a main note (?)
    - example notelog do subnote <notename> <sub-notename>
