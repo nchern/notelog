@@ -16,8 +16,6 @@ import (
 )
 
 const (
-	homeDir = "/tmp/test_notes"
-
 	mode = 0644
 )
 
@@ -68,7 +66,7 @@ func TestSearchShoudWriteLastSearchResults(t *testing.T) {
 
 		require.NoError(t, underTest.Search("foobar"))
 
-		resultsFilename := filepath.Join(homeDir, note.DotNotelogDir, lastResultsFile)
+		resultsFilename := filepath.Join(notes.HomeDir(), note.DotNotelogDir, lastResultsFile)
 		body, err := ioutil.ReadFile(resultsFilename)
 
 		require.NoError(t, err) // file must exist
@@ -85,10 +83,10 @@ func TestSearchShoudWriteLastSearchResultsWithoutTermColor(t *testing.T) {
 
 		require.NoError(t, underTest.Search("foo bar"))
 
-		resultsFilename := filepath.Join(homeDir, note.DotNotelogDir, lastResultsFile)
+		resultsFilename := filepath.Join(notes.HomeDir(), note.DotNotelogDir, lastResultsFile)
 		body, err := ioutil.ReadFile(resultsFilename)
 
-		expected := "/tmp/test_notes/a/main.org:1:foo bar buzz\n"
+		expected := notes.HomeDir() + "/a/main.org:1:foo bar buzz\n"
 		require.NoError(t, err) // file must exist
 		assert.Equal(t, expected, string(body))
 	})
@@ -118,8 +116,8 @@ func TestSearchShouldNotGetResultsFromLastResutsFile(t *testing.T) {
 			require.NoError(t, err)
 
 			expected := []string{
-				"/tmp/test_notes/a/main.org:1:foo bar buzz",
-				"/tmp/test_notes/b/main.org:1:foobar bar addd buzz",
+				notes.HomeDir() + "/a/main.org:1:foo bar buzz",
+				notes.HomeDir() + "/b/main.org:1:foobar bar addd buzz",
 			}
 
 			assert.Equal(t, expected, toSortedLines(out.String()))
@@ -142,8 +140,8 @@ func TestSearcShouldSearchNamesOnlyIfSet(t *testing.T) {
 		require.NoError(t, err)
 
 		expected := []string{
-			"/tmp/test_notes/a/main.org:1: ",
-			"/tmp/test_notes/c/main.org:1: ",
+			notes.HomeDir() + "/a/main.org:1: ",
+			notes.HomeDir() + "/c/main.org:1: ",
 		}
 
 		assert.Equal(t, expected, toSortedLines(actual.String()))
@@ -165,27 +163,27 @@ func TestSearchShouldSearchInNoteNames(t *testing.T) {
 		}{
 			{"simple query",
 				[]string{
-					"/tmp/test_notes/buzz/main.org:1:findme",
-					"/tmp/test_notes/findme/main.org:1: ",
-					"/tmp/test_notes/findme2/main.org:1: ",
+					notes.HomeDir() + "/buzz/main.org:1:findme",
+					notes.HomeDir() + "/findme/main.org:1: ",
+					notes.HomeDir() + "/findme2/main.org:1: ",
 				},
 				[]string{"findme"}},
 			{"two terms",
 				[]string{
-					"/tmp/test_notes/findme2/main.org:1: ",
-					"/tmp/test_notes/foo/main.org:1: ",
+					notes.HomeDir() + "/findme2/main.org:1: ",
+					notes.HomeDir() + "/foo/main.org:1: ",
 				},
 				[]string{"findme2", "fo"}},
 			{"with terms and excluded terms",
 				[]string{
-					"/tmp/test_notes/buzz/main.org:1:findme",
-					"/tmp/test_notes/findme/main.org:1: ",
+					notes.HomeDir() + "/buzz/main.org:1:findme",
+					notes.HomeDir() + "/findme/main.org:1: ",
 				},
 				[]string{"find", "-findme2"}},
 			{"terms and exclude terms are case insensitive",
 				[]string{
-					"/tmp/test_notes/buzz/main.org:1:findme",
-					"/tmp/test_notes/findme/main.org:1: ",
+					notes.HomeDir() + "/buzz/main.org:1:findme",
+					notes.HomeDir() + "/findme/main.org:1: ",
 				},
 				[]string{"finD", "-FindmE2"}},
 		}
@@ -219,8 +217,8 @@ func disTestSearchShouldLookInArchive(t *testing.T) {
 		require.NoError(t, err)
 
 		expected := []string{
-			fmt.Sprintf("%s/.archive/andme/main.org:1:abc d", homeDir),
-			fmt.Sprintf("%s/findme/main.org:1:abc", homeDir),
+			fmt.Sprintf("%s/.archive/andme/main.org:1:abc d", notes.HomeDir()),
+			fmt.Sprintf("%s/findme/main.org:1:abc", notes.HomeDir()),
 		}
 		assert.Equal(t, expected, toSortedLines(out.String()))
 	})
@@ -243,8 +241,8 @@ func TestSearchNoteNamesOnlyShouldEnsureNoTermColorsInOutput(t *testing.T) {
 		require.NoError(t, err)
 
 		expected := []string{
-			"/tmp/test_notes/a/main.org:1: ",
-			"/tmp/test_notes/foo/main.org:1: ",
+			notes.HomeDir() + "/a/main.org:1: ",
+			notes.HomeDir() + "/foo/main.org:1: ",
 		}
 
 		assert.Equal(t, expected, toSortedLines(out.String()))
@@ -265,13 +263,13 @@ func TestSearcShouldSearchCaseSensitiveIfSet(t *testing.T) {
 		}{
 			{"simple query",
 				[]string{
-					"/tmp/test_notes/a/main.org:2:foo",
+					notes.HomeDir() + "/a/main.org:2:foo",
 				},
 				[]string{"foo"}},
 			{"simple query-2",
 				[]string{
-					"/tmp/test_notes/a/main.org:3:fOo bar",
-					"/tmp/test_notes/c/main.org:1:bar FOO",
+					notes.HomeDir() + "/a/main.org:3:fOo bar",
+					notes.HomeDir() + "/c/main.org:1:bar FOO",
 				},
 				[]string{"FOO", "fOo"}},
 		}
@@ -292,6 +290,10 @@ func TestSearcShouldSearchCaseSensitiveIfSet(t *testing.T) {
 }
 
 func withNotes(files m, fn func(notes note.List)) {
+	homeDir, err := ioutil.TempDir("", "test_notes")
+	if err != nil {
+		panic(err)
+	}
 
 	must(os.MkdirAll(homeDir, 0755))
 	defer os.RemoveAll(homeDir)
