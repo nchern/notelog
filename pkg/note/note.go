@@ -4,6 +4,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/nchern/notelog/pkg/env"
 )
@@ -28,6 +29,8 @@ var notesRootPath = env.Get("NOTELOG_HOME", filepath.Join(os.Getenv("HOME"), def
 type Note struct {
 	name    string
 	homeDir string
+
+	modifiedAt time.Time
 }
 
 // NewNote creates a new instance of a Note
@@ -36,6 +39,10 @@ func NewNote(name string, homeDir string) *Note {
 		name:    name,
 		homeDir: homeDir,
 	}
+}
+
+func (n *Note) ModifiedAt() time.Time {
+	return n.modifiedAt
 }
 
 // FullPath returns full path to the notes file

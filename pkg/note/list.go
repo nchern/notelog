@@ -113,7 +113,9 @@ func (l List) All() ([]*Note, error) {
 		if strings.HasPrefix(dir.Name(), ".") {
 			continue
 		}
-		res = append(res, NewNote(dir.Name(), l.HomeDir()))
+		nt := NewNote(dir.Name(), l.HomeDir())
+		nt.modifiedAt = dir.ModTime()
+		res = append(res, nt)
 	}
 
 	return res, nil
