@@ -19,6 +19,7 @@ func TestAutoComplete(t *testing.T) {
 	names := []string{
 		"bar",
 		"buzz",
+		"drum",
 		"foo"}
 
 	allCommands := bytes.Buffer{}
@@ -32,13 +33,16 @@ func TestAutoComplete(t *testing.T) {
 		}{
 			{"should complete names",
 				"notelog ",
-				text(names...)},
+				text(append([]string{"do"}, names...)...)},
 			{"should complete subcommands",
 				"notelog do ",
 				strings.TrimSuffix(allCommands.String(), "\n")},
-			{"should complete flag",
+			{"should complete do command",
 				"notelog d",
-				text("do")},
+				text("do", "drum")},
+			{"should complete exclude do comand",
+				"notelog dr",
+				text("drum")},
 			{"should complete flag 2",
 				"notelog do",
 				text("do")},

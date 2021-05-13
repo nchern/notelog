@@ -11,6 +11,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const cmdDo = "do"
+
 var autocompleteCmd = &cobra.Command{
 	Use:   "autocomplete",
 	Short: "uses by bash to return autocompletions",
@@ -35,15 +37,10 @@ func init() {
 }
 
 func autoComplete(list note.List, line string, i int, w io.Writer) error {
-	const cmdDo = "do"
 
 	beforeCursor := line[0 : i+1]
 	curTok := getCurrentCompletingToken(beforeCursor)
 	prevToks := strings.TrimSpace(strings.TrimSuffix(strings.TrimSpace(beforeCursor), curTok))
-	if strings.HasPrefix(curTok, "d") {
-		_, err := fmt.Fprintln(w, cmdDo)
-		return err
-	}
 
 	if strings.HasSuffix(prevToks, cmdDo) {
 		return printCommandsWithPrefix(curTok, w)
@@ -69,6 +66,14 @@ func printCommandsWithPrefix(prefix string, w io.Writer) error {
 }
 
 func printNotesWithPrefix(notes []*note.Note, prefix string, w io.Writer) error {
+	// Hack: autocomplete do command
+	if strings.HasPrefix(cmdDo, prefix) {
+		_, err := fmt.Fprintln(w, cmdDo)
+		if err != nil {
+			return err
+		}
+	}
+
 	for _, note := range notes {
 		if !strings.HasPrefix(note.Name(), prefix) {
 			continue
