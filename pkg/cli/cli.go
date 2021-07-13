@@ -33,6 +33,10 @@ var (
 		Use:   "notelog",
 		Short: "Efficient CLI personal note manager",
 		Args:  cobra.MinimumNArgs(0),
+
+		SilenceUsage:  true,
+		SilenceErrors: true,
+
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return edit(args, false)
 		},
