@@ -114,6 +114,8 @@ func (l List) All() ([]*Note, error) {
 			continue
 		}
 		nt := NewNote(dir.Name(), l.HomeDir())
+		// HACK: this works only as a whole note file gets re-created.
+		// Vim does it when writes the file
 		nt.modifiedAt = dir.ModTime()
 		res = append(res, nt)
 	}
