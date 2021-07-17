@@ -14,6 +14,7 @@ const (
 	testDir  = "test-notes"
 )
 
+// WithNotes - test helper function
 func WithNotes(t *testing.T, fn func(notes note.List)) {
 	home, err := ioutil.TempDir(testRoot, testDir)
 	require.NoError(t, err)

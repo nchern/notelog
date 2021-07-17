@@ -10,8 +10,8 @@ import (
 )
 
 var (
-	readErr  = errors.New("boom")
-	writeErr = errors.New("boom boom")
+	errRead  = errors.New("boom")
+	errWrite = errors.New("boom boom")
 )
 
 func TestShouldFormat(t *testing.T) {
@@ -121,12 +121,12 @@ func TestShouldFormat(t *testing.T) {
 func TestShouldFailOnReaderError(t *testing.T) {
 	actual := &bytes.Buffer{}
 	err := Format(&brokenStream{}, actual)
-	assert.Equal(t, readErr, err)
+	assert.Equal(t, errRead, err)
 }
 
 func TestShouldFailOnWriterError(t *testing.T) {
 	err := Format(bytes.NewBufferString("foo"), &brokenStream{})
-	assert.Equal(t, writeErr, err)
+	assert.Equal(t, errWrite, err)
 }
 
 func text(lines ...string) string {
@@ -135,6 +135,6 @@ func text(lines ...string) string {
 
 type brokenStream struct{}
 
-func (t *brokenStream) Read(b []byte) (int, error) { return 0, readErr }
+func (t *brokenStream) Read(b []byte) (int, error) { return 0, errRead }
 
-func (t *brokenStream) Write(b []byte) (int, error) { return 0, writeErr }
+func (t *brokenStream) Write(b []byte) (int, error) { return 0, errWrite }

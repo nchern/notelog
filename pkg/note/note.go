@@ -41,6 +41,7 @@ func NewNote(name string, homeDir string) *Note {
 	}
 }
 
+// ModifiedAt returns time when this node was modified
 func (n *Note) ModifiedAt() time.Time {
 	return n.modifiedAt
 }
