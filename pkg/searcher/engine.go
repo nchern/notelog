@@ -42,7 +42,7 @@ func searchNote(nt *note.Note, match matcherFunc) ([]*result, error) {
 	return res, nil
 }
 
-func searchInNotes(notes []*note.Note, req *request) ([]*result, error) {
+func searchInNotes(notes []*note.Note, req *request, onlyNames bool) ([]*result, error) {
 	match, err := req.matcher()
 	if err != nil {
 		return nil, err
@@ -65,14 +65,27 @@ func searchInNotes(notes []*note.Note, req *request) ([]*result, error) {
 		}(nt)
 	}
 
-	res := []*result{}
+	names := map[string]bool{}
+	results := []*result{}
 	for i := 0; i < len(notes); i++ {
 		select {
 		case found := <-resChan:
-			res = append(res, found...)
+			if onlyNames {
+				for _, res := range found {
+					if names[res.path] {
+						continue
+					}
+					names[res.path] = true
+					res.text = " "
+					res.lineNum = 1
+					results = append(results, res)
+				}
+			} else {
+				results = append(results, found...)
+			}
 		case err := <-errChan:
 			log.Println(err) // TODO: find better way of error handling
 		}
 	}
-	return res, nil
+	return results, nil
 }

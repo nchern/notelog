@@ -20,8 +20,9 @@ func TestGetLastNthResult(t *testing.T) {
 		underTest.SaveResults = true
 
 		// perform search to generate last results file
-		err := underTest.Search("foo")
+		n, err := underTest.Search("foo")
 		require.NoError(t, err)
+		require.Equal(t, 2, n)
 
 		b, err := ioutil.ReadFile(notes.MetadataFilename(lastResultsFile))
 		require.NoError(t, err)

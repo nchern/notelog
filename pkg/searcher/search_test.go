@@ -49,8 +49,9 @@ func TestShoudSearch(t *testing.T) {
 			t.Run(tt.name, func(t *testing.T) {
 				actual := &bytes.Buffer{}
 				underTest := NewSearcher(notes, actual)
-
-				require.NoError(t, underTest.Search(tt.given...))
+				// FIXME
+				_, err := underTest.Search(tt.given...)
+				require.NoError(t, err)
 				assert.Equal(t, tt.expected, len(toSortedLines(actual.String())))
 			})
 		}
@@ -64,7 +65,8 @@ func TestSearchShoudWriteLastSearchResults(t *testing.T) {
 		underTest := NewSearcher(notes, actual)
 		underTest.SaveResults = true
 
-		require.NoError(t, underTest.Search("foobar"))
+		_, err := underTest.Search("foobar")
+		require.NoError(t, err)
 
 		resultsFilename := filepath.Join(notes.HomeDir(), note.DotNotelogDir, lastResultsFile)
 		body, err := ioutil.ReadFile(resultsFilename)
@@ -81,7 +83,9 @@ func TestSearchShoudWriteLastSearchResultsWithoutTermColor(t *testing.T) {
 		underTest := NewSearcher(notes, actual)
 		underTest.SaveResults = true
 
-		require.NoError(t, underTest.Search("foo bar"))
+		n, err := underTest.Search("foo bar")
+		require.NoError(t, err)
+		require.Equal(t, 1, n)
 
 		resultsFilename := filepath.Join(notes.HomeDir(), note.DotNotelogDir, lastResultsFile)
 		body, err := ioutil.ReadFile(resultsFilename)
@@ -92,19 +96,19 @@ func TestSearchShoudWriteLastSearchResultsWithoutTermColor(t *testing.T) {
 	})
 }
 
-func TestSearchShoudReturnExitErrorOneIfFoundNothing(t *testing.T) {
+func TestSearchShoudReturnZeroResultsIfFoundNothing(t *testing.T) {
 	withNotes(files, func(notes note.List) {
 		actual := &bytes.Buffer{}
 		underTest := NewSearcher(notes, actual)
 
-		err := underTest.Search("you will not find me")
-		require.NotNil(t, err)
+		n, err := underTest.Search("you will not find me")
+		require.NoError(t, err)
 
-		assert.Equal(t, ErrNoResults, err)
+		assert.Equal(t, 0, n)
 	})
 }
 
-func TestSearchShouldNotGetResultsFromLastResutsFile(t *testing.T) {
+func TestSearchShouldNotSearchInLastResutsFile(t *testing.T) {
 	withNotes(files, func(notes note.List) {
 		// search 2 times so that last_results will be filled
 		for i := 0; i < 2; i++ {
@@ -112,14 +116,14 @@ func TestSearchShouldNotGetResultsFromLastResutsFile(t *testing.T) {
 			underTest := NewSearcher(notes, out)
 			underTest.SaveResults = true
 
-			err := underTest.Search("foo")
+			n, err := underTest.Search("foo")
 			require.NoError(t, err)
 
 			expected := []string{
 				notes.HomeDir() + "/a/main.org:1:foo bar buzz",
 				notes.HomeDir() + "/b/main.org:1:foobar bar addd buzz",
 			}
-
+			assert.Equal(t, len(expected), n)
 			assert.Equal(t, expected, toSortedLines(out.String()))
 		}
 	})
@@ -136,14 +140,14 @@ func TestSearcShouldSearchNamesOnlyIfSet(t *testing.T) {
 		underTest := NewSearcher(notes, actual)
 		underTest.OnlyNames = true
 
-		err := underTest.Search("foo")
+		n, err := underTest.Search("foo")
 		require.NoError(t, err)
 
 		expected := []string{
 			notes.HomeDir() + "/a/main.org:1: ",
 			notes.HomeDir() + "/c/main.org:1: ",
 		}
-
+		assert.Equal(t, len(expected), n)
 		assert.Equal(t, expected, toSortedLines(actual.String()))
 	})
 }
@@ -193,16 +197,17 @@ func TestSearchShouldSearchInNoteNames(t *testing.T) {
 				out := &bytes.Buffer{}
 				underTest := NewSearcher(notes, out)
 
-				err := underTest.Search(tt.given...)
+				n, err := underTest.Search(tt.given...)
 				require.NoError(t, err)
 
+				assert.Equal(t, len(tt.expected), n)
 				assert.Equal(t, tt.expected, toSortedLines(out.String()))
 			})
 		}
 	})
 }
 
-func disTestSearchShouldLookInArchive(t *testing.T) {
+func disabledTestSearchShouldLookInArchive(t *testing.T) {
 	// TODO: enable
 	files := map[string]string{
 		".archive/andme/main.org": "abc d",
@@ -213,13 +218,14 @@ func disTestSearchShouldLookInArchive(t *testing.T) {
 		out := &bytes.Buffer{}
 		underTest := NewSearcher(notes, out)
 
-		err := underTest.Search("abc")
+		n, err := underTest.Search("abc")
 		require.NoError(t, err)
 
 		expected := []string{
 			fmt.Sprintf("%s/.archive/andme/main.org:1:abc d", notes.HomeDir()),
 			fmt.Sprintf("%s/findme/main.org:1:abc", notes.HomeDir()),
 		}
+		assert.Equal(t, len(expected), n)
 		assert.Equal(t, expected, toSortedLines(out.String()))
 	})
 }
@@ -237,7 +243,7 @@ func TestSearchNoteNamesOnlyShouldEnsureNoTermColorsInOutput(t *testing.T) {
 		underTest := NewSearcher(notes, out)
 		underTest.OnlyNames = true
 
-		err := underTest.Search("foo", "buzz")
+		n, err := underTest.Search("foo", "buzz")
 		require.NoError(t, err)
 
 		expected := []string{
@@ -245,6 +251,7 @@ func TestSearchNoteNamesOnlyShouldEnsureNoTermColorsInOutput(t *testing.T) {
 			notes.HomeDir() + "/foo/main.org:1: ",
 		}
 
+		assert.Equal(t, len(expected), n)
 		assert.Equal(t, expected, toSortedLines(out.String()))
 	})
 }
@@ -280,9 +287,10 @@ func TestSearcShouldSearchCaseSensitiveIfSet(t *testing.T) {
 				underTest := NewSearcher(notes, actual)
 				underTest.CaseSensitive = true
 
-				err := underTest.Search(tt.given...)
+				n, err := underTest.Search(tt.given...)
 				require.NoError(t, err)
 
+				assert.Equal(t, len(tt.expected), n)
 				assert.Equal(t, tt.expected, toSortedLines(actual.String()))
 			})
 		}

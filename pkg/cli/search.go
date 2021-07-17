@@ -70,8 +70,8 @@ func search(args []string) error {
 	s.OnlyNames = titlesOnly
 	s.SaveResults = interactive
 	s.CaseSensitive = caseSensitive
-	err := s.Search(args...)
-	if err == searcher.ErrNoResults {
+	n, err := s.Search(args...)
+	if n == 0 {
 		os.Exit(1)
 	}
 

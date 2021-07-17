@@ -1,7 +1,6 @@
 package searcher
 
 import (
-	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -16,8 +15,6 @@ import (
 const (
 	lastResultsFile = "last_search"
 )
-
-var ErrNoResults = errors.New("search: nothing found")
 
 // Notes abstracts note collection to search in
 type Notes interface {
@@ -100,7 +97,7 @@ func NewSearcher(notes Notes, out io.Writer) *Searcher {
 
 // Search runs the search over all notes in notes home and prints results to stdout
 // Terms grammar looks like: "foo bar -buzz -fuzz" where -xxx means exclude xxx matches from the output
-func (s *Searcher) Search(terms ...string) error {
+func (s *Searcher) Search(terms ...string) (int, error) {
 	req := parseRequest(terms...)
 	req.CaseSensitive = s.CaseSensitive
 
@@ -109,7 +106,7 @@ func (s *Searcher) Search(terms ...string) error {
 	if s.SaveResults {
 		f, err := os.Create(s.notes.MetadataFilename(lastResultsFile))
 		if err != nil {
-			return err
+			return 0, err
 		}
 		defer f.Close()
 		resF = f
@@ -117,40 +114,26 @@ func (s *Searcher) Search(terms ...string) error {
 
 	l, err := s.notes.All()
 	if err != nil {
-		return err
+		return 0, err
 	}
 
-	res, err := searchInNotes(l, req)
+	res, err := searchInNotes(l, req, s.OnlyNames)
 	if err != nil {
-		return err
-	}
-	if len(res) == 0 {
-		return ErrNoResults
+		return 0, err
 	}
 
-	return s.outputResults(res, resF)
+	return len(res), s.outputResults(res, resF)
 }
 
 func (s *Searcher) outputResults(results []*result, persistentOut io.Writer) error {
-	names := map[string]bool{}
 	if s.OnlyNames {
 		sort.Sort(byPath(results))
 	}
 	for _, res := range results {
-		orig := *res
-		if s.OnlyNames {
-			if names[res.path] {
-				continue
-			}
-			names[res.path] = true
-			res.text = " "
-			res.lineNum = 1
-		}
-
 		if _, err := fmt.Fprintln(s.out, res); err != nil {
 			return err
 		}
-		if _, err := fmt.Fprintln(persistentOut, &orig); err != nil {
+		if _, err := fmt.Fprintln(persistentOut, res); err != nil {
 			return err
 		}
 	}
