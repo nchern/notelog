@@ -68,14 +68,12 @@ func TestSearchShoudWriteLastSearchResults(t *testing.T) {
 		_, err := underTest.Search("foobar")
 		require.NoError(t, err)
 
-		resultsFilename := filepath.Join(notes.HomeDir(), note.DotNotelogDir, lastResultsFile)
-		body, err := ioutil.ReadFile(resultsFilename)
+		body := mustReadLastResults(t, notes)
 
 		expected := []string{
 			notes.HomeDir() + "/b/main.org:1:foobar bar addd buzz",
 		}
-		require.NoError(t, err) // file must exist
-		assert.Equal(t, expected, toSortedLines(string(body)))
+		assert.Equal(t, expected, toSortedLines(body))
 	})
 }
 
@@ -90,11 +88,9 @@ func TestSearchShoudWriteLastSearchResultsWithoutTermColor(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, 1, n)
 
-		resultsFilename := filepath.Join(notes.HomeDir(), note.DotNotelogDir, lastResultsFile)
-		body, err := ioutil.ReadFile(resultsFilename)
+		body := mustReadLastResults(t, notes)
 
 		expected := notes.HomeDir() + "/a/main.org:1:foo bar buzz\n"
-		require.NoError(t, err) // file must exist
 		assert.Equal(t, expected, string(body))
 	})
 }
@@ -139,19 +135,40 @@ func TestSearcShouldSearchNamesOnlyIfSet(t *testing.T) {
 		"c/main.org": "bar foo",
 	}
 	withNotes(files, func(notes note.List) {
-		actual := &bytes.Buffer{}
-		underTest := NewSearcher(notes, actual)
-		underTest.OnlyNames = true
-
-		n, err := underTest.Search("foo")
-		require.NoError(t, err)
-
-		expected := []string{
-			"a:1: ",
-			"c:1: ",
+		prepare := func() (*Searcher, *bytes.Buffer) {
+			out := &bytes.Buffer{}
+			s := NewSearcher(notes, out)
+			s.OnlyNames = true
+			return s, out
 		}
-		assert.Equal(t, len(expected), n)
-		assert.Equal(t, expected, toSortedLines(actual.String()))
+		t.Run("with simple search", func(t *testing.T) {
+			underTest, actual := prepare()
+			n, err := underTest.Search("foo")
+			require.NoError(t, err)
+
+			expected := []string{
+				"a:1: ",
+				"c:1: ",
+			}
+			assert.Equal(t, len(expected), n)
+			assert.Equal(t, expected, toSortedLines(actual.String()))
+		})
+		t.Run("saved results should have line numbers of first occurance", func(t *testing.T) {
+			underTest, _ := prepare()
+			underTest.SaveResults = true
+
+			expected := []string{
+				notes.HomeDir() + "/a/main.org:2:foo",
+				notes.HomeDir() + "/c/main.org:1:bar foo",
+			}
+
+			n, err := underTest.Search("foo")
+			require.NoError(t, err)
+			require.Equal(t, len(expected), n)
+
+			body := mustReadLastResults(t, notes)
+			assert.Equal(t, expected, toSortedLines(body))
+		})
 	})
 }
 
@@ -331,4 +348,12 @@ func toSortedLines(s string) []string {
 	lines := strings.Split(strings.Trim(s, "\n"), "\n")
 	sort.Strings(lines)
 	return lines
+}
+
+func mustReadLastResults(t *testing.T, notes note.List) string {
+	resultsFilename := filepath.Join(notes.HomeDir(), note.DotNotelogDir, lastResultsFile)
+	body, err := ioutil.ReadFile(resultsFilename)
+	require.NoError(t, err) // file must exist
+
+	return string(body)
 }

@@ -130,10 +130,16 @@ func (s *Searcher) outputResults(results []*result, persistentOut io.Writer) err
 		sort.Sort(byPath(results))
 	}
 	for _, res := range results {
+		orig := *res
+		if s.OnlyNames {
+			res.text = " "
+			res.lineNum = 1
+		}
+
 		if _, err := fmt.Fprintln(s.out, res.Display()); err != nil {
 			return err
 		}
-		if _, err := fmt.Fprintln(persistentOut, res); err != nil {
+		if _, err := fmt.Fprintln(persistentOut, &orig); err != nil {
 			return err
 		}
 	}

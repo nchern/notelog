@@ -92,8 +92,6 @@ func searchInNotes(notes []*note.Note, req *request, onlyNames bool) ([]*result,
 						continue
 					}
 					names[res.path] = true
-					res.text = " "
-					res.lineNum = 1
 					results = append(results, res)
 				}
 			} else {
