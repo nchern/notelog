@@ -12,10 +12,16 @@ type result struct {
 	path    string
 	lineNum int
 	text    string
+	name    string
 }
 
 func (r *result) String() string {
 	return fmt.Sprintf("%s:%d:%s", r.path, r.lineNum, r.text)
+}
+
+func (r *result) Display() string {
+	// TODO: elaborate better name
+	return fmt.Sprintf("%s:%d:%s", r.name, r.lineNum, r.text)
 }
 
 func searchNote(nt *note.Note, match matcherFunc) ([]*result, error) {
@@ -32,7 +38,12 @@ func searchNote(nt *note.Note, match matcherFunc) ([]*result, error) {
 		lnum++
 		l := scanner.Text()
 		if match(l) {
-			res = append(res, &result{path: nt.FullPath(), lineNum: lnum, text: l})
+			res = append(res, &result{
+				path:    nt.FullPath(),
+				lineNum: lnum,
+				text:    l,
+				name:    nt.Name(),
+			})
 		}
 	}
 
@@ -59,7 +70,12 @@ func searchInNotes(notes []*note.Note, req *request, onlyNames bool) ([]*result,
 				return
 			}
 			if match(nt.Name()) {
-				results = append(results, &result{path: nt.FullPath(), lineNum: 1, text: " "})
+				results = append(results, &result{
+					path:    nt.FullPath(),
+					lineNum: 1,
+					text:    " ",
+					name:    nt.Name(),
+				})
 			}
 			resChan <- results
 		}(nt)

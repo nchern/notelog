@@ -71,8 +71,11 @@ func TestSearchShoudWriteLastSearchResults(t *testing.T) {
 		resultsFilename := filepath.Join(notes.HomeDir(), note.DotNotelogDir, lastResultsFile)
 		body, err := ioutil.ReadFile(resultsFilename)
 
+		expected := []string{
+			notes.HomeDir() + "/b/main.org:1:foobar bar addd buzz",
+		}
 		require.NoError(t, err) // file must exist
-		assert.Equal(t, actual.Bytes(), body)
+		assert.Equal(t, expected, toSortedLines(string(body)))
 	})
 }
 
@@ -120,8 +123,8 @@ func TestSearchShouldNotSearchInLastResutsFile(t *testing.T) {
 			require.NoError(t, err)
 
 			expected := []string{
-				notes.HomeDir() + "/a/main.org:1:foo bar buzz",
-				notes.HomeDir() + "/b/main.org:1:foobar bar addd buzz",
+				"a:1:foo bar buzz",
+				"b:1:foobar bar addd buzz",
 			}
 			assert.Equal(t, len(expected), n)
 			assert.Equal(t, expected, toSortedLines(out.String()))
@@ -144,8 +147,8 @@ func TestSearcShouldSearchNamesOnlyIfSet(t *testing.T) {
 		require.NoError(t, err)
 
 		expected := []string{
-			notes.HomeDir() + "/a/main.org:1: ",
-			notes.HomeDir() + "/c/main.org:1: ",
+			"a:1: ",
+			"c:1: ",
 		}
 		assert.Equal(t, len(expected), n)
 		assert.Equal(t, expected, toSortedLines(actual.String()))
@@ -167,27 +170,27 @@ func TestSearchShouldSearchInNoteNames(t *testing.T) {
 		}{
 			{"simple query",
 				[]string{
-					notes.HomeDir() + "/buzz/main.org:1:findme",
-					notes.HomeDir() + "/findme/main.org:1: ",
-					notes.HomeDir() + "/findme2/main.org:1: ",
+					"buzz:1:findme",
+					"findme2:1: ",
+					"findme:1: ",
 				},
 				[]string{"findme"}},
 			{"two terms",
 				[]string{
-					notes.HomeDir() + "/findme2/main.org:1: ",
-					notes.HomeDir() + "/foo/main.org:1: ",
+					"findme2:1: ",
+					"foo:1: ",
 				},
 				[]string{"findme2", "fo"}},
 			{"with terms and excluded terms",
 				[]string{
-					notes.HomeDir() + "/buzz/main.org:1:findme",
-					notes.HomeDir() + "/findme/main.org:1: ",
+					"buzz:1:findme",
+					"findme:1: ",
 				},
 				[]string{"find", "-findme2"}},
 			{"terms and exclude terms are case insensitive",
 				[]string{
-					notes.HomeDir() + "/buzz/main.org:1:findme",
-					notes.HomeDir() + "/findme/main.org:1: ",
+					"buzz:1:findme",
+					"findme:1: ",
 				},
 				[]string{"finD", "-FindmE2"}},
 		}
@@ -247,8 +250,8 @@ func TestSearchNoteNamesOnlyShouldEnsureNoTermColorsInOutput(t *testing.T) {
 		require.NoError(t, err)
 
 		expected := []string{
-			notes.HomeDir() + "/a/main.org:1: ",
-			notes.HomeDir() + "/foo/main.org:1: ",
+			"a:1: ",
+			"foo:1: ",
 		}
 
 		assert.Equal(t, len(expected), n)
@@ -270,13 +273,13 @@ func TestSearcShouldSearchCaseSensitiveIfSet(t *testing.T) {
 		}{
 			{"simple query",
 				[]string{
-					notes.HomeDir() + "/a/main.org:2:foo",
+					"a:2:foo",
 				},
 				[]string{"foo"}},
 			{"simple query-2",
 				[]string{
-					notes.HomeDir() + "/a/main.org:3:fOo bar",
-					notes.HomeDir() + "/c/main.org:1:bar FOO",
+					"a:3:fOo bar",
+					"c:1:bar FOO",
 				},
 				[]string{"FOO", "fOo"}},
 		}

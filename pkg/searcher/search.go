@@ -130,7 +130,7 @@ func (s *Searcher) outputResults(results []*result, persistentOut io.Writer) err
 		sort.Sort(byPath(results))
 	}
 	for _, res := range results {
-		if _, err := fmt.Fprintln(s.out, res); err != nil {
+		if _, err := fmt.Fprintln(s.out, res.Display()); err != nil {
 			return err
 		}
 		if _, err := fmt.Fprintln(persistentOut, res); err != nil {
