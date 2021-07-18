@@ -2,6 +2,7 @@ package editor
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"os/exec"
 	"strings"
@@ -40,13 +41,19 @@ func Edit(note Note, readOnly bool) error {
 		args = append(args, "-R")
 	}
 	args = append(args, note.FullPath())
-	ed := Shellout(args...)
+	ed := shellout(args...)
 	return ed.Run()
 }
 
-// Shellout creates a ready to shellout exec.Command editor to edit given filename.
+// EditAt opens a note in editor at a given line
+func EditAt(path string, lineNum int) error {
+	// TODO: works on vim only
+	return shellout(path, fmt.Sprintf("+%d", lineNum)).Run()
+}
+
+// shellout creates a ready to shellout exec.Command editor to edit given filename.
 // It inherits all std* streams from the current process
-func Shellout(flags ...string) *exec.Cmd {
+func shellout(flags ...string) *exec.Cmd {
 	// HACK: this will not work properly if flags contain values with spaces
 	args := strings.Fields(strings.TrimSpace(editorFlags))
 	args = append(args, flags...)

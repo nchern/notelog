@@ -42,9 +42,14 @@ func browseSearch(args []string) error {
 	if r == "" {
 		return nil
 	}
-	toks := strings.Split(r, ":")
 
-	return editor.Shellout(toks[0], "+"+toks[1]).Run()
+	toks := strings.Split(r, ":")
+	lnum, err := strconv.ParseInt(toks[1], 10, 64)
+	if err != nil {
+		return err
+	}
+
+	return editor.EditAt(toks[0], int(lnum))
 }
 
 func parseNumber(args []string) (int64, error) {
