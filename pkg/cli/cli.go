@@ -78,6 +78,7 @@ func Execute() error {
 }
 
 func parseArgs(args []string) (noteName string, instantRecord string, err error) {
+	//	FIXME: this function was a really bad idea - need to get rid of it
 	if len(args) < 1 {
 		noteName = scratchpadName
 		return

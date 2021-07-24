@@ -1,6 +1,9 @@
 package cli
 
 import (
+	"strconv"
+	"strings"
+
 	"github.com/nchern/notelog/pkg/editor"
 	"github.com/nchern/notelog/pkg/note"
 	"github.com/spf13/cobra"
@@ -38,6 +41,19 @@ func init() {
 func edit(args []string, readOnly bool) error {
 	notes := note.NewList()
 
+	lnum := int64(-1)
+	if len(args) > 0 {
+		nameAndLine := strings.SplitN(args[0], ":", 2)
+		args[0] = nameAndLine[0]
+		if len(nameAndLine) > 1 {
+			var err error
+			lnum, err = strconv.ParseInt(nameAndLine[1], 10, 64)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
 	noteName, instantRecord, err := parseArgs(args)
 	if err != nil {
 		return err
@@ -51,5 +67,5 @@ func edit(args []string, readOnly bool) error {
 	if instantRecord != "" {
 		return nt.WriteInstantRecord(instantRecord, skipLines)
 	}
-	return editor.Edit(nt, readOnly)
+	return editor.Edit(nt, readOnly, lnum)
 }

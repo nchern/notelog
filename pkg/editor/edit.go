@@ -28,7 +28,7 @@ type Note interface {
 }
 
 // Edit calls an editor to interactively edit given note
-func Edit(note Note, readOnly bool) error {
+func Edit(note Note, readOnly bool, lineNum int64) error {
 	defer note.RemoveIfEmpty()
 
 	if err := note.Init(); err != nil && !errors.Is(err, os.ErrExist) {
@@ -41,6 +41,10 @@ func Edit(note Note, readOnly bool) error {
 		args = append(args, "-R")
 	}
 	args = append(args, note.FullPath())
+	if lineNum > 0 {
+		// TODO: works on vim only
+		args = append(args, fmt.Sprintf("+%d", lineNum))
+	}
 	ed := shellout(args...)
 	return ed.Run()
 }
