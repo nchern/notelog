@@ -127,7 +127,7 @@ func (s *Searcher) Search(terms ...string) (int, error) {
 
 func (s *Searcher) outputResults(results []*result, persistentOut io.Writer) error {
 	if s.OnlyNames {
-		sort.Sort(byPath(results))
+		sort.Sort(byName(results))
 	}
 	for _, res := range results {
 		orig := *res
@@ -162,8 +162,8 @@ func parseRequest(args ...string) *request {
 	return res
 }
 
-type byPath []*result
+type byName []*result
 
-func (a byPath) Len() int           { return len(a) }
-func (a byPath) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
-func (a byPath) Less(i, j int) bool { return a[i].path < a[j].path }
+func (a byName) Len() int           { return len(a) }
+func (a byName) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a byName) Less(i, j int) bool { return a[i].name < a[j].name }

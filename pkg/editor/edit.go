@@ -41,23 +41,16 @@ func Edit(note Note, readOnly bool, ln LineNumber) error {
 	}
 
 	args := []string{}
+	// TODO: customize, flags below work in vim only
 	if readOnly {
-		// TODO: customize, this works in vim only
 		args = append(args, "-R")
 	}
 	args = append(args, note.FullPath())
 	if lnum > 0 {
-		// TODO: works on vim only
 		args = append(args, fmt.Sprintf("+%s", string(ln)))
 	}
 	ed := shellout(args...)
 	return ed.Run()
-}
-
-// EditAt opens a note in editor at a given line
-func EditAt(path string, lineNum int) error {
-	// TODO: works on vim only
-	return shellout(path, fmt.Sprintf("+%d", lineNum)).Run()
 }
 
 // shellout creates a ready to shellout exec.Command editor to edit given filename.

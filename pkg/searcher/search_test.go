@@ -71,7 +71,7 @@ func TestSearchShoudWriteLastSearchResults(t *testing.T) {
 		body := mustReadLastResults(t, notes)
 
 		expected := []string{
-			notes.HomeDir() + "/b/main.org:1:foobar bar addd buzz",
+			"b:1",
 		}
 		assert.Equal(t, expected, toSortedLines(body))
 	})
@@ -90,7 +90,7 @@ func TestSearchShoudWriteLastSearchResultsWithoutTermColor(t *testing.T) {
 
 		body := mustReadLastResults(t, notes)
 
-		expected := notes.HomeDir() + "/a/main.org:1:foo bar buzz\n"
+		expected := "a:1\n"
 		assert.Equal(t, expected, string(body))
 	})
 }
@@ -158,8 +158,8 @@ func TestSearcShouldSearchNamesOnlyIfSet(t *testing.T) {
 			underTest.SaveResults = true
 
 			expected := []string{
-				notes.HomeDir() + "/a/main.org:2:foo",
-				notes.HomeDir() + "/c/main.org:1:bar foo",
+				"a:2",
+				"c:1",
 			}
 
 			n, err := underTest.Search("foo")

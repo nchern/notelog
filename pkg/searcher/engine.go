@@ -9,14 +9,13 @@ import (
 )
 
 type result struct {
-	path    string
 	lineNum int
 	text    string
 	name    string
 }
 
 func (r *result) String() string {
-	return fmt.Sprintf("%s:%d:%s", r.path, r.lineNum, r.text)
+	return fmt.Sprintf("%s:%d", r.name, r.lineNum)
 }
 
 func (r *result) Display() string {
@@ -39,7 +38,6 @@ func searchNote(nt *note.Note, match matcherFunc) ([]*result, error) {
 		l := scanner.Text()
 		if match(l) {
 			res = append(res, &result{
-				path:    nt.FullPath(),
 				lineNum: lnum,
 				text:    l,
 				name:    nt.Name(),
@@ -71,7 +69,6 @@ func searchInNotes(notes []*note.Note, req *request, onlyNames bool) ([]*result,
 			}
 			if match(nt.Name()) {
 				results = append(results, &result{
-					path:    nt.FullPath(),
 					lineNum: 1,
 					text:    " ",
 					name:    nt.Name(),
@@ -88,10 +85,10 @@ func searchInNotes(notes []*note.Note, req *request, onlyNames bool) ([]*result,
 		case found := <-resChan:
 			if onlyNames {
 				for _, res := range found {
-					if names[res.path] {
+					if names[res.name] {
 						continue
 					}
-					names[res.path] = true
+					names[res.name] = true
 					results = append(results, res)
 				}
 			} else {

@@ -3,7 +3,6 @@ package cli
 import (
 	"errors"
 	"strconv"
-	"strings"
 
 	"github.com/nchern/notelog/pkg/editor"
 	"github.com/nchern/notelog/pkg/note"
@@ -43,13 +42,13 @@ func browseSearch(args []string) error {
 		return nil
 	}
 
-	toks := strings.Split(r, ":")
-	lnum, err := strconv.ParseInt(toks[1], 10, 64)
+	noteName, lnum := parseNoteNameAndLineNumber(r)
+	nt, err := notes.GetOrCreate(noteName)
 	if err != nil {
 		return err
 	}
 
-	return editor.EditAt(toks[0], int(lnum))
+	return editor.Edit(nt, false, lnum)
 }
 
 func parseNumber(args []string) (int64, error) {
