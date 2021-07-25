@@ -14,6 +14,8 @@ func GetLastNthResult(notes Notes, n int) (string, error) {
 		}
 		return "", err
 	}
+	defer f.Close()
+
 	i := 1
 	scanner := bufio.NewScanner(f)
 	for scanner.Scan() {
