@@ -22,7 +22,7 @@ var removeCmd = &cobra.Command{
 			name = note.NameFromFilename(args[0])
 			err = validateNoteName(name)
 		} else {
-			name, _, err = parseArgs(args)
+			name, err = parseNoteName(args[0])
 		}
 		if err != nil {
 			return err

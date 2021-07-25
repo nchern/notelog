@@ -42,7 +42,7 @@ func archive(args []string) error {
 		noteName = note.NameFromFilename(args[0])
 		err = validateNoteName(noteName)
 	} else {
-		noteName, _, err = parseArgs(args)
+		noteName, err = parseNoteName(args[0])
 	}
 	if err != nil {
 		return err

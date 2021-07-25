@@ -27,7 +27,7 @@ func init() {
 func printNote(args []string) error {
 	notes := note.NewList()
 
-	noteName, _, err := parseArgs(args)
+	noteName, err := parseNoteName(args[0])
 	if err != nil {
 		return err
 	}

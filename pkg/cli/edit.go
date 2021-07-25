@@ -37,19 +37,23 @@ func init() {
 	doCmd.AddCommand(editCmd)
 }
 
+func parseNoteNameAndLineNumber(rawName string) (name string, lnum editor.LineNumber) {
+	nameAndLine := strings.SplitN(rawName, ":", 2)
+	name = nameAndLine[0]
+	if len(nameAndLine) > 1 {
+		lnum = editor.LineNumber(nameAndLine[1])
+	}
+	return
+}
+
 func edit(args []string, readOnly bool) error {
 	notes := note.NewList()
 
 	var lnum editor.LineNumber
-	if len(args) > 0 {
-		nameAndLine := strings.SplitN(args[0], ":", 2)
-		args[0] = nameAndLine[0]
-		if len(nameAndLine) > 1 {
-			lnum = editor.LineNumber(nameAndLine[1])
-		}
-	}
+	noteName := noteNameFromArgs(args)
+	noteName, lnum = parseNoteNameAndLineNumber(noteName)
 
-	noteName, instantRecord, err := parseArgs(args)
+	noteName, err := parseNoteName(noteName)
 	if err != nil {
 		return err
 	}
@@ -59,6 +63,10 @@ func edit(args []string, readOnly bool) error {
 		return err
 	}
 
+	instantRecord := ""
+	if len(args) > 1 {
+		instantRecord = strings.TrimSpace(strings.Join(args[1:], " "))
+	}
 	if instantRecord != "" {
 		return nt.WriteInstantRecord(instantRecord, skipLines)
 	}

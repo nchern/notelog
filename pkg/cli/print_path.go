@@ -27,7 +27,7 @@ func init() {
 func printFullPath(args []string) error {
 	notes := note.NewList()
 
-	noteName, _, err := parseArgs(args)
+	noteName, err := parseNoteName(noteNameFromArgs(args))
 	if err != nil {
 		return err
 	}

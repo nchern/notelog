@@ -24,7 +24,7 @@ func init() {
 }
 
 func touch(notes note.List, args []string) error {
-	name, _, err := parseArgs(args)
+	name, err := parseNoteName(args[0])
 	if err != nil {
 		return err
 	}

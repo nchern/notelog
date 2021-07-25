@@ -77,17 +77,17 @@ func Execute() error {
 	return rootCmd.Execute()
 }
 
-func parseArgs(args []string) (noteName string, instantRecord string, err error) {
-	//	FIXME: this function was a really bad idea - need to get rid of it
-	if len(args) < 1 {
-		noteName = scratchpadName
-		return
+func parseNoteName(name string) (string, error) {
+	name = strings.TrimSpace(name)
+	if err := validateNoteName(name); err != nil {
+		return "", err
 	}
+	return name, nil
+}
 
-	noteName = strings.TrimSpace(args[0])
-	if err = validateNoteName(noteName); err != nil {
-		return
+func noteNameFromArgs(args []string) string {
+	if len(args) < 1 {
+		return scratchpadName
 	}
-	instantRecord = strings.TrimSpace(strings.Join(args[1:], " "))
-	return
+	return args[0]
 }

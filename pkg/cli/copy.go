@@ -14,10 +14,15 @@ var copyCmd = &cobra.Command{
 	SilenceUsage:  true,
 
 	RunE: func(cmd *cobra.Command, args []string) error {
-		name, newName, err := parseArgs(args)
+		name, err := parseNoteName(args[0])
 		if err != nil {
 			return err
 		}
+		newName, err := parseNoteName(args[1])
+		if err != nil {
+			return err
+		}
+
 		return notes.Copy(name, newName)
 	},
 }
