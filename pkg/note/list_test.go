@@ -1,6 +1,8 @@
 package note
 
 import (
+	"bytes"
+	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -90,16 +92,65 @@ func TestInit(t *testing.T) {
 }
 
 func TestGetOrCreate(t *testing.T) {
+	const noteName = "new-one"
+
 	withNotes(t, func(notes List) {
-		underTest, err := notes.GetOrCreate("new-one")
+		underTest, err := notes.GetOrCreate(noteName)
 		assert.NoError(t, err)
 
 		found, err := underTest.Exists()
 		assert.NoError(t, err)
 		assert.True(t, found)
 
-		underTest2, err := notes.GetOrCreate("new-one")
+		underTest2, err := notes.GetOrCreate(noteName)
 		assert.NoError(t, err)
 		assert.Equal(t, underTest.FullPath(), underTest2.FullPath())
+	})
+}
+
+func TestGet(t *testing.T) {
+	// merge with GetOrCreate?
+	const noteName = "new-one"
+
+	withNotes(t, func(notes List) {
+		missing, err := notes.Get("nonexistent")
+		assert.Error(t, err) // FIXME: check concrete error
+		assert.Nil(t, missing)
+
+		created := makeNote(t, notes, noteName)
+
+		underTest, err := notes.Get(noteName)
+		assert.NoError(t, err)
+		assert.Equal(t, created.FullPath(), underTest.FullPath())
+	})
+}
+
+func TestCopy(t *testing.T) {
+	const (
+		noteFoo = "foo"
+		newName = "foo-copy"
+		body    = "this is the note to copy"
+	)
+	actualBuf := &bytes.Buffer{}
+	withNotes(t, func(underTest List) {
+		nt := makeNote(t, underTest, noteFoo)
+		w, err := nt.writer()
+		require.NoError(t, err)
+		_, err = io.WriteString(w, body)
+		require.NoError(t, err)
+		w.Close()
+
+		err = underTest.Copy(noteFoo, newName)
+		assert.NoError(t, err)
+
+		newOne, err := underTest.Get(newName)
+		require.NoError(t, err)
+		assert.Equal(t, newName, newOne.name)
+
+		assert.NoError(t, newOne.Dump(actualBuf))
+		assert.Equal(t, body, actualBuf.String())
+
+		err = underTest.Copy("nonexistent", newName)
+		assert.Error(t, err) // FIXME: check concrete error
 	})
 }

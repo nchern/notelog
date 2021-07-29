@@ -98,6 +98,7 @@ func (l List) Copy(srcName string, dstName string) error {
 	if err != nil {
 		return err
 	}
+	defer w.Close()
 
 	return src.Dump(w)
 }
