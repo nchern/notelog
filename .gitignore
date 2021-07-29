@@ -12,3 +12,5 @@
 *.out
 
 *version_generated.go
+
+artifacts
