@@ -78,6 +78,10 @@ func Execute() error {
 }
 
 func parseNoteName(name string) (string, error) {
+	// FIXME: this is a hack, need more elegant solution than double if
+	if name == scratchpadName {
+		return name, nil
+	}
 	name = strings.TrimSpace(name)
 	if err := validateNoteName(name); err != nil {
 		return "", err
