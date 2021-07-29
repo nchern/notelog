@@ -34,7 +34,7 @@ func Sync(notes note.List, customMsg string) error {
 
 		switch v := err.(type) {
 		case *exec.ExitError:
-			fmt.Printf("notelog: [%s] returned code %d\n", cmd, v.ExitCode())
+			fmt.Fprintf(os.Stderr, "notelog: [%s] returned code %d\n", cmd, v.ExitCode())
 		}
 	}
 
