@@ -42,7 +42,7 @@ func (l List) Init() error {
 // Get returns an existing node from the current collection with a given name
 // If the note with a given name does not exit an error is returned
 func (l List) Get(name string) (*Note, error) {
-	nt := NewNote(name, l.HomeDir())
+	nt := newNote(name, l.HomeDir())
 	found, err := nt.Exists()
 	if err != nil {
 		return nil, err
@@ -79,7 +79,7 @@ func (l List) Rename(oldName string, newName string) error {
 		return err
 	}
 
-	return os.Rename(nt.dir(), NewNote(newName, l.HomeDir()).dir())
+	return os.Rename(nt.dir(), newNote(newName, l.HomeDir()).dir())
 }
 
 // Copy copies a note
@@ -113,7 +113,7 @@ func (l List) All() ([]*Note, error) {
 		if strings.HasPrefix(dir.Name(), ".") {
 			continue
 		}
-		nt := NewNote(dir.Name(), l.HomeDir())
+		nt := newNote(dir.Name(), l.HomeDir())
 		// HACK: this works only as a whole note file gets re-created.
 		// Vim does it when writes the file
 		nt.modifiedAt = dir.ModTime()
@@ -141,7 +141,7 @@ func (l List) Archive(name string) error {
 
 // GetOrCreate returns a note with a given name. If the note does not exist it creates it.
 func (l List) GetOrCreate(name string) (*Note, error) {
-	nt := NewNote(name, l.HomeDir())
+	nt := newNote(name, l.HomeDir())
 
 	// Init call ensures atomic note dir creation
 	err := nt.Init()

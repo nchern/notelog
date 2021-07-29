@@ -33,8 +33,8 @@ type Note struct {
 	modifiedAt time.Time
 }
 
-// NewNote creates a new instance of a Note
-func NewNote(name string, homeDir string) *Note {
+// newNote creates a new instance of a Note
+func newNote(name string, homeDir string) *Note {
 	return &Note{
 		name:    name,
 		homeDir: homeDir,
