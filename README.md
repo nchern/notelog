@@ -74,6 +74,8 @@ As of now you have to add it manually using standard `git remote add ...`
    - [ ] when adding lines, format them according to a given template
  - [ ] (?) multiple temporary drafts - when open a draft, this should not be the same file every time
  - [ ] have notes on `.md` format and not only in `.org`
+ - [ ] refactoring: consolidate `withNotes` functions in tests
+ - [ ] refactoring: consider using testing.T.TempDir() in tests instead of manually create / cleanup temp dirs
  - [ ] archive: a note can:
    - [X] be put into archive, so it will not stay in the main note list
          Current behavior: no search in the archive. Only through actual notes
