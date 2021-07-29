@@ -3,23 +3,41 @@ package testutil
 import (
 	"io/ioutil"
 	"os"
-	"testing"
+	"path/filepath"
 
 	"github.com/nchern/notelog/pkg/note"
-	"github.com/stretchr/testify/require"
 )
 
 const (
 	testRoot = "/tmp"
 	testDir  = "test-notes"
+	mode     = 0644
 )
 
 // WithNotes - test helper function
-func WithNotes(t *testing.T, fn func(notes note.List)) {
-	home, err := ioutil.TempDir(testRoot, testDir)
-	require.NoError(t, err)
+func WithNotes(files map[string]string, fn func(notes note.List)) {
+	homeDir, err := ioutil.TempDir("", "test_notes")
+	if err != nil {
+		panic(err)
+	}
 
-	defer os.RemoveAll(home)
+	must(os.MkdirAll(homeDir, 0755))
+	defer os.RemoveAll(homeDir)
 
-	fn(note.List(home))
+	must(os.MkdirAll(filepath.Join(homeDir, note.DotNotelogDir), 0755))
+
+	for name, body := range files {
+		fullName := filepath.Join(homeDir, name, "main.org")
+		dir, _ := filepath.Split(fullName)
+		must(os.MkdirAll(dir, 0755))
+		must(ioutil.WriteFile(fullName, []byte(body), mode))
+	}
+
+	fn(note.List(homeDir))
+}
+
+func must(err error) {
+	if err != nil {
+		panic(err)
+	}
 }

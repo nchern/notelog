@@ -43,7 +43,7 @@ func browseSearch(args []string) error {
 	}
 
 	noteName, lnum := parseNoteNameAndLineNumber(r)
-	nt, err := notes.GetOrCreate(noteName)
+	nt, err := notes.Get(noteName)
 	if err != nil {
 		return err
 	}

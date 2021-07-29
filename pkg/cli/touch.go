@@ -20,14 +20,20 @@ var touchCmd = &cobra.Command{
 }
 
 func init() {
+	addFormatFlag(touchCmd)
 	doCmd.AddCommand(touchCmd)
 }
 
 func touch(notes note.List, args []string) error {
+	t, err := note.ParseFormat(noteFormat)
+	if err != nil {
+		return err
+	}
+
 	name, err := parseNoteName(args[0])
 	if err != nil {
 		return err
 	}
-	_, err = notes.GetOrCreate(name)
+	_, err = notes.GetOrCreate(name, t)
 	return err
 }

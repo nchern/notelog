@@ -16,6 +16,8 @@ const (
 var (
 	readOnly bool
 
+	noteFormat string
+
 	editCmd = &cobra.Command{
 		Use:   "edit",
 		Short: "opens a given note in editor",
@@ -32,9 +34,16 @@ var (
 )
 
 func init() {
-	editCmd.Flags().BoolVarP(&readOnly, "read-only", "r", false, "opens note in read-only mode")
+	editCmd.Flags().BoolVarP(&readOnly,
+		"read-only", "r", false, "opens note in read-only mode")
+	addFormatFlag(editCmd)
 
 	doCmd.AddCommand(editCmd)
+}
+
+func addFormatFlag(cmd *cobra.Command) {
+	cmd.Flags().StringVarP(&noteFormat,
+		"format", "t", string(note.Org), "note format; currently org or md are supported")
 }
 
 func parseNoteNameAndLineNumber(rawName string) (name string, lnum editor.LineNumber) {
@@ -47,18 +56,21 @@ func parseNoteNameAndLineNumber(rawName string) (name string, lnum editor.LineNu
 }
 
 func edit(args []string, readOnly bool) error {
+	t, err := note.ParseFormat(noteFormat)
+	if err != nil {
+		return err
+	}
 	notes := note.NewList()
 
 	var lnum editor.LineNumber
 	noteName := noteNameFromArgs(args)
 	noteName, lnum = parseNoteNameAndLineNumber(noteName)
 
-	noteName, err := parseNoteName(noteName)
+	noteName, err = parseNoteName(noteName)
 	if err != nil {
 		return err
 	}
-
-	nt, err := notes.GetOrCreate(noteName)
+	nt, err := notes.GetOrCreate(noteName, t)
 	if err != nil {
 		return err
 	}

@@ -23,7 +23,7 @@ func init() {
 }
 
 func TestInit(t *testing.T) {
-	testutil.WithNotes(t, func(notes note.List) {
+	testutil.WithNotes(map[string]string{}, func(notes note.List) {
 		out := bytes.Buffer{}
 		assert.NoError(t, Init(notes, &out))
 		assert.Equal(t, "init\n", out.String())
