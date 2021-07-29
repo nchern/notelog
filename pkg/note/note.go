@@ -11,7 +11,8 @@ import (
 
 const (
 	defaultNotesDir = "notes"
-	defaultFilename = "main.org"
+
+	defaultFileBaseName = "main."
 
 	// DotNotelogDir is a dir where notelog store its files
 	DotNotelogDir = ".notelog"
@@ -23,10 +24,13 @@ const (
 	defaultFilePerms = 0644
 )
 
-var notesRootPath = env.Get("NOTELOG_HOME", filepath.Join(os.Getenv("HOME"), defaultNotesDir))
+var (
+	notesRootPath = env.Get("NOTELOG_HOME", filepath.Join(os.Getenv("HOME"), defaultNotesDir))
+)
 
 // Note represents a note in the system. A directory with the main.org file as note file as of now.
 type Note struct {
+	typ     Format
 	name    string
 	homeDir string
 
@@ -36,6 +40,7 @@ type Note struct {
 // newNote creates a new instance of a Note
 func newNote(name string, homeDir string) *Note {
 	return &Note{
+		typ:     Unknown,
 		name:    name,
 		homeDir: homeDir,
 	}
@@ -48,7 +53,7 @@ func (n *Note) ModifiedAt() time.Time {
 
 // FullPath returns full path to the notes file
 func (n *Note) FullPath() string {
-	return filepath.Join(n.homeDir, n.name, defaultFilename)
+	return filepath.Join(n.homeDir, n.name, defaultFileBaseName+string(n.typ))
 }
 
 // MetadataFilename returns full path to the metadata file in this note namespace

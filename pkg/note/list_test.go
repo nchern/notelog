@@ -25,7 +25,7 @@ func withNotes(t *testing.T, fn func(notes List)) {
 }
 
 func makeNote(t *testing.T, notes List, name string) *Note {
-	nt, err := notes.GetOrCreate(name)
+	nt, err := notes.GetOrCreate(name, Org)
 	require.NoError(t, err)
 	found, _ := nt.Exists()
 	require.True(t, found)
@@ -51,15 +51,20 @@ func TestRename(t *testing.T) {
 		err := notes.Rename("foo", "bar")
 		assert.NoError(t, err)
 
-		found, _ := underTest.Exists()
+		found, err := underTest.Exists()
+		require.NoError(t, err)
 		assert.False(t, found)
 
-		found, _ = newNote("bar", notes.HomeDir()).Exists()
-		assert.True(t, found)
+		bar, err := notes.Get("bar")
+		require.NoError(t, err)
+		found, err = bar.Exists()
+		require.True(t, found)
 	})
 }
 
 func TestArchive(t *testing.T) {
+	const expectedFilename = "main.org"
+
 	withNotes(t, func(notes List) {
 		underTest := makeNote(t, notes, "foo")
 
@@ -69,7 +74,7 @@ func TestArchive(t *testing.T) {
 		found, _ := underTest.Exists()
 		assert.False(t, found)
 
-		_, err = os.Stat(filepath.Join(notes.HomeDir(), archiveNoteDir, underTest.name, defaultFilename))
+		_, err = os.Stat(filepath.Join(notes.HomeDir(), archiveNoteDir, underTest.name, expectedFilename))
 		assert.NoError(t, err)
 	})
 }
@@ -95,14 +100,14 @@ func TestGetOrCreate(t *testing.T) {
 	const noteName = "new-one"
 
 	withNotes(t, func(notes List) {
-		underTest, err := notes.GetOrCreate(noteName)
+		underTest, err := notes.GetOrCreate(noteName, Org)
 		assert.NoError(t, err)
 
 		found, err := underTest.Exists()
 		assert.NoError(t, err)
 		assert.True(t, found)
 
-		underTest2, err := notes.GetOrCreate(noteName)
+		underTest2, err := notes.GetOrCreate(noteName, Org)
 		assert.NoError(t, err)
 		assert.Equal(t, underTest.FullPath(), underTest2.FullPath())
 	})

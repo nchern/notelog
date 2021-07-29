@@ -42,15 +42,21 @@ func (l List) Init() error {
 // Get returns an existing node from the current collection with a given name
 // If the note with a given name does not exit an error is returned
 func (l List) Get(name string) (*Note, error) {
-	nt := newNote(name, l.HomeDir())
-	found, err := nt.Exists()
-	if err != nil {
-		return nil, err
+	var errNotExist = fmt.Errorf("%s does not exist", name)
+	// beware this loop: O(n) FS lookups. Fine while there is a few of supportedTypes
+	for t := range supportedFormats {
+		nt := newNote(name, l.HomeDir())
+		nt.typ = t
+
+		found, err := nt.Exists()
+		if err != nil {
+			return nil, err
+		}
+		if found {
+			return nt, nil
+		}
 	}
-	if !found {
-		return nil, fmt.Errorf("%s does not exist", name)
-	}
-	return nt, nil
+	return nil, errNotExist
 }
 
 // MetadataFilename returns full path to the notelog metadata for a given file
@@ -89,7 +95,7 @@ func (l List) Copy(srcName string, dstName string) error {
 		return err
 	}
 
-	dst, err := l.GetOrCreate(dstName)
+	dst, err := l.GetOrCreate(dstName, src.typ)
 	if err != nil {
 		return err
 	}
@@ -114,7 +120,12 @@ func (l List) All() ([]*Note, error) {
 		if strings.HasPrefix(dir.Name(), ".") {
 			continue
 		}
-		nt := newNote(dir.Name(), l.HomeDir())
+		// This is suboptimal with different note types: yields FS lookups, O(len(supportedTypes))
+		nt, err := l.Get(dir.Name())
+		if err != nil {
+			return nil, err
+		}
+
 		// HACK: this works only as a whole note file gets re-created.
 		// Vim does it when writes the file
 		nt.modifiedAt = dir.ModTime()
@@ -141,17 +152,19 @@ func (l List) Archive(name string) error {
 }
 
 // GetOrCreate returns a note with a given name. If the note does not exist it creates it.
-func (l List) GetOrCreate(name string) (*Note, error) {
+func (l List) GetOrCreate(name string, t Format) (*Note, error) {
 	nt := newNote(name, l.HomeDir())
 
 	// Init call ensures atomic note dir creation
 	err := nt.Init()
 	if errors.Is(err, os.ErrExist) {
-		return nt, nil
+		return l.Get(name)
 	}
 	if err != nil {
 		return nil, err
 	}
+
+	nt.typ = t
 	f, err := os.OpenFile(nt.FullPath(), os.O_RDWR|os.O_CREATE, defaultFilePerms)
 	defer f.Close()
 	if err != nil {

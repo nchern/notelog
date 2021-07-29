@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/nchern/notelog/pkg/note"
+	"github.com/nchern/notelog/pkg/testutil"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -16,16 +17,21 @@ const (
 )
 
 func TestAutoComplete(t *testing.T) {
-	names := []string{
-		"bar",
-		"buzz",
-		"drum",
-		"foo"}
+	files := map[string]string{
+		"bar":  "",
+		"buzz": "",
+		"drum": "",
+		"foo":  "",
+	}
+	names := []string{}
+	for name := range files {
+		names = append(names, name)
+	}
 
 	allCommands := bytes.Buffer{}
 	listCommands(&allCommands)
 
-	withDirs(names, func() {
+	testutil.WithNotes(files, func(notes note.List) {
 		var tests = []struct {
 			name     string
 			given    string
@@ -69,7 +75,7 @@ func TestAutoComplete(t *testing.T) {
 				pos := len(tt.given) - 1
 
 				assert.NoError(t,
-					autoComplete(note.List(homeDir), tt.given, pos, w))
+					autoComplete(notes, tt.given, pos, w))
 				assert.Equal(t, tt.expected+"\n", w.String())
 			})
 		}

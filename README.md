@@ -73,7 +73,6 @@ As of now you have to add it manually using standard `git remote add ...`
  - [ ] (?) in-note macros:
    - [ ] when adding lines, format them according to a given template
  - [ ] (?) multiple temporary drafts - when open a draft, this should not be the same file every time
- - [ ] have notes on `.md` format and not only in `.org`
  - [ ] refactoring: consolidate `withNotes` functions in tests
  - [ ] refactoring: consider using testing.T.TempDir() in tests instead of manually create / cleanup temp dirs
  - [ ] search
@@ -93,6 +92,7 @@ As of now you have to add it manually using standard `git remote add ...`
  - [ ] note templates (?)
  - [ ] cross-linking: you can fetch all the references from other notes to a given note
    - [ ] embed cross links in notes?
+ - [X] have notes on `.md` format and not only in `.org`
  - [X] add more examples, hints, use cases and script recipes
  - [X] integration with fzf: search results
  - [X] vim plugin

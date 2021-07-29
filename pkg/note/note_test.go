@@ -11,7 +11,7 @@ import (
 func TestRemoveIfEmpty(t *testing.T) {
 	withNotes(t, func(notes List) {
 
-		underTest, err := notes.GetOrCreate("empty")
+		underTest, err := notes.GetOrCreate("empty", Org)
 		require.NoError(t, err)
 
 		found, err := underTest.Exists()
