@@ -153,7 +153,7 @@ func TestSearcShouldSearchNamesOnlyIfSet(t *testing.T) {
 			assert.Equal(t, len(expected), n)
 			assert.Equal(t, expected, toSortedLines(actual.String()))
 		})
-		t.Run("saved results should have line numbers of first occurance", func(t *testing.T) {
+		t.Run("saved results should have line numbers of first occurrence", func(t *testing.T) {
 			underTest, _ := prepare()
 			underTest.SaveResults = true
 
