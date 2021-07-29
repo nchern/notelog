@@ -1,0 +1,12 @@
+#!/bin/sh -ue
+
+# Allows to browse search results using fuzzy search.
+# Usage: noteseach-fzf term1 term2
+
+# depends on: https://github.com/junegunn/fzf
+
+exec notelog 'do' search $@ | 
+    fzf -0 \
+        --preview-window 'up,70%' \
+        --preview 'notelog do print $(echo {} | cut -d":" -f1) | NOTE_NAME="{}" notelog-preview.awk' \
+        --bind 'enter:execute(notelog $(echo {} | cut -d":" -f1-2))'

@@ -25,10 +25,9 @@ $ notelog -h
 ```
 
 ## Roadmap
- - [ ] integration with fzf: search results
  - [ ] in-note macros:
    - [ ] when adding lines, format them according to a given template
- - [ ] multiple temporary drafts - when open a draft, this should not be the same file every time
+ - [ ] (?) multiple temporary drafts - when open a draft, this should not be the same file every time
  - [ ] have notes on `.md` format and not only in `.org`
  - [ ] add more examples, hints, use cases and script recipes
  - [ ] archive: a note can:
@@ -45,6 +44,7 @@ $ notelog -h
  - [ ] note templates (?)
  - [ ] cross-linking: you can fetch all the references from other notes to a given note
    - [ ] embed cross links in notes?
+ - [X] integration with fzf: search results
  - [X] vim plugin
    - [X] MVP
  - [X] create dir structure in one go during init phase. Consider fixing existing incomplete structure.

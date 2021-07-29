@@ -1,8 +1,8 @@
 #!/bin/sh -ue
 
-# Allows to browse notes with fuzzy search
+# Allows to browse your note collection with fuzzy search over note titles
 # Usage: notes
 
 # depends on: https://github.com/junegunn/fzf
 
-exec notelog do list | fzf --preview 'notelog do print {}' --bind 'enter:execute(notelog {})'
+exec notelog 'do' list | fzf --preview 'notelog do print {}' --bind 'enter:execute(notelog {})'
