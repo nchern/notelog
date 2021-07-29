@@ -1,35 +1,79 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/nchern/notelog)](https://goreportcard.com/report/github.com/nchern/notelog)
 # notelog
 
-Notelog is a simple organiser to maintain personal notes.
+Notelog is a simple organiser to maintain personal notes. The notes are kept on
+the file system under a certain folder `NOTELOG_HOME`. You can control this location
+via corresponding environment variable.
+Default location for your notes is `$HOME/notes/personal`.
 
-It keeps notebase in your home directory as files under a single folder.
-Integrates with your favourite text editor(tested with VIM).
+Notelog seamlessly integrates with your favorite text editor(tested with VIM).
+
+Vim plugin is [available](vim/README.md)
 
 ## Installation
 ```bash
-go get github.com/nchern/notelog/...
+make install
 ```
 
-## Examples
+## Examples and features
 
 ```bash
-# Opens "my-note" in editor
+# Opens "my-note" in editor. Creates a note if the note does not exist
 $ notelog my-note
 
-# adds a line "foo bar" to "my-note" directly from command line
+# Adds a line "foo bar" to "my-note" directly from command line
 $ notelog my-note foo bar
 
+# Archive a note: the note becomes unavailable in this collection
+# for direct edits, also is not visible for search by default
+$ notelog do archive my-note
+
+# Lists all notes in collection sorted by last modified date
+$ notelog do list --by-date
+
 # Prints help
-$ notelog -h
+$ notelog help
 ```
 
+## Advanced features
+
+### Search
+
+Notelog supports search over notes collection.
+
+```bash
+# Search all lines that contain "foo" over all notes
+$ notelog do search --interactive foo
+1. noteA:1:foo bar
+2. noteB:10:hello foo
+
+# Open the second search result note from previous search in editor
+$ notelog do search-browse 2
+```
+
+### Integrate with git
+
+Since your notes are just a bunch of text files in a subtree on a file system,
+you can add your note collection to a git repo and have them version controlled.
+Notelog has a couple of commands to simplify this task though currently this functionality is pretty basic.
+
+```bash
+# Initialize a repo in the current notes collection
+$ notelog do init-repo
+
+# Synchronize the repo with origin: add all the changes, commit, update from the origin and push
+$ notelog do sync
+```
+
+**Please note that the "origin" remote is not automatically added**.
+As of now you have to add it manually using standard `git remote add ...`
+
 ## Roadmap
- - [ ] in-note macros:
+ - [ ] add more description for `contrib` scripts
+ - [ ] (?) in-note macros:
    - [ ] when adding lines, format them according to a given template
  - [ ] (?) multiple temporary drafts - when open a draft, this should not be the same file every time
  - [ ] have notes on `.md` format and not only in `.org`
- - [ ] add more examples, hints, use cases and script recipes
  - [ ] archive: a note can:
    - [X] be put into archive, so it will not stay in the main note list
          Current behavior: no search in the archive. Only through actual notes
@@ -44,6 +88,7 @@ $ notelog -h
  - [ ] note templates (?)
  - [ ] cross-linking: you can fetch all the references from other notes to a given note
    - [ ] embed cross links in notes?
+ - [X] add more examples, hints, use cases and script recipes
  - [X] integration with fzf: search results
  - [X] vim plugin
    - [X] MVP

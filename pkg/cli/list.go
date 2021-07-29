@@ -16,7 +16,7 @@ var (
 	listCmd = &cobra.Command{
 		Use:     "list",
 		Aliases: []string{"ls"},
-		Short:   "lists all notes",
+		Short:   "lists all notes. Output is sorted by note's name alphabetically by default",
 		Args:    cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return listNotes(note.NewList(), os.Stdout)
@@ -31,7 +31,7 @@ func (b byDate) Swap(i, j int)      { b[i], b[j] = b[j], b[i] }
 func (b byDate) Less(i, j int) bool { return b[i].ModifiedAt().Before(b[j].ModifiedAt()) }
 
 func init() {
-	listCmd.Flags().BoolVarP(&sortByDate, "sort", "s", false, "sorts notes by last modified date in asc order")
+	listCmd.Flags().BoolVarP(&sortByDate, "by-date", "d", false, "sorts notes by last modified date in asc order")
 
 	doCmd.AddCommand(listCmd)
 }
