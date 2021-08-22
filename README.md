@@ -76,6 +76,9 @@ As of now you have to add it manually using standard `git remote add ...`
  - [ ] have notes on `.md` format and not only in `.org`
  - [ ] refactoring: consolidate `withNotes` functions in tests
  - [ ] refactoring: consider using testing.T.TempDir() in tests instead of manually create / cleanup temp dirs
+ - [ ] search
+   - [ ] add regexp search
+   - [ ] consider indexing full text search solutions, e.g. https://github.com/blevesearch/bleve
  - [ ] archive: a note can:
    - [X] be put into archive, so it will not stay in the main note list
          Current behavior: no search in the archive. Only through actual notes
