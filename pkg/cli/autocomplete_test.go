@@ -17,15 +17,10 @@ const (
 )
 
 func TestAutoComplete(t *testing.T) {
-	files := map[string]string{
-		"bar":  "",
-		"buzz": "",
-		"drum": "",
-		"foo":  "",
-	}
-	names := []string{}
-	for name := range files {
-		names = append(names, name)
+	files := map[string]string{}
+	names := []string{"bar", "buzz", "drum", "foo"}
+	for _, name := range names {
+		files[name] = ""
 	}
 
 	allCommands := bytes.Buffer{}
