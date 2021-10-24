@@ -250,25 +250,23 @@ func disabledTestSearchShouldLookInArchive(t *testing.T) {
 	})
 }
 
-func TestSearchNoteNamesOnlyShouldEnsureNoTermColorsInOutput(t *testing.T) {
-	// TODO: remove if no term colors will be used
+func TestSearchSearchInNotesOfDifferentTypes(t *testing.T) {
 
 	files := map[string]string{
-		"a/main.org":   "foo",
-		"b/main.org":   "fuzz",
-		"foo/main.org": "bar\nbuzz",
+		"a/main.org": "foo",
+		"b/main.org": "fuzz",
+		"c/main.md":  "bar\nfoo",
 	}
 	withNotes(files, func(notes note.List) {
 		out := &bytes.Buffer{}
 		underTest := NewSearcher(notes, out)
-		underTest.OnlyNames = true
 
-		n, err := underTest.Search("foo", "buzz")
+		n, err := underTest.Search("foo")
 		require.NoError(t, err)
 
 		expected := []string{
-			"a:1: ",
-			"foo:1: ",
+			"a:1:foo",
+			"c:2:foo",
 		}
 
 		assert.Equal(t, len(expected), n)

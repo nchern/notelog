@@ -78,6 +78,7 @@ As of now you have to add it manually using standard `git remote add ...`
  - [ ] search
    - [ ] add regexp search
    - [ ] consider indexing full text search solutions, e.g. https://github.com/blevesearch/bleve
+   - [ ] add colors to output when at tty
  - [ ] archive: a note can:
    - [X] be put into archive, so it will not stay in the main note list
          Current behavior: no search in the archive. Only through actual notes
