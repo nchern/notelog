@@ -2,42 +2,46 @@ package cli
 
 import (
 	"bytes"
-	"os"
-	"path/filepath"
 	"strings"
 	"testing"
 
 	"github.com/nchern/notelog/pkg/note"
 	"github.com/nchern/notelog/pkg/testutil"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const (
 	homeDir = "/tmp/test_notes"
 )
 
-func TestAutoComplete(t *testing.T) {
+func mkFiles(names ...string) map[string]string {
 	files := map[string]string{}
-	names := []string{"bar", "buzz", "drum", "foo"}
 	for _, name := range names {
 		files[name] = ""
 	}
+	return files
+}
+
+func TestAutoComplete(t *testing.T) {
+	names := []string{"bar", "buzz", "drum", "foo"}
 
 	allCommands := bytes.Buffer{}
 	listCommands(&allCommands)
 
+	files := mkFiles(names...)
 	testutil.WithNotes(files, func(notes note.List) {
 		var tests = []struct {
 			name     string
 			given    string
 			expected string
 		}{
-			{"should complete names",
+			{"should complete names and do subcommand",
 				"notelog ",
 				text(append([]string{"do"}, names...)...)},
 			{"should complete subcommands",
 				"notelog do ",
-				strings.TrimSuffix(allCommands.String(), "\n")},
+				allCommands.String()},
 			{"should complete do command",
 				"notelog d",
 				text("do", "drum")},
@@ -62,6 +66,9 @@ func TestAutoComplete(t *testing.T) {
 			{"should complete names after subcommands and already given names",
 				"notelog do edit foo b",
 				text("bar", "buzz")},
+			{"should complete note names subcommand edit",
+				"notelog do edit ",
+				text("bar", "buzz", "drum", "foo")},
 		}
 		for _, tt := range tests {
 			tt := tt
@@ -71,27 +78,28 @@ func TestAutoComplete(t *testing.T) {
 
 				assert.NoError(t,
 					autoComplete(notes, tt.given, pos, w))
-				assert.Equal(t, tt.expected+"\n", w.String())
+				assert.Equal(t, tt.expected, w.String())
 			})
 		}
 	})
 }
 
-func text(lines ...string) string { return strings.Join(lines, "\n") }
+func TestAutoCompleteWithArchivedNotes(t *testing.T) {
+	files := mkFiles("bar", "buzz", "drum", "foo", "foobar")
+	testutil.WithNotes(files, func(notes note.List) {
+		require.NoError(t, notes.Archive("bar"))
+		require.NoError(t, notes.Archive("foobar"))
 
-func withDirs(dirs []string, fn func()) {
-	must(os.MkdirAll(homeDir, 0755))
-	defer os.RemoveAll(homeDir)
+		given := "notelog "
+		pos := len(given) - 1
 
-	for _, name := range dirs {
-		must(os.MkdirAll(filepath.Join(homeDir, name), 0755))
-	}
+		expected := text("do", "buzz", "drum", "foo")
 
-	fn()
+		w := &bytes.Buffer{}
+		assert.NoError(t,
+			autoComplete(notes, given, pos, w))
+		assert.Equal(t, expected, w.String())
+	})
 }
 
-func must(err error) {
-	if err != nil {
-		panic(err)
-	}
-}
+func text(lines ...string) string { return strings.Join(lines, "\n") + "\n" }

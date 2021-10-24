@@ -50,7 +50,7 @@ func autoComplete(list note.List, line string, i int, w io.Writer) error {
 	if err != nil {
 		return err
 	}
-	return printNotesWithPrefix(notes, curTok, w)
+	return printNotesWithPrefix(notes, curTok, prevToks, w)
 }
 
 func printCommandsWithPrefix(prefix string, w io.Writer) error {
@@ -65,9 +65,9 @@ func printCommandsWithPrefix(prefix string, w io.Writer) error {
 	return nil
 }
 
-func printNotesWithPrefix(notes []*note.Note, prefix string, w io.Writer) error {
+func printNotesWithPrefix(notes []*note.Note, curTok string, prevToks string, w io.Writer) error {
 	// Hack: autocomplete do command
-	if strings.HasPrefix(cmdDo, prefix) {
+	if strings.HasPrefix(cmdDo, curTok) && !strings.HasSuffix(prevToks, editCmd.Use) {
 		_, err := fmt.Fprintln(w, cmdDo)
 		if err != nil {
 			return err
@@ -75,7 +75,7 @@ func printNotesWithPrefix(notes []*note.Note, prefix string, w io.Writer) error 
 	}
 
 	for _, note := range notes {
-		if !strings.HasPrefix(note.Name(), prefix) {
+		if !strings.HasPrefix(note.Name(), curTok) {
 			continue
 		}
 		if _, err := fmt.Fprintln(w, note.Name()); err != nil {
