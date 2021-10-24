@@ -8,9 +8,10 @@ import (
 )
 
 var prnNoteCmd = &cobra.Command{
-	Use:   "print",
-	Short: "prints a given note",
-	Args:  cobra.ExactArgs(1),
+	Use:     "print",
+	Short:   "prints a given note",
+	Args:    cobra.MinimumNArgs(1),
+	Aliases: []string{"cat"},
 
 	SilenceErrors: true,
 	SilenceUsage:  true,
@@ -27,15 +28,20 @@ func init() {
 func printNote(args []string) error {
 	notes := note.NewList()
 
-	noteName, err := parseNoteName(args[0])
-	if err != nil {
-		return err
-	}
+	for _, arg := range args {
+		noteName, err := parseNoteName(arg)
+		if err != nil {
+			return err
+		}
 
-	nt, err := notes.Get(noteName)
-	if err != nil {
-		return err
-	}
+		nt, err := notes.Get(noteName)
+		if err != nil {
+			return err
+		}
 
-	return nt.Dump(os.Stdout)
+		if err = nt.Dump(os.Stdout); err != nil {
+			return err
+		}
+	}
+	return nil
 }
