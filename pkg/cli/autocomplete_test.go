@@ -90,15 +90,29 @@ func TestAutoCompleteWithArchivedNotes(t *testing.T) {
 		require.NoError(t, notes.Archive("bar"))
 		require.NoError(t, notes.Archive("foobar"))
 
-		given := "notelog "
-		pos := len(given) - 1
+		var tests = []struct {
+			name     string
+			given    string
+			expected string
+		}{
+			{"should complete non-archived names",
+				"notelog ",
+				text("do", "buzz", "drum", "foo")},
+			{"should complete archived names for arch-open",
+				"notelog do arch-open ",
+				text("bar", "foobar")},
+		}
+		for _, tt := range tests {
+			tt := tt
+			t.Run(tt.name, func(t *testing.T) {
+				pos := len(tt.given) - 1
 
-		expected := text("do", "buzz", "drum", "foo")
-
-		w := &bytes.Buffer{}
-		assert.NoError(t,
-			autoComplete(notes, given, pos, w))
-		assert.Equal(t, expected, w.String())
+				w := &bytes.Buffer{}
+				assert.NoError(t,
+					autoComplete(notes, tt.given, pos, w))
+				assert.Equal(t, tt.expected, w.String())
+			})
+		}
 	})
 }
 

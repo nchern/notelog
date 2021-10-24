@@ -37,7 +37,6 @@ func init() {
 }
 
 func autoComplete(list note.List, line string, i int, w io.Writer) error {
-
 	beforeCursor := line[0 : i+1]
 	curTok := getCurrentCompletingToken(beforeCursor)
 	prevToks := strings.TrimSpace(strings.TrimSuffix(strings.TrimSpace(beforeCursor), curTok))
@@ -46,6 +45,9 @@ func autoComplete(list note.List, line string, i int, w io.Writer) error {
 		return printCommandsWithPrefix(curTok, w)
 	}
 
+	if strings.HasSuffix(prevToks, archOpenCmd.Use) {
+		list = list.GetArchive()
+	}
 	notes, err := list.All()
 	if err != nil {
 		return err
@@ -65,13 +67,27 @@ func printCommandsWithPrefix(prefix string, w io.Writer) error {
 	return nil
 }
 
-func printNotesWithPrefix(notes []*note.Note, curTok string, prevToks string, w io.Writer) error {
-	// Hack: autocomplete do command
-	if strings.HasPrefix(cmdDo, curTok) && !strings.HasSuffix(prevToks, editCmd.Use) {
+func autoCompleteDoCommand(curTok string, prevToks string, w io.Writer) error {
+	// Hack: this hacky function attemtps to autocomplete do command
+	// if this is required
+	for _, cmd := range doCmd.Commands() {
+		// no need to autocomplete "do" if subcommands are already entered
+		if strings.HasSuffix(prevToks, cmd.Use) {
+			return nil
+		}
+	}
+	if strings.HasPrefix(cmdDo, curTok) {
 		_, err := fmt.Fprintln(w, cmdDo)
 		if err != nil {
 			return err
 		}
+	}
+	return nil
+}
+
+func printNotesWithPrefix(notes []*note.Note, curTok string, prevToks string, w io.Writer) error {
+	if err := autoCompleteDoCommand(curTok, prevToks, w); err != nil {
+		return err
 	}
 
 	for _, note := range notes {

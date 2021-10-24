@@ -173,6 +173,11 @@ func (l List) GetOrCreate(name string, t Format) (*Note, error) {
 	return nt, nil
 }
 
+// GetArchive returns a new list that contains archived notes of a given list
+func (l List) GetArchive() List {
+	return List(filepath.Join(string(l), archiveNoteDir))
+}
+
 // NewList returns a list of notes
 func NewList() List {
 	return List(notesRootPath)

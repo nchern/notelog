@@ -17,7 +17,7 @@ var (
 	notes = note.NewList()
 
 	doCmd = &cobra.Command{
-		Use:   "do",
+		Use:   cmdDo,
 		Short: "runs a given command to manipulate notes",
 		Args:  cobra.ExactArgs(1),
 
