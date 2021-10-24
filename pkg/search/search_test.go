@@ -1,4 +1,4 @@
-package searcher
+package search
 
 import (
 	"bytes"
@@ -29,9 +29,6 @@ var (
 
 type m map[string]string
 
-func init() {
-}
-
 func TestShoudSearch(t *testing.T) {
 	withNotes(files, func(notes note.List) {
 		var tests = []struct {
@@ -47,63 +44,24 @@ func TestShoudSearch(t *testing.T) {
 		for _, tt := range tests {
 			tt := tt
 			t.Run(tt.name, func(t *testing.T) {
-				actual := &bytes.Buffer{}
-				underTest := NewSearcher(notes, actual)
+				underTest := NewEngine(notes)
 				// FIXME
-				_, err := underTest.Search(tt.given...)
+				actual, err := underTest.Search(tt.given...)
 				require.NoError(t, err)
-				assert.Equal(t, tt.expected, len(toSortedLines(actual.String())))
+				assert.Equal(t, tt.expected, len(actual))
 			})
 		}
 	})
 }
 
-func TestSearchShoudWriteLastSearchResults(t *testing.T) {
-	withNotes(files, func(notes note.List) {
-		actual := &bytes.Buffer{}
-
-		underTest := NewSearcher(notes, actual)
-		underTest.SaveResults = true
-
-		_, err := underTest.Search("foobar")
-		require.NoError(t, err)
-
-		body := mustReadLastResults(t, notes)
-
-		expected := []string{
-			"b:1",
-		}
-		assert.Equal(t, expected, toSortedLines(body))
-	})
-}
-
-func TestSearchShoudWriteLastSearchResultsWithoutTermColor(t *testing.T) {
-	withNotes(files, func(notes note.List) {
-		actual := &bytes.Buffer{}
-
-		underTest := NewSearcher(notes, actual)
-		underTest.SaveResults = true
-
-		n, err := underTest.Search("foo bar")
-		require.NoError(t, err)
-		require.Equal(t, 1, n)
-
-		body := mustReadLastResults(t, notes)
-
-		expected := "a:1\n"
-		assert.Equal(t, expected, string(body))
-	})
-}
-
 func TestSearchShoudReturnZeroResultsIfFoundNothing(t *testing.T) {
 	withNotes(files, func(notes note.List) {
-		actual := &bytes.Buffer{}
-		underTest := NewSearcher(notes, actual)
+		underTest := NewEngine(notes)
 
-		n, err := underTest.Search("you will not find me")
+		actual, err := underTest.Search("you will not find me")
 		require.NoError(t, err)
 
-		assert.Equal(t, 0, n)
+		assert.Equal(t, 0, len(actual))
 	})
 }
 
@@ -111,19 +69,30 @@ func TestSearchShouldNotSearchInLastResutsFile(t *testing.T) {
 	withNotes(files, func(notes note.List) {
 		// search 2 times so that last_results will be filled
 		for i := 0; i < 2; i++ {
-			out := &bytes.Buffer{}
-			underTest := NewSearcher(notes, out)
-			underTest.SaveResults = true
+			underTest := NewEngine(notes)
 
-			n, err := underTest.Search("foo")
+			actual, err := underTest.Search("foo")
 			require.NoError(t, err)
 
-			expected := []string{
-				"a:1:foo bar buzz",
-				"b:1:foobar bar addd buzz",
+			expected := []*Result{
+				{
+					name:    "a",
+					lineNum: 1,
+					text:    "foo bar buzz",
+				},
+				{
+					name:    "b",
+					lineNum: 1,
+					text:    "foobar bar addd buzz",
+				},
 			}
-			assert.Equal(t, len(expected), n)
-			assert.Equal(t, expected, toSortedLines(out.String()))
+			sort.Sort(byName(actual))
+			assert.Equal(t, len(expected), len(actual))
+			assert.Equal(t, expected, actual)
+
+			out := &bytes.Buffer{}
+			r, err := NewPersistentRenderer(notes, &StreamRenderer{W: out})
+			assert.NoError(t, Render(r, actual, false))
 		}
 	})
 }
@@ -135,39 +104,37 @@ func TestSearcShouldSearchNamesOnlyIfSet(t *testing.T) {
 		"c/main.org": "bar foo",
 	}
 	withNotes(files, func(notes note.List) {
-		prepare := func() (*Searcher, *bytes.Buffer) {
-			out := &bytes.Buffer{}
-			s := NewSearcher(notes, out)
+		prepare := func() *Engine {
+			s := NewEngine(notes)
 			s.OnlyNames = true
-			return s, out
+			return s
 		}
 		t.Run("with simple search", func(t *testing.T) {
-			underTest, actual := prepare()
-			n, err := underTest.Search("foo")
+			expected := []*Result{
+				{name: "b", lineNum: 1, text: "fuzz"},
+			}
+
+			underTest := prepare()
+			actual, err := underTest.Search("fuzz")
 			require.NoError(t, err)
 
-			expected := []string{
-				"a:1: ",
-				"c:1: ",
-			}
-			assert.Equal(t, len(expected), n)
-			assert.Equal(t, expected, toSortedLines(actual.String()))
+			sort.Sort(byName(actual))
+			assert.Equal(t, expected, actual)
 		})
 		t.Run("saved results should have line numbers of first occurrence", func(t *testing.T) {
-			underTest, _ := prepare()
-			underTest.SaveResults = true
-
-			expected := []string{
-				"a:2",
-				"c:1",
+			expected := []*Result{
+				{name: "a", lineNum: 2, text: "foo"},
+				{name: "c", lineNum: 1, text: "bar foo"},
 			}
 
-			n, err := underTest.Search("foo")
-			require.NoError(t, err)
-			require.Equal(t, len(expected), n)
+			underTest := prepare()
 
-			body := mustReadLastResults(t, notes)
-			assert.Equal(t, expected, toSortedLines(body))
+			actual, err := underTest.Search("foo")
+			require.NoError(t, err)
+			require.Equal(t, len(expected), len(actual))
+
+			sort.Sort(byName(actual))
+			assert.Equal(t, expected, actual)
 		})
 	})
 }
@@ -182,46 +149,46 @@ func TestSearchShouldSearchInNoteNames(t *testing.T) {
 	withNotes(files, func(notes note.List) {
 		var tests = []struct {
 			name     string
-			expected []string
+			expected []*Result
 			given    []string
 		}{
 			{"simple query",
-				[]string{
-					"buzz:1:findme",
-					"findme2:1: ",
-					"findme:1: ",
+				[]*Result{
+					{name: "buzz", lineNum: 1, text: "findme"},
+					{name: "findme", lineNum: 1, text: " "},
+					{name: "findme2", lineNum: 1, text: " "},
 				},
 				[]string{"findme"}},
 			{"two terms",
-				[]string{
-					"findme2:1: ",
-					"foo:1: ",
+				[]*Result{
+					{name: "findme2", lineNum: 1, text: " "},
+					{name: "foo", lineNum: 1, text: " "},
 				},
 				[]string{"findme2", "fo"}},
 			{"with terms and excluded terms",
-				[]string{
-					"buzz:1:findme",
-					"findme:1: ",
+				[]*Result{
+					{name: "buzz", lineNum: 1, text: "findme"},
+					{name: "findme", lineNum: 1, text: " "},
 				},
 				[]string{"find", "-findme2"}},
 			{"terms and exclude terms are case insensitive",
-				[]string{
-					"buzz:1:findme",
-					"findme:1: ",
+				[]*Result{
+					{name: "buzz", lineNum: 1, text: "findme"},
+					{name: "findme", lineNum: 1, text: " "},
 				},
 				[]string{"finD", "-FindmE2"}},
 		}
 		for _, tt := range tests {
 			tt := tt
 			t.Run(tt.name, func(t *testing.T) {
-				out := &bytes.Buffer{}
-				underTest := NewSearcher(notes, out)
+				underTest := NewEngine(notes)
 
-				n, err := underTest.Search(tt.given...)
+				actual, err := underTest.Search(tt.given...)
 				require.NoError(t, err)
 
-				assert.Equal(t, len(tt.expected), n)
-				assert.Equal(t, tt.expected, toSortedLines(out.String()))
+				sort.Sort(byName(actual))
+				assert.Equal(t, len(tt.expected), len(actual))
+				assert.Equal(t, tt.expected, actual)
 			})
 		}
 	})
@@ -235,17 +202,17 @@ func disabledTestSearchShouldLookInArchive(t *testing.T) {
 		"foo/main.org":            "bar",
 	}
 	withNotes(files, func(notes note.List) {
-		out := &bytes.Buffer{}
-		underTest := NewSearcher(notes, out)
+		underTest := NewEngine(notes)
 
-		n, err := underTest.Search("abc")
+		actual, err := underTest.Search("abc")
 		require.NoError(t, err)
 
 		expected := []string{
 			fmt.Sprintf("%s/.archive/andme/main.org:1:abc d", notes.HomeDir()),
 			fmt.Sprintf("%s/findme/main.org:1:abc", notes.HomeDir()),
 		}
-		assert.Equal(t, len(expected), n)
+		out := &bytes.Buffer{}
+		assert.Equal(t, len(expected), len(actual))
 		assert.Equal(t, expected, toSortedLines(out.String()))
 	})
 }
@@ -258,19 +225,18 @@ func TestSearchSearchInNotesOfDifferentTypes(t *testing.T) {
 		"c/main.md":  "bar\nfoo",
 	}
 	withNotes(files, func(notes note.List) {
-		out := &bytes.Buffer{}
-		underTest := NewSearcher(notes, out)
+		expected := []*Result{
+			&Result{name: "a", lineNum: 1, text: "foo"},
+			&Result{name: "c", lineNum: 2, text: "foo"},
+		}
+		underTest := NewEngine(notes)
 
-		n, err := underTest.Search("foo")
+		actual, err := underTest.Search("foo")
 		require.NoError(t, err)
 
-		expected := []string{
-			"a:1:foo",
-			"c:2:foo",
-		}
-
-		assert.Equal(t, len(expected), n)
-		assert.Equal(t, expected, toSortedLines(out.String()))
+		assert.Equal(t, len(expected), len(actual))
+		sort.Sort(byName(actual))
+		assert.Equal(t, expected, actual)
 	})
 }
 
@@ -283,33 +249,33 @@ func TestSearcShouldSearchCaseSensitiveIfSet(t *testing.T) {
 	withNotes(files, func(notes note.List) {
 		var tests = []struct {
 			name     string
-			expected []string
+			expected []*Result
 			given    []string
 		}{
 			{"simple query",
-				[]string{
-					"a:2:foo",
+				[]*Result{
+					{name: "a", lineNum: 2, text: "foo"},
 				},
 				[]string{"foo"}},
 			{"simple query-2",
-				[]string{
-					"a:3:fOo bar",
-					"c:1:bar FOO",
+				[]*Result{
+					{name: "a", lineNum: 3, text: "fOo bar"},
+					{name: "c", lineNum: 1, text: "bar FOO"},
 				},
 				[]string{"FOO", "fOo"}},
 		}
 		for _, tt := range tests {
 			tt := tt
 			t.Run(tt.name, func(t *testing.T) {
-				actual := &bytes.Buffer{}
-				underTest := NewSearcher(notes, actual)
+				underTest := NewEngine(notes)
 				underTest.CaseSensitive = true
 
-				n, err := underTest.Search(tt.given...)
+				actual, err := underTest.Search(tt.given...)
 				require.NoError(t, err)
 
-				assert.Equal(t, len(tt.expected), n)
-				assert.Equal(t, tt.expected, toSortedLines(actual.String()))
+				sort.Sort(byName(actual))
+				assert.Equal(t, len(tt.expected), len(actual))
+				assert.Equal(t, tt.expected, actual)
 			})
 		}
 	})

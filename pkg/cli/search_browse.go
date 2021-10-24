@@ -6,7 +6,7 @@ import (
 
 	"github.com/nchern/notelog/pkg/editor"
 	"github.com/nchern/notelog/pkg/note"
-	"github.com/nchern/notelog/pkg/searcher"
+	"github.com/nchern/notelog/pkg/search"
 	"github.com/spf13/cobra"
 )
 
@@ -34,7 +34,7 @@ func browseSearch(args []string) error {
 	if err != nil {
 		return err
 	}
-	r, err := searcher.GetLastNthResult(notes, int(n))
+	r, err := search.GetLastNthResult(notes, int(n))
 	if err != nil {
 		return err
 	}

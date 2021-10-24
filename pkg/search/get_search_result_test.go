@@ -1,4 +1,4 @@
-package searcher
+package search
 
 import (
 	"bytes"
@@ -14,15 +14,18 @@ import (
 
 func TestGetLastNthResult(t *testing.T) {
 	withNotes(files, func(notes note.List) {
-		buf := &bytes.Buffer{}
-
-		underTest := NewSearcher(notes, buf)
-		underTest.SaveResults = true
+		underTest := NewEngine(notes)
 
 		// perform search to generate last results file
-		n, err := underTest.Search("foo")
+		actual, err := underTest.Search("foo")
 		require.NoError(t, err)
-		require.Equal(t, 2, n)
+		require.Equal(t, 2, len(actual))
+
+		buf := &bytes.Buffer{}
+		r, err := NewPersistentRenderer(
+			notes,
+			&StreamRenderer{W: buf})
+		assert.NoError(t, Render(r, actual, false))
 
 		b, err := ioutil.ReadFile(notes.MetadataFilename(lastResultsFile))
 		require.NoError(t, err)

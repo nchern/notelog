@@ -2,11 +2,10 @@ package cli
 
 import (
 	"errors"
-	"io"
 	"os"
 
 	"github.com/nchern/notelog/pkg/note"
-	"github.com/nchern/notelog/pkg/searcher"
+	"github.com/nchern/notelog/pkg/search"
 	"github.com/spf13/cobra"
 )
 
@@ -28,7 +27,7 @@ var searchCmd = &cobra.Command{
 	SilenceUsage:  true,
 
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return search(args)
+		return doSearch(args)
 	},
 }
 
@@ -54,26 +53,34 @@ func init() {
 	doCmd.AddCommand(searchCmd)
 }
 
-func search(args []string) error {
+func doSearch(args []string) error {
 	if len(args) < 1 {
 		return errors.New("Not enough args. Specify a search term")
 	}
 
 	notes := note.NewList()
 
-	var out io.Writer = os.Stdout
-	if interactive {
-		out = &nlWriter{inner: out}
-	}
-	s := searcher.NewSearcher(notes, out)
+	s := search.NewEngine(notes)
 
 	s.OnlyNames = titlesOnly
-	s.SaveResults = interactive
 	s.CaseSensitive = caseSensitive
-	n, err := s.Search(args...)
-	if n == 0 {
+	res, err := s.Search(args...)
+	if err != nil {
+		return err
+	}
+	if len(res) == 0 {
 		os.Exit(1)
 	}
 
-	return err
+	simpleRenderer := &search.StreamRenderer{W: os.Stdout, OnlyNames: titlesOnly}
+	var renderer search.Renderer = simpleRenderer
+	if interactive {
+		simpleRenderer.W = &nlWriter{inner: os.Stdout}
+		renderer, err = search.NewPersistentRenderer(notes, simpleRenderer)
+		if err != nil {
+			return err
+		}
+	}
+
+	return search.Render(renderer, res, titlesOnly)
 }

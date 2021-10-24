@@ -1,12 +1,7 @@
-package searcher
+package search
 
 import (
-	"fmt"
-	"io"
-	"io/ioutil"
-	"os"
 	"regexp"
-	"sort"
 	"strings"
 
 	"github.com/nchern/notelog/pkg/note"
@@ -74,76 +69,39 @@ func (r *request) compileRegexp(terms []string) (*regexp.Regexp, error) {
 	return regexp.Compile(opts + regexOr(terms))
 }
 
-// Searcher represents a search engine over notes
-type Searcher struct {
+// Engine represents a search engine over notes
+type Engine struct {
 	OnlyNames bool
-
-	SaveResults bool
 
 	CaseSensitive bool
 
 	notes Notes
-
-	out io.Writer
 }
 
-// NewSearcher returns a new Searcher instance
-func NewSearcher(notes Notes, out io.Writer) *Searcher {
-	return &Searcher{
-		out:   out,
+// NewEngine returns a new Searcher instance
+func NewEngine(notes Notes) *Engine {
+	return &Engine{
 		notes: notes,
 	}
 }
 
 // Search runs the search over all notes in notes home and prints results to stdout
 // Terms grammar looks like: "foo bar -buzz -fuzz" where -xxx means exclude xxx matches from the output
-func (s *Searcher) Search(terms ...string) (int, error) {
+func (s *Engine) Search(terms ...string) ([]*Result, error) {
 	req := parseRequest(terms...)
 	req.CaseSensitive = s.CaseSensitive
 
-	var resF = ioutil.Discard
-
-	if s.SaveResults {
-		f, err := os.Create(s.notes.MetadataFilename(lastResultsFile))
-		if err != nil {
-			return 0, err
-		}
-		defer f.Close()
-		resF = f
-	}
-
 	l, err := s.notes.All()
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
 	res, err := searchInNotes(l, req, s.OnlyNames)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
-	return len(res), s.outputResults(res, resF)
-}
-
-func (s *Searcher) outputResults(results []*result, persistentOut io.Writer) error {
-	if s.OnlyNames {
-		sort.Sort(byName(results))
-	}
-	for _, res := range results {
-		orig := *res
-		if s.OnlyNames {
-			res.text = " "
-			res.lineNum = 1
-		}
-
-		if _, err := fmt.Fprintln(s.out, res.Display()); err != nil {
-			return err
-		}
-		if _, err := fmt.Fprintln(persistentOut, &orig); err != nil {
-			return err
-		}
-	}
-	return nil
+	return res, nil
 }
 
 func regexOr(terms []string) string {
@@ -162,7 +120,7 @@ func parseRequest(args ...string) *request {
 	return res
 }
 
-type byName []*result
+type byName []*Result
 
 func (a byName) Len() int           { return len(a) }
 func (a byName) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }

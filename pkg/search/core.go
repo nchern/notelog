@@ -1,4 +1,4 @@
-package searcher
+package search
 
 import (
 	"bufio"
@@ -8,22 +8,25 @@ import (
 	"github.com/nchern/notelog/pkg/note"
 )
 
-type result struct {
+// Result represents one search result
+type Result struct {
 	lineNum int
 	text    string
 	name    string
 }
 
-func (r *result) String() string {
+// String returns stringified representation of Result
+func (r *Result) String() string {
 	return fmt.Sprintf("%s:%d", r.name, r.lineNum)
 }
 
-func (r *result) Display() string {
+// Display returns display friendly name of a result
+func (r *Result) Display() string {
 	// TODO: elaborate better name
 	return fmt.Sprintf("%s:%d:%s", r.name, r.lineNum, r.text)
 }
 
-func searchNote(nt *note.Note, match matcherFunc) ([]*result, error) {
+func searchNote(nt *note.Note, match matcherFunc) ([]*Result, error) {
 	r, err := nt.Reader()
 	if err != nil {
 		return nil, err
@@ -31,13 +34,13 @@ func searchNote(nt *note.Note, match matcherFunc) ([]*result, error) {
 	defer r.Close()
 
 	lnum := 0
-	res := []*result{}
+	res := []*Result{}
 	scanner := bufio.NewScanner(r)
 	for scanner.Scan() {
 		lnum++
 		l := scanner.Text()
 		if match(l) {
-			res = append(res, &result{
+			res = append(res, &Result{
 				lineNum: lnum,
 				text:    l,
 				name:    nt.Name(),
@@ -51,13 +54,13 @@ func searchNote(nt *note.Note, match matcherFunc) ([]*result, error) {
 	return res, nil
 }
 
-func searchInNotes(notes []*note.Note, req *request, onlyNames bool) ([]*result, error) {
+func searchInNotes(notes []*note.Note, req *request, onlyNames bool) ([]*Result, error) {
 	match, err := req.matcher()
 	if err != nil {
 		return nil, err
 	}
 
-	resChan := make(chan []*result, len(notes))
+	resChan := make(chan []*Result, len(notes))
 	errChan := make(chan error, len(notes))
 
 	for _, nt := range notes {
@@ -68,7 +71,7 @@ func searchInNotes(notes []*note.Note, req *request, onlyNames bool) ([]*result,
 				return
 			}
 			if match(nt.Name()) {
-				results = append(results, &result{
+				results = append(results, &Result{
 					lineNum: 1,
 					text:    " ",
 					name:    nt.Name(),
@@ -79,7 +82,7 @@ func searchInNotes(notes []*note.Note, req *request, onlyNames bool) ([]*result,
 	}
 
 	names := map[string]bool{}
-	results := []*result{}
+	results := []*Result{}
 	for i := 0; i < len(notes); i++ {
 		select {
 		case found := <-resChan:
@@ -95,7 +98,7 @@ func searchInNotes(notes []*note.Note, req *request, onlyNames bool) ([]*result,
 				results = append(results, found...)
 			}
 		case err := <-errChan:
-			log.Println(err) // TODO: find better way of error handling
+			log.Printf("ERROR search: %s", err) // TODO: find better way of error handling
 		}
 	}
 	return results, nil
