@@ -68,7 +68,7 @@ func printCommandsWithPrefix(prefix string, w io.Writer) error {
 }
 
 func autoCompleteDoCommand(curTok string, prevToks string, w io.Writer) error {
-	// Hack: this hacky function attemtps to autocomplete do command
+	// Hack: this hacky function attempts to autocomplete do command
 	// if this is required
 	for _, cmd := range doCmd.Commands() {
 		// no need to autocomplete "do" if subcommands are already entered

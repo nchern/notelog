@@ -86,7 +86,6 @@ func TestSearchShouldNotSearchInLastResutsFile(t *testing.T) {
 					text:    "foobar bar addd buzz",
 				},
 			}
-			sort.Sort(byName(actual))
 			assert.Equal(t, len(expected), len(actual))
 			assert.Equal(t, expected, actual)
 
@@ -118,7 +117,6 @@ func TestSearcShouldSearchNamesOnlyIfSet(t *testing.T) {
 			actual, err := underTest.Search("fuzz")
 			require.NoError(t, err)
 
-			sort.Sort(byName(actual))
 			assert.Equal(t, expected, actual)
 		})
 		t.Run("saved results should have line numbers of first occurrence", func(t *testing.T) {
@@ -133,7 +131,6 @@ func TestSearcShouldSearchNamesOnlyIfSet(t *testing.T) {
 			require.NoError(t, err)
 			require.Equal(t, len(expected), len(actual))
 
-			sort.Sort(byName(actual))
 			assert.Equal(t, expected, actual)
 		})
 	})
@@ -186,7 +183,6 @@ func TestSearchShouldSearchInNoteNames(t *testing.T) {
 				actual, err := underTest.Search(tt.given...)
 				require.NoError(t, err)
 
-				sort.Sort(byName(actual))
 				assert.Equal(t, len(tt.expected), len(actual))
 				assert.Equal(t, tt.expected, actual)
 			})
@@ -235,7 +231,6 @@ func TestSearchSearchInNotesOfDifferentTypes(t *testing.T) {
 		require.NoError(t, err)
 
 		assert.Equal(t, len(expected), len(actual))
-		sort.Sort(byName(actual))
 		assert.Equal(t, expected, actual)
 	})
 }
@@ -273,7 +268,6 @@ func TestSearcShouldSearchCaseSensitiveIfSet(t *testing.T) {
 				actual, err := underTest.Search(tt.given...)
 				require.NoError(t, err)
 
-				sort.Sort(byName(actual))
 				assert.Equal(t, len(tt.expected), len(actual))
 				assert.Equal(t, tt.expected, actual)
 			})

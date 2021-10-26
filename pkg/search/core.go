@@ -54,7 +54,7 @@ func searchNote(nt *note.Note, match matcherFunc) ([]*Result, error) {
 	return res, nil
 }
 
-func searchInNotes(notes []*note.Note, req *request, onlyNames bool) ([]*Result, error) {
+func searchInNotes(notes []*note.Note, req *request) ([]*Result, error) {
 	match, err := req.matcher()
 	if err != nil {
 		return nil, err
@@ -86,7 +86,7 @@ func searchInNotes(notes []*note.Note, req *request, onlyNames bool) ([]*Result,
 	for i := 0; i < len(notes); i++ {
 		select {
 		case found := <-resChan:
-			if onlyNames {
+			if req.OnlyNames {
 				for _, res := range found {
 					if names[res.name] {
 						continue

@@ -2,6 +2,7 @@ package search
 
 import (
 	"regexp"
+	"sort"
 	"strings"
 
 	"github.com/nchern/notelog/pkg/note"
@@ -21,6 +22,7 @@ type Notes interface {
 type matcherFunc func(string) bool
 
 type request struct {
+	OnlyNames     bool
 	CaseSensitive bool
 
 	terms        []string
@@ -78,7 +80,7 @@ type Engine struct {
 	notes Notes
 }
 
-// NewEngine returns a new Searcher instance
+// NewEngine returns a new Engine instance
 func NewEngine(notes Notes) *Engine {
 	return &Engine{
 		notes: notes,
@@ -89,6 +91,7 @@ func NewEngine(notes Notes) *Engine {
 // Terms grammar looks like: "foo bar -buzz -fuzz" where -xxx means exclude xxx matches from the output
 func (s *Engine) Search(terms ...string) ([]*Result, error) {
 	req := parseRequest(terms...)
+	req.OnlyNames = s.OnlyNames
 	req.CaseSensitive = s.CaseSensitive
 
 	l, err := s.notes.All()
@@ -96,10 +99,12 @@ func (s *Engine) Search(terms ...string) ([]*Result, error) {
 		return nil, err
 	}
 
-	res, err := searchInNotes(l, req, s.OnlyNames)
+	res, err := searchInNotes(l, req)
 	if err != nil {
 		return nil, err
 	}
+
+	sort.Sort(byName(res))
 
 	return res, nil
 }
