@@ -23,3 +23,7 @@ test: build
 .PHONY: gen-version
 gen-version:
 	@./generate-version.sh $(VERSION_FILE)
+
+.PHONY: coverage
+coverage: vet
+	@./coverage.sh
