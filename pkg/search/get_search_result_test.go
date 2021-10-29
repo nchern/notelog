@@ -13,7 +13,7 @@ import (
 )
 
 func TestGetLastNthResult(t *testing.T) {
-	withNotes(files, func(notes note.List) {
+	withNotes(mkTestFiles(), func(notes note.List) {
 		underTest := NewEngine(notes)
 
 		// perform search to generate last results file
@@ -57,7 +57,7 @@ func TestGetLastNthResult(t *testing.T) {
 }
 
 func TestGetLastNthResultShouldReturnEmptyStringIfNoResultsFound(t *testing.T) {
-	withNotes(files, func(notes note.List) {
+	withNotes(mkTestFiles(), func(notes note.List) {
 		// make sure last results file does not exist
 		_, err := os.Stat(notes.MetadataFilename(lastResultsFile))
 		assert.True(t, os.IsNotExist(err))

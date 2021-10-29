@@ -37,7 +37,7 @@ func TestPersistentRendererShoudWriteLastSearchResults(t *testing.T) {
 }
 
 func TestSearchShoudWriteLastSearchResultsWithoutTermColor(t *testing.T) {
-	withNotes(files, func(notes note.List) {
+	withNotes(mkTestFiles(), func(notes note.List) {
 		underTest := NewEngine(notes)
 
 		res, err := underTest.Search("foo bar")

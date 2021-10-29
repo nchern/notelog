@@ -68,7 +68,7 @@ func TestShouldGrep(t *testing.T) {
 }
 
 func TestGrepShouldFailOnBrokenRegexp(t *testing.T) {
-	withNotes(files, func(notes note.List) {
+	withNotes(mkTestFiles(), func(notes note.List) {
 		underTest := NewGrepEngine(notes)
 		actual, err := underTest.Search("(a")
 		assert.Error(t, err)

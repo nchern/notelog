@@ -19,43 +19,70 @@ const (
 	mode = 0644
 )
 
-var (
-	files = m{
+var ()
+
+type m map[string]string
+
+func mkTestFiles() m {
+	return m{
 		"a/main.org": "foo bar buzz",
 		"b/main.org": "foobar bar addd buzz",
 		"c/main.org": "fuzz bar xx buzz",
 	}
-)
-
-type m map[string]string
+}
 
 func TestShoudSearch(t *testing.T) {
+	files := m{
+		"a/main.org": "foo bar buzz",
+		"b/main.org": "foobar bar addd buzz",
+		"c/main.org": "fuzz bar xx buzz",
+		"d/main.org": "xx* yyy) abc",
+	}
 	withNotes(files, func(notes note.List) {
 		var tests = []struct {
 			name     string
-			expected int
+			expected []*Result
 			given    []string
 		}{
 			{"one term",
-				2, []string{"foo"}},
+				[]*Result{
+					{name: "a", lineNum: 1, text: "foo bar buzz"},
+					{name: "b", lineNum: 1, text: "foobar bar addd buzz"},
+				},
+				[]string{"foo"}},
 			{"with excluded terms",
-				1, []string{"bar", "-fuzz", "-foobar"}},
+				[]*Result{
+					{name: "a", lineNum: 1, text: "foo bar buzz"},
+				},
+				[]string{"bar", "-fuzz", "-foobar"},
+			},
+			{"with special regexp characters - star",
+				[]*Result{
+					{name: "d", lineNum: 1, text: "xx* yyy) abc"},
+				},
+				[]string{"xx*"},
+			},
+			{"with special regexp characters - parenthesis",
+				[]*Result{
+					{name: "d", lineNum: 1, text: "xx* yyy) abc"},
+				},
+				[]string{"yy", ")"},
+			},
 		}
 		for _, tt := range tests {
 			tt := tt
 			t.Run(tt.name, func(t *testing.T) {
 				underTest := NewEngine(notes)
-				// FIXME
 				actual, err := underTest.Search(tt.given...)
 				require.NoError(t, err)
-				assert.Equal(t, tt.expected, len(actual))
+				assert.Equal(t, tt.expected, actual)
 			})
 		}
 	})
 }
 
 func TestSearchShoudReturnZeroResultsIfFoundNothing(t *testing.T) {
-	withNotes(files, func(notes note.List) {
+	withNotes(mkTestFiles(), func(notes note.List) {
 		underTest := NewEngine(notes)
 
 		actual, err := underTest.Search("you will not find me")
@@ -66,7 +93,7 @@ func TestSearchShoudReturnZeroResultsIfFoundNothing(t *testing.T) {
 }
 
 func TestSearchShouldNotSearchInLastResutsFile(t *testing.T) {
-	withNotes(files, func(notes note.List) {
+	withNotes(mkTestFiles(), func(notes note.List) {
 		// search 2 times so that last_results will be filled
 		for i := 0; i < 2; i++ {
 			underTest := NewEngine(notes)

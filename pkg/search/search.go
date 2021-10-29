@@ -61,6 +61,9 @@ func (r *request) matcher() (matcherFunc, error) {
 }
 
 func (r *request) compileRegexp(terms []string) (*regexp.Regexp, error) {
+	for i := 0; i < len(terms); i++ {
+		terms[i] = regexp.QuoteMeta(terms[i])
+	}
 	return compileRx(regexOr(terms), !r.CaseSensitive)
 }
 

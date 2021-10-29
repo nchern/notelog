@@ -76,7 +76,7 @@ As of now you have to add it manually using standard `git remote add ...`
  - [ ] refactoring: consolidate `withNotes` functions in tests
  - [ ] refactoring: consider using testing.T.TempDir() in tests instead of manually create / cleanup temp dirs
  - [ ] search
-   - [ ] add regexp search
+   - [X] add regexp search
    - [ ] consider indexing full text search solutions, e.g. https://github.com/blevesearch/bleve
    - [ ] add colors to output when at tty
  - [ ] archive: a note can:
