@@ -2,7 +2,6 @@ package search
 
 import (
 	"regexp"
-	"sort"
 	"strings"
 
 	"github.com/nchern/notelog/pkg/note"
@@ -14,7 +13,6 @@ const (
 
 // Notes abstracts note collection to search in
 type Notes interface {
-	HomeDir() string
 	All() ([]*note.Note, error)
 	MetadataFilename(name string) string
 }
@@ -22,7 +20,6 @@ type Notes interface {
 type matcherFunc func(string) bool
 
 type request struct {
-	OnlyNames     bool
 	CaseSensitive bool
 
 	terms        []string
@@ -64,14 +61,18 @@ func (r *request) matcher() (matcherFunc, error) {
 }
 
 func (r *request) compileRegexp(terms []string) (*regexp.Regexp, error) {
-	opts := ""
-	if !r.CaseSensitive {
-		opts = "(?i)"
-	}
-	return regexp.Compile(opts + regexOr(terms))
+	return compileRx(regexOr(terms), !r.CaseSensitive)
 }
 
-// Engine represents a search engine over notes
+func compileRx(expr string, ignoreCase bool) (*regexp.Regexp, error) {
+	opts := ""
+	if ignoreCase {
+		opts = "(?i)"
+	}
+	return regexp.Compile(opts + expr)
+}
+
+// Engine represents a simple search engine over notes
 type Engine struct {
 	OnlyNames bool
 
@@ -91,22 +92,14 @@ func NewEngine(notes Notes) *Engine {
 // Terms grammar looks like: "foo bar -buzz -fuzz" where -xxx means exclude xxx matches from the output
 func (s *Engine) Search(terms ...string) ([]*Result, error) {
 	req := parseRequest(terms...)
-	req.OnlyNames = s.OnlyNames
 	req.CaseSensitive = s.CaseSensitive
 
-	l, err := s.notes.All()
+	match, err := req.matcher()
 	if err != nil {
 		return nil, err
 	}
 
-	res, err := searchInNotes(l, req)
-	if err != nil {
-		return nil, err
-	}
-
-	sort.Sort(byName(res))
-
-	return res, nil
+	return searchInNotes(s.notes, match, s.OnlyNames)
 }
 
 func regexOr(terms []string) string {

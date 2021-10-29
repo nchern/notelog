@@ -27,43 +27,52 @@ var searchCmd = &cobra.Command{
 	SilenceUsage:  true,
 
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return doSearch(args)
+		if len(args) < 1 {
+			return errors.New("Not enough args. Specify a search term")
+		}
+
+		notes := note.NewList()
+
+		s := search.NewEngine(notes)
+
+		s.OnlyNames = titlesOnly
+		s.CaseSensitive = caseSensitive
+
+		return doSearch(args, s)
 	},
 }
 
-func init() {
-	searchCmd.Flags().BoolVarP(&interactive,
+func bindSearchFlags(cmd *cobra.Command) {
+	cmd.Flags().BoolVarP(&interactive,
 		"interactive",
 		"i",
 		false,
 		"if set, search results are saved to a file under NOTELOG_HOME dir. Search results in output get numbered.")
 
-	searchCmd.Flags().BoolVarP(&titlesOnly,
+	cmd.Flags().BoolVarP(&titlesOnly,
 		"titles-only",
 		"t",
 		false,
 		"if set, outputs note titles of search results only")
 
-	searchCmd.Flags().BoolVarP(&caseSensitive,
+	cmd.Flags().BoolVarP(&caseSensitive,
 		"case-sensitive",
 		"c",
 		false,
 		"if set, runs case sensitive search")
+}
+
+func init() {
+	bindSearchFlags(searchCmd)
 
 	doCmd.AddCommand(searchCmd)
 }
 
-func doSearch(args []string) error {
-	if len(args) < 1 {
-		return errors.New("Not enough args. Specify a search term")
-	}
+type searcher interface {
+	Search(...string) ([]*search.Result, error)
+}
 
-	notes := note.NewList()
-
-	s := search.NewEngine(notes)
-
-	s.OnlyNames = titlesOnly
-	s.CaseSensitive = caseSensitive
+func doSearch(args []string, s searcher) error {
 	res, err := s.Search(args...)
 	if err != nil {
 		return err

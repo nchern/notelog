@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"log"
+	"sort"
 
 	"github.com/nchern/notelog/pkg/note"
 )
@@ -54,16 +55,17 @@ func searchNote(nt *note.Note, match matcherFunc) ([]*Result, error) {
 	return res, nil
 }
 
-func searchInNotes(notes []*note.Note, req *request) ([]*Result, error) {
-	match, err := req.matcher()
+func searchInNotes(notes Notes, match matcherFunc, onlyNames bool) ([]*Result, error) {
+
+	l, err := notes.All()
 	if err != nil {
 		return nil, err
 	}
 
-	resChan := make(chan []*Result, len(notes))
-	errChan := make(chan error, len(notes))
+	resChan := make(chan []*Result, len(l))
+	errChan := make(chan error, len(l))
 
-	for _, nt := range notes {
+	for _, nt := range l {
 		go func(nt *note.Note) {
 			results, err := searchNote(nt, match)
 			if err != nil {
@@ -83,10 +85,10 @@ func searchInNotes(notes []*note.Note, req *request) ([]*Result, error) {
 
 	names := map[string]bool{}
 	results := []*Result{}
-	for i := 0; i < len(notes); i++ {
+	for i := 0; i < len(l); i++ {
 		select {
 		case found := <-resChan:
-			if req.OnlyNames {
+			if onlyNames {
 				for _, res := range found {
 					if names[res.name] {
 						continue
@@ -101,5 +103,8 @@ func searchInNotes(notes []*note.Note, req *request) ([]*Result, error) {
 			log.Printf("ERROR search: %s", err) // TODO: find better way of error handling
 		}
 	}
+
+	sort.Sort(byName(results))
+
 	return results, nil
 }
