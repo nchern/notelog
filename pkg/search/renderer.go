@@ -14,7 +14,7 @@ type Renderer interface {
 	Close() error
 }
 
-// Render renders a results collection using gien renderer
+// Render renders a results collection using given renderer
 func Render(renderer Renderer, results []*Result, onlyNames bool) error {
 	defer renderer.Close()
 	if onlyNames {
@@ -31,6 +31,7 @@ func Render(renderer Renderer, results []*Result, onlyNames bool) error {
 // StreamRenderer renders search result to the underline stream
 type StreamRenderer struct {
 	OnlyNames bool
+	Colorize  bool
 	W         io.Writer
 }
 
@@ -41,7 +42,7 @@ func (sr *StreamRenderer) Render(res *Result) (err error) {
 		rs.text = " "
 		rs.lineNum = 1
 	}
-	_, err = fmt.Fprintln(sr.W, rs.Display())
+	_, err = fmt.Fprintln(sr.W, rs.Display(sr.Colorize))
 	return
 }
 

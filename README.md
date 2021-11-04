@@ -72,13 +72,13 @@ As of now you have to add it manually using standard `git remote add ...`
  - [ ] add more description for `contrib` scripts
  - [ ] (?) in-note macros:
    - [ ] when adding lines, format them according to a given template
- - [ ] (?) multiple temporary drafts - when open a draft, this should not be the same file every time
  - [ ] refactoring: consolidate `withNotes` functions in tests
  - [ ] refactoring: consider using testing.T.TempDir() in tests instead of manually create / cleanup temp dirs
+ - [ ] (?) add man page - scdoc
  - [ ] search
-   - [X] add regexp search
    - [ ] consider indexing full text search solutions, e.g. https://github.com/blevesearch/bleve
-   - [ ] add colors to output when at tty
+   - [x] add regexp search
+   - [x] add colors to output when at tty
  - [ ] archive: a note can:
    - [X] be put into archive, so it will not stay in the main note list
          Current behavior: no search in the archive. Only through actual notes
@@ -93,15 +93,16 @@ As of now you have to add it manually using standard `git remote add ...`
  - [ ] note templates (?)
  - [ ] cross-linking: you can fetch all the references from other notes to a given note
    - [ ] embed cross links in notes?
- - [X] have notes on `.md` format and not only in `.org`
- - [X] add more examples, hints, use cases and script recipes
- - [X] integration with fzf: search results
- - [X] vim plugin
-   - [X] MVP
- - [X] create dir structure in one go during init phase. Consider fixing existing incomplete structure.
-   - [X] create .notelog at least
- - [X] migrate to cobra subcommand parser
- - [X] create and populate .gitignore if NOTELOG_HOME is considered as a git repo
+ - [ ] (WONT DO - useless) multiple temporary drafts - when open a draft, this should not be the same file every time
+ - [x] have notes on `.md` format and not only in `.org`
+ - [x] add more examples, hints, use cases and script recipes
+ - [x] integration with fzf: search results
+ - [x] vim plugin
+   - [x] MVP
+ - [x] create dir structure in one go during init phase. Consider fixing existing incomplete structure.
+   - [x] create .notelog at least
+ - [x] migrate to cobra subcommand parser
+ - [x] create and populate .gitignore if NOTELOG_HOME is considered as a git repo
  - [x] smart bash auto-completion for subcommands
  - [x] search capabilities
    - [x] search browsing: quick jump to search results from command line

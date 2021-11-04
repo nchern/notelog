@@ -11,10 +11,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-const (
-	homeDir = "/tmp/test_notes"
-)
-
 func mkFiles(names ...string) map[string]string {
 	files := map[string]string{}
 	for _, name := range names {

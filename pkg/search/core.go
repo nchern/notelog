@@ -5,8 +5,21 @@ import (
 	"fmt"
 	"log"
 	"sort"
+	"strings"
 
 	"github.com/nchern/notelog/pkg/note"
+)
+
+const (
+	fgRed     = 31
+	fgGreen   = 32
+	fgMagenta = 35
+
+	fgHiRed     = 91
+	fgHiMagenta = 95
+
+	bold      = "1"
+	underline = "4"
 )
 
 // Result represents one search result
@@ -14,6 +27,8 @@ type Result struct {
 	lineNum int
 	text    string
 	name    string
+
+	matches []string
 }
 
 // String returns stringified representation of Result
@@ -22,12 +37,38 @@ func (r *Result) String() string {
 }
 
 // Display returns display friendly name of a result
-func (r *Result) Display() string {
+func (r *Result) Display(colored bool) string {
 	// TODO: elaborate better name
-	return fmt.Sprintf("%s:%d:%s", r.name, r.lineNum, r.text)
+	text := r.text
+	name := r.name
+	lineNum := fmt.Sprintf("%d", r.lineNum)
+	if colored {
+		for _, m := range r.matches {
+			s := colorize(m, fgRed, bold)
+			text = strings.Replace(text, m, s, -1)
+
+			lineNum = colorize(lineNum, fgGreen, bold)
+
+			if strings.Index(r.name, m) > -1 {
+				toks := strings.Split(name, m)
+				for i, tok := range toks {
+					toks[i] = colorize(tok, fgMagenta, bold)
+				}
+				name = colorize(m, fgRed, bold, underline)
+				name = strings.Join(toks, name)
+			} else {
+				name = colorize(name, fgMagenta, bold)
+			}
+		}
+	}
+	return fmt.Sprintf("%s:%s:%s", name, lineNum, text)
 }
 
-func searchNote(nt *note.Note, match matcherFunc) ([]*Result, error) {
+func colorize(s string, color int, attrs ...string) string {
+	return fmt.Sprintf("\033[%d;%sm%s\033[0m", color, strings.Join(attrs, ";"), s)
+}
+
+func searchNote(nt *note.Note, matcher matcherFunc) ([]*Result, error) {
 	r, err := nt.Reader()
 	if err != nil {
 		return nil, err
@@ -40,11 +81,14 @@ func searchNote(nt *note.Note, match matcherFunc) ([]*Result, error) {
 	for scanner.Scan() {
 		lnum++
 		l := scanner.Text()
-		if match(l) {
+		matches := matcher(l)
+		found := len(matches) != 0
+		if found {
 			res = append(res, &Result{
 				lineNum: lnum,
 				text:    l,
 				name:    nt.Name(),
+				matches: matches,
 			})
 		}
 	}
@@ -55,7 +99,7 @@ func searchNote(nt *note.Note, match matcherFunc) ([]*Result, error) {
 	return res, nil
 }
 
-func searchInNotes(notes Notes, match matcherFunc, onlyNames bool) ([]*Result, error) {
+func searchInNotes(notes Notes, matcher matcherFunc, onlyNames bool) ([]*Result, error) {
 
 	l, err := notes.All()
 	if err != nil {
@@ -67,16 +111,18 @@ func searchInNotes(notes Notes, match matcherFunc, onlyNames bool) ([]*Result, e
 
 	for _, nt := range l {
 		go func(nt *note.Note) {
-			results, err := searchNote(nt, match)
+			results, err := searchNote(nt, matcher)
 			if err != nil {
 				errChan <- err
 				return
 			}
-			if match(nt.Name()) {
+			matches := matcher(nt.Name())
+			if len(matches) != 0 {
 				results = append(results, &Result{
 					lineNum: 1,
 					text:    " ",
 					name:    nt.Name(),
+					matches: matches,
 				})
 			}
 			resChan <- results

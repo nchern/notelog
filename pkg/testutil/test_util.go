@@ -9,9 +9,7 @@ import (
 )
 
 const (
-	testRoot = "/tmp"
-	testDir  = "test-notes"
-	mode     = 0644
+	mode = 0644
 )
 
 // WithNotes - test helper function

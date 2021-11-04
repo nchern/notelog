@@ -13,7 +13,7 @@ import (
 
 func TestWriteInstantRecord(t *testing.T) {
 	const sample = "instant"
-	n := &Note{homeDir: testRoot, name: testDir}
+	n := &Note{homeDir: t.TempDir(), name: testDir}
 	if err := n.Init(); err != nil && !errors.Is(err, os.ErrExist) {
 		require.NoError(t, err)
 	}

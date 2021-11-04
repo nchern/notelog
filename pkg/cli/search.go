@@ -15,6 +15,8 @@ var (
 	titlesOnly bool
 
 	caseSensitive bool
+
+	color bool
 )
 
 var searchCmd = &cobra.Command{
@@ -60,6 +62,11 @@ func bindSearchFlags(cmd *cobra.Command) {
 		"c",
 		false,
 		"if set, runs case sensitive search")
+	cmd.Flags().BoolVarP(&color,
+		"color",
+		"l",
+		false,
+		"if set, enables colored output")
 }
 
 func init() {
@@ -81,7 +88,11 @@ func doSearch(args []string, s searcher) error {
 		os.Exit(1)
 	}
 
-	simpleRenderer := &search.StreamRenderer{W: os.Stdout, OnlyNames: titlesOnly}
+	simpleRenderer := &search.StreamRenderer{
+		W:         os.Stdout,
+		OnlyNames: titlesOnly,
+		Colorize:  color,
+	}
 	var renderer search.Renderer = simpleRenderer
 	if interactive {
 		simpleRenderer.W = &nlWriter{inner: os.Stdout}

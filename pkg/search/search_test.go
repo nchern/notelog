@@ -46,25 +46,25 @@ func TestShoudSearch(t *testing.T) {
 		}{
 			{"one term",
 				[]*Result{
-					{name: "a", lineNum: 1, text: "foo bar buzz"},
-					{name: "b", lineNum: 1, text: "foobar bar addd buzz"},
+					{name: "a", lineNum: 1, text: "foo bar buzz", matches: []string{"foo"}},
+					{name: "b", lineNum: 1, text: "foobar bar addd buzz", matches: []string{"foo"}},
 				},
 				[]string{"foo"}},
 			{"with excluded terms",
 				[]*Result{
-					{name: "a", lineNum: 1, text: "foo bar buzz"},
+					{name: "a", lineNum: 1, text: "foo bar buzz", matches: []string{"bar"}},
 				},
 				[]string{"bar", "-fuzz", "-foobar"},
 			},
 			{"with special regexp characters - star",
 				[]*Result{
-					{name: "d", lineNum: 1, text: "xx* yyy) abc"},
+					{name: "d", lineNum: 1, text: "xx* yyy) abc", matches: []string{"xx*"}},
 				},
 				[]string{"xx*"},
 			},
 			{"with special regexp characters - parenthesis",
 				[]*Result{
-					{name: "d", lineNum: 1, text: "xx* yyy) abc"},
+					{name: "d", lineNum: 1, text: "xx* yyy) abc", matches: []string{"yy", ")"}},
 				},
 				[]string{"yy", ")"},
 			},
@@ -106,11 +106,13 @@ func TestSearchShouldNotSearchInLastResutsFile(t *testing.T) {
 					name:    "a",
 					lineNum: 1,
 					text:    "foo bar buzz",
+					matches: []string{"foo"},
 				},
 				{
 					name:    "b",
 					lineNum: 1,
 					text:    "foobar bar addd buzz",
+					matches: []string{"foo"},
 				},
 			}
 			assert.Equal(t, len(expected), len(actual))
@@ -137,7 +139,7 @@ func TestSearcShouldSearchNamesOnlyIfSet(t *testing.T) {
 		}
 		t.Run("with simple search", func(t *testing.T) {
 			expected := []*Result{
-				{name: "b", lineNum: 1, text: "fuzz"},
+				{name: "b", lineNum: 1, text: "fuzz", matches: []string{"fuzz"}},
 			}
 
 			underTest := prepare()
@@ -148,8 +150,8 @@ func TestSearcShouldSearchNamesOnlyIfSet(t *testing.T) {
 		})
 		t.Run("saved results should have line numbers of first occurrence", func(t *testing.T) {
 			expected := []*Result{
-				{name: "a", lineNum: 2, text: "foo"},
-				{name: "c", lineNum: 1, text: "bar foo"},
+				{name: "a", lineNum: 2, text: "foo", matches: []string{"foo"}},
+				{name: "c", lineNum: 1, text: "bar foo", matches: []string{"foo"}},
 			}
 
 			underTest := prepare()
@@ -178,27 +180,28 @@ func TestSearchShouldSearchInNoteNames(t *testing.T) {
 		}{
 			{"simple query",
 				[]*Result{
-					{name: "buzz", lineNum: 1, text: "findme"},
-					{name: "findme", lineNum: 1, text: " "},
-					{name: "findme2", lineNum: 1, text: " "},
+					{name: "buzz", lineNum: 1, text: "findme", matches: []string{"findme"}},
+					{name: "findme", lineNum: 1, text: " ", matches: []string{"findme"}},
+					{name: "findme2", lineNum: 1, text: " ", matches: []string{"findme"}},
 				},
 				[]string{"findme"}},
+
 			{"two terms",
 				[]*Result{
-					{name: "findme2", lineNum: 1, text: " "},
-					{name: "foo", lineNum: 1, text: " "},
+					{name: "findme2", lineNum: 1, text: " ", matches: []string{"findme2"}},
+					{name: "foo", lineNum: 1, text: " ", matches: []string{"fo"}},
 				},
 				[]string{"findme2", "fo"}},
 			{"with terms and excluded terms",
 				[]*Result{
-					{name: "buzz", lineNum: 1, text: "findme"},
-					{name: "findme", lineNum: 1, text: " "},
+					{name: "buzz", lineNum: 1, text: "findme", matches: []string{"find"}},
+					{name: "findme", lineNum: 1, text: " ", matches: []string{"find"}},
 				},
 				[]string{"find", "-findme2"}},
 			{"terms and exclude terms are case insensitive",
 				[]*Result{
-					{name: "buzz", lineNum: 1, text: "findme"},
-					{name: "findme", lineNum: 1, text: " "},
+					{name: "buzz", lineNum: 1, text: "findme", matches: []string{"find"}},
+					{name: "findme", lineNum: 1, text: " ", matches: []string{"find"}},
 				},
 				[]string{"finD", "-FindmE2"}},
 		}
@@ -249,8 +252,8 @@ func TestSearchSearchInNotesOfDifferentTypes(t *testing.T) {
 	}
 	withNotes(files, func(notes note.List) {
 		expected := []*Result{
-			&Result{name: "a", lineNum: 1, text: "foo"},
-			&Result{name: "c", lineNum: 2, text: "foo"},
+			&Result{name: "a", lineNum: 1, text: "foo", matches: []string{"foo"}},
+			&Result{name: "c", lineNum: 2, text: "foo", matches: []string{"foo"}},
 		}
 		underTest := NewEngine(notes)
 
@@ -276,13 +279,13 @@ func TestSearcShouldSearchCaseSensitiveIfSet(t *testing.T) {
 		}{
 			{"simple query",
 				[]*Result{
-					{name: "a", lineNum: 2, text: "foo"},
+					{name: "a", lineNum: 2, text: "foo", matches: []string{"foo"}},
 				},
 				[]string{"foo"}},
 			{"simple query-2",
 				[]*Result{
-					{name: "a", lineNum: 3, text: "fOo bar"},
-					{name: "c", lineNum: 1, text: "bar FOO"},
+					{name: "a", lineNum: 3, text: "fOo bar", matches: []string{"fOo"}},
+					{name: "c", lineNum: 1, text: "bar FOO", matches: []string{"FOO"}},
 				},
 				[]string{"FOO", "fOo"}},
 		}

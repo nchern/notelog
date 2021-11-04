@@ -25,9 +25,9 @@ func (s *GrepEngine) Search(terms ...string) ([]*Result, error) {
 		return nil, err
 	}
 
-	match := func(s string) bool {
-		return rx.MatchString(s)
+	matches := func(s string) []string {
+		return rx.FindAllString(s, -1)
 	}
 
-	return searchInNotes(s.notes, match, s.OnlyNames)
+	return searchInNotes(s.notes, matches, s.OnlyNames)
 }

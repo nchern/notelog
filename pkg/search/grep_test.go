@@ -24,21 +24,22 @@ func TestShouldGrep(t *testing.T) {
 			{"trivial case",
 				false,
 				[]*Result{
-					{name: "a", lineNum: 1, text: "foo bar buz"},
-					{name: "b", lineNum: 1, text: "foobar bar addd buzz"},
+					{name: "a", lineNum: 1, text: "foo bar buz", matches: []string{"foo"}},
+					{name: "b", lineNum: 1, text: "foobar bar addd buzz", matches: []string{"foo"}},
 				},
 				"foo"},
 			{"regexp - beginning of the line",
 				false,
 				[]*Result{
-					{name: "d", lineNum: 1, text: "buzz bar xx"},
+					{name: "d", lineNum: 1, text: "buzz bar xx", matches: []string{"buz"}},
 				},
 				"^buz"},
+
 			{"regexp - or",
 				false,
 				[]*Result{
-					{name: "b", lineNum: 2, text: "abc dfgh"},
-					{name: "c", lineNum: 1, text: "fuzz Bar xx buzz"},
+					{name: "b", lineNum: 2, text: "abc dfgh", matches: []string{"abc"}},
+					{name: "c", lineNum: 1, text: "fuzz Bar xx buzz", matches: []string{"fuz"}},
 				},
 				"(abc|fuz)"},
 			{"no results",
@@ -48,7 +49,7 @@ func TestShouldGrep(t *testing.T) {
 			{"regexp - case sensitive",
 				true,
 				[]*Result{
-					{name: "c", lineNum: 1, text: "fuzz Bar xx buzz"},
+					{name: "c", lineNum: 1, text: "fuzz Bar xx buzz", matches: []string{"Bar xx buzz"}},
 				},
 				"Ba.+"},
 		}

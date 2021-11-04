@@ -17,7 +17,7 @@ type Notes interface {
 	MetadataFilename(name string) string
 }
 
-type matcherFunc func(string) bool
+type matcherFunc func(string) []string
 
 type request struct {
 	CaseSensitive bool
@@ -48,15 +48,16 @@ func (r *request) matcher() (matcherFunc, error) {
 	if err != nil {
 		return nil, err
 	}
-	return func(s string) bool {
-		if !terms.MatchString(s) {
-			return false
+	return func(s string) []string {
+		matches := terms.FindAllString(s, -1)
+		if len(matches) == 0 {
+			return matches
 		}
-		if excludeTerms != nil && excludeTerms.MatchString(s) {
+		if excludeTerms != nil && len(excludeTerms.FindAllString(s, -1)) != 0 {
 			// filter out excludeTerms if provided
-			return false
+			return []string{}
 		}
-		return true
+		return matches
 	}, nil
 }
 
@@ -77,8 +78,7 @@ func compileRx(expr string, ignoreCase bool) (*regexp.Regexp, error) {
 
 // Engine represents a simple search engine over notes
 type Engine struct {
-	OnlyNames bool
-
+	OnlyNames     bool // TODO: consolidate with Renderers
 	CaseSensitive bool
 
 	notes Notes

@@ -3,7 +3,6 @@ package note
 import (
 	"bytes"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
@@ -13,13 +12,12 @@ import (
 )
 
 const (
-	testRoot = "/tmp"
-	testDir  = "test-notes"
+	testDir = "test-notes"
 )
 
 func withNotes(t *testing.T, fn func(notes List)) {
-	home, err := ioutil.TempDir(testRoot, testDir)
-	require.NoError(t, err)
+	home := filepath.Join(t.TempDir(), testDir)
+	must(os.MkdirAll(home, defaultDirPerms))
 
 	fn(List(home))
 }
