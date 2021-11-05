@@ -119,5 +119,9 @@ autocmd FileType org nnoremap <Localleader>gd :call NotesBrowseGroupDirectory()<
 " Archives current note
 autocmd FileType org command! NLArchive : call NotesArchive()
 
-"
+" Deletes the current note
 autocmd FileType org command! NLDelete :w | execute "!notelog do rm -f '%'" | bd
+
+" Runs fzf to search through note names and then opens selected note
+" Requires FZF plugin
+autocmd FileType org command! NLBrowse :call fzf#run({'source': 'notelog do ls', 'sink': 'NLOpen'})
