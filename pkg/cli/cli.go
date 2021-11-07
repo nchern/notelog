@@ -44,9 +44,10 @@ var (
 
 	// HACK
 	lsCmdsCmd = &cobra.Command{
-		Use:   "list-cmds",
-		Short: "lists all subcommands",
-		Args:  cobra.NoArgs,
+		Use:     "list-cmds",
+		Short:   "lists all subcommands",
+		Aliases: []string{"ls-cmds"},
+		Args:    cobra.NoArgs,
 
 		SilenceErrors: true,
 		SilenceUsage:  false,
