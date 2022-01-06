@@ -13,7 +13,7 @@ lint:
 	@golint ./...
 
 .PHONY: vet
-vet:
+vet: lint
 	@go vet ./...
 
 .PHONY: test
