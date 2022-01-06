@@ -28,12 +28,12 @@ func Format(src io.Reader, dst io.Writer) error {
 		}
 
 		l := scanner.Text()
+		l = strings.TrimSpace(l)
 
 		if listNumber.MatchString(l) {
 			isListItem = true
 			itemIndent = strings.Repeat(" ", len(listNumber.FindString(l)))
 		} else {
-			l = strings.TrimSpace(l)
 			if isListItem {
 				if l != "" {
 					l = itemIndent + indent.ReplaceAllString(l, "")
@@ -48,11 +48,7 @@ func Format(src io.Reader, dst io.Writer) error {
 		}
 		i++
 	}
-	if err := scanner.Err(); err != nil {
-		return err
-	}
-
-	return nil
+	return scanner.Err()
 }
 
 type printer struct {

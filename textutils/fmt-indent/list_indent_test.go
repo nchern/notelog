@@ -103,6 +103,24 @@ func TestShouldFormat(t *testing.T) {
 				"\t- item2",
 			),
 		},
+		// {"subtext under bullet list",
+		// 	text(
+		// 		"- foobar",
+		// 		"  aaabbbcc",
+		// 		"  aabb",
+		// 		"- foo barr",
+		// 		"  fuzzbuzz",
+		// 		"  uzzbuzz",
+		// 	),
+		// 	text(
+		// 		"- foobar",
+		// 		"aaabbbcc",
+		// 		"aabb",
+		// 		"- foo barr",
+		// 		"fuzzbuzz",
+		// 		"    uzzbuzz",
+		// 	),
+		// },
 	}
 	for _, tt := range tests {
 		tt := tt
