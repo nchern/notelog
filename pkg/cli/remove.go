@@ -9,7 +9,7 @@ var removeCmd = &cobra.Command{
 	Use:   "rm",
 	Short: "removes a given note",
 
-	Args: cobra.ExactArgs(1),
+	Args: cobra.MinimumNArgs(1),
 
 	SilenceErrors: true,
 	SilenceUsage:  true,
@@ -18,16 +18,22 @@ var removeCmd = &cobra.Command{
 		var err error
 		var name string
 
-		if filename {
-			name = note.NameFromFilename(args[0])
-			err = validateNoteName(name)
-		} else {
-			name, err = parseNoteName(args[0])
+		for _, arg := range args {
+			if filename {
+				name = note.NameFromFilename(arg)
+				err = validateNoteName(name)
+			} else {
+				name, err = parseNoteName(arg)
+			}
+			if err != nil {
+				return err
+			}
+			err = notes.Remove(name)
+			if err != nil {
+				return err
+			}
 		}
-		if err != nil {
-			return err
-		}
-		return notes.Remove(name)
+		return nil
 	},
 }
 
