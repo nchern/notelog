@@ -21,7 +21,7 @@ make install
 # Opens "my-note" in editor. Creates a note if the note does not exist
 $ notelog my-note
 
-# Adds a line "foo bar" to "my-note" directly from command line
+# Instant note: adds a line "foo bar" to "my-note" directly from command line
 $ notelog my-note foo bar
 
 # Archive a note: the note becomes unavailable in this collection
@@ -69,6 +69,8 @@ $ notelog do sync
 As of now you have to add it manually using standard `git remote add ...`
 
 ## Roadmap
+ - [ ] conflict-free instant note taking from commandline:
+        when a note is open in editor and one tries to add an instant note, editor could override amended note
  - [ ] add more description for `contrib` scripts
  - [ ] (?) in-note macros:
    - [ ] when adding lines, format them according to a given template
