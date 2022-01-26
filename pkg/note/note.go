@@ -4,9 +4,8 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
-
-	"github.com/nchern/notelog/pkg/env"
 )
 
 const (
@@ -25,8 +24,29 @@ const (
 )
 
 var (
-	notesRootPath = env.Get("NOTELOG_HOME", filepath.Join(os.Getenv("HOME"), defaultNotesDir))
+	notesRootPath = defineNotesRootPath()
 )
+
+func curDirContainsNotes() bool {
+	_, err := os.Stat(filepath.Join(".", DotNotelogDir))
+	return err == nil
+}
+
+func defineNotesRootPath() string {
+	defaultPath := filepath.Join(os.Getenv("HOME"), defaultNotesDir)
+	if curDirContainsNotes() {
+		path, err := os.Getwd()
+		if err != nil {
+			return defaultPath
+		}
+		return path
+	}
+	path := strings.TrimSpace(os.Getenv("NOTELOG_HOME"))
+	if path == "" {
+		return defaultPath
+	}
+	return path
+}
 
 // Note represents a note in the system. A directory with the main.org file as note file as of now.
 type Note struct {
