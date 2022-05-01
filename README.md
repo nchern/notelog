@@ -69,6 +69,8 @@ $ notelog do sync
 As of now you have to add it manually using standard `git remote add ...`
 
 ## Roadmap
+ - [ ] get rid of cobra lib - it's too dependency-bload
+        - look at https://github.com/jessevdk/go-flags or even https://github.com/muesli/coral - drop in replacement for cobra
  - [ ] conflict-free instant note taking from commandline:
         when a note is open in editor and one tries to add an instant note, editor could override amended note
  - [ ] add more description for `contrib` scripts
