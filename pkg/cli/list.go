@@ -11,6 +11,7 @@ import (
 )
 
 var (
+	verbose    bool
 	sortByDate bool
 
 	listCmd = &cobra.Command{
@@ -32,8 +33,18 @@ func (b byDate) Less(i, j int) bool { return b[i].ModifiedAt().Before(b[j].Modif
 
 func init() {
 	listCmd.Flags().BoolVarP(&sortByDate, "by-date", "d", false, "sorts notes by last modified date in asc order")
+	listCmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "verbose output: includes note modified dates")
 
 	doCmd.AddCommand(listCmd)
+}
+
+func formatNote(nt *note.Note) string {
+	if verbose {
+		return fmt.Sprintf("%s\t%s",
+			nt.ModifiedAt().Format("2006-01-02T15:04"),
+			nt.Name())
+	}
+	return nt.Name()
 }
 
 func listNotes(list note.List, w io.Writer) error {
@@ -45,7 +56,7 @@ func listNotes(list note.List, w io.Writer) error {
 		sort.Sort(byDate(notes))
 	}
 	for _, note := range notes {
-		if _, err := fmt.Fprintln(w, note.Name()); err != nil {
+		if _, err := fmt.Fprintln(w, formatNote(note)); err != nil {
 			return err
 		}
 	}
