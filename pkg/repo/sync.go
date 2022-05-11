@@ -21,9 +21,10 @@ func Sync(notes note.List, customMsg string) error {
 	}
 	defer logFile.Close()
 
+	doCommit := fmt.Sprintf("%s diff-index --quiet HEAD || %s commit -q -m '%s'", gitCmd, gitCmd, msg)
 	cmds := []*exec.Cmd{
 		git(notes, logFile, "add", "."),
-		git(notes, logFile, "commit", "-q", "-m", msg),
+		sh(doCommit, notes.HomeDir(), logFile),
 		git(notes, logFile, "pull", "-q", "--rebase"),
 		git(notes, logFile, "push", "-q", "origin", "master"),
 	}

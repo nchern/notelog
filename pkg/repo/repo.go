@@ -17,6 +17,16 @@ const (
 
 var gitCmd = "git"
 
+func sh(expr string, cwd string, logFile io.Writer) *exec.Cmd {
+	cmd := exec.Command("sh", "-c", expr)
+
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = logFile
+	cmd.Dir = cwd
+
+	return cmd
+}
+
 func git(notes note.List, logFile io.Writer, args ...string) *exec.Cmd {
 	cmd := exec.Command(gitCmd, args...)
 
