@@ -45,21 +45,6 @@ var (
 		},
 	}
 
-	// HACK
-	lsCmdsCmd = &coral.Command{
-		Use:     "list-cmds",
-		Short:   "lists all subcommands",
-		Aliases: []string{"ls-cmds"},
-		Args:    coral.NoArgs,
-
-		SilenceErrors: true,
-		SilenceUsage:  false,
-
-		RunE: func(cmd *coral.Command, args []string) error {
-			return listCommands(os.Stdout)
-		},
-	}
-
 	defaultHelp = rootCmd.HelpFunc()
 
 	mainConfDir  = filepath.Join(os.Getenv("HOME"), note.DotNotelogDir)
@@ -77,8 +62,6 @@ type Config struct {
 }
 
 func init() {
-	doCmd.AddCommand(lsCmdsCmd)
-
 	rootCmd.SetHelpFunc(func(cmd *coral.Command, s []string) {
 		defaultHelp(cmd, s)
 
@@ -87,20 +70,6 @@ func init() {
 	})
 
 	rootCmd.AddCommand(doCmd)
-}
-
-func loadConfig() error {
-	_, err := toml.DecodeFile(mainConfPath, &conf)
-	if err != nil {
-		return err
-	}
-
-	ft, err := note.ParseFormat(conf.NoteFormat)
-	if err != nil || ft == note.Unknown {
-		log.Printf("WARN loadConfig: %s", err)
-		conf.NoteFormat = defaultFormat
-	}
-	return nil
 }
 
 // Execute is an entry point of CLI
@@ -117,6 +86,20 @@ func Execute() error {
 	}
 
 	return rootCmd.Execute()
+}
+
+func loadConfig() error {
+	_, err := toml.DecodeFile(mainConfPath, &conf)
+	if err != nil {
+		return err
+	}
+
+	ft, err := note.ParseFormat(conf.NoteFormat)
+	if err != nil || ft == note.Unknown {
+		log.Printf("WARN loadConfig: %s", err)
+		conf.NoteFormat = defaultFormat
+	}
+	return nil
 }
 
 func parseNoteName(name string) (string, error) {
