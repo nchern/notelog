@@ -10,7 +10,9 @@ import (
 
 const (
 	// should be configurable
-	skipLines uint = 2
+	defaultSkipLines uint = 2
+
+	defaultFormat = string(note.Org)
 )
 
 var (
@@ -43,7 +45,7 @@ func init() {
 
 func addFormatFlag(cmd *cobra.Command) {
 	cmd.Flags().StringVarP(&noteFormat,
-		"format", "t", string(note.Org), "note format; currently org or md are supported")
+		"format", "t", defaultFormat, "note format; currently org or md are supported")
 }
 
 func parseNoteNameAndLineNumber(rawName string) (name string, lnum editor.LineNumber) {
@@ -80,7 +82,7 @@ func edit(args []string, readOnly bool) error {
 		instantRecord = strings.TrimSpace(strings.Join(args[1:], " "))
 	}
 	if instantRecord != "" {
-		return nt.WriteInstantRecord(instantRecord, skipLines)
+		return nt.WriteInstantRecord(instantRecord, defaultSkipLines)
 	}
 
 	return editor.Edit(nt, readOnly, lnum)
