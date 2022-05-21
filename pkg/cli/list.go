@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	verbose    bool
+	longOutput bool
 	sortByDate bool
 
 	listCmd = &coral.Command{
@@ -33,15 +33,16 @@ func (b byDate) Less(i, j int) bool { return b[i].ModifiedAt().Before(b[j].Modif
 
 func init() {
 	listCmd.Flags().BoolVarP(&sortByDate, "by-date", "d", false, "sorts notes by last modified date in asc order")
-	listCmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "verbose output: includes note modified dates")
+	listCmd.Flags().BoolVarP(&longOutput, "long", "l", false, "verbose output: includes note modified dates")
 
 	doCmd.AddCommand(listCmd)
 }
 
 func formatNote(nt *note.Note) string {
-	if verbose {
-		return fmt.Sprintf("%s\t%s",
-			nt.ModifiedAt().Format("2006-01-02T15:04"),
+	if longOutput {
+		return fmt.Sprintf("%s %s %s",
+			nt.ModifiedAt().Format("2006-01-02"),
+			nt.ModifiedAt().Format("15:04:05"),
 			nt.Name())
 	}
 	return nt.Name()
