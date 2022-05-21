@@ -24,16 +24,21 @@ const (
 
 // Result represents one search result
 type Result struct {
-	lineNum int
-	text    string
-	name    string
+	lineNum  int
+	text     string
+	name     string
+	archived bool
 
 	matches []string
 }
 
 // String returns stringified representation of Result
 func (r *Result) String() string {
-	return fmt.Sprintf("%s:%d", r.name, r.lineNum)
+	archive := ""
+	if r.archived {
+		archive = "a"
+	}
+	return fmt.Sprintf("%s:%d:%s", r.name, r.lineNum, archive)
 }
 
 // Display returns display friendly name of a result
@@ -68,7 +73,7 @@ func colorize(s string, color int, attrs ...string) string {
 	return fmt.Sprintf("\033[%d;%sm%s\033[0m", color, strings.Join(attrs, ";"), s)
 }
 
-func searchNote(nt *note.Note, matcher matcherFunc) ([]*Result, error) {
+func searchNote(notes Notes, nt *note.Note, matcher matcherFunc) ([]*Result, error) {
 	r, err := nt.Reader()
 	if err != nil {
 		return nil, err
@@ -85,10 +90,11 @@ func searchNote(nt *note.Note, matcher matcherFunc) ([]*Result, error) {
 		found := len(matches) != 0
 		if found {
 			res = append(res, &Result{
-				lineNum: lnum,
-				text:    l,
-				name:    nt.Name(),
-				matches: matches,
+				lineNum:  lnum,
+				text:     l,
+				name:     nt.Name(),
+				matches:  matches,
+				archived: nt.Archived(),
 			})
 		}
 	}
@@ -111,7 +117,7 @@ func searchInNotes(notes Notes, matcher matcherFunc, onlyNames bool) ([]*Result,
 
 	for _, nt := range l {
 		go func(nt *note.Note) {
-			results, err := searchNote(nt, matcher)
+			results, err := searchNote(notes, nt, matcher)
 			if err != nil {
 				errChan <- err
 				return
@@ -119,10 +125,11 @@ func searchInNotes(notes Notes, matcher matcherFunc, onlyNames bool) ([]*Result,
 			matches := matcher(nt.Name())
 			if len(matches) != 0 {
 				results = append(results, &Result{
-					lineNum: 1,
-					text:    " ",
-					name:    nt.Name(),
-					matches: matches,
+					lineNum:  1,
+					text:     " ",
+					name:     nt.Name(),
+					matches:  matches,
+					archived: nt.Archived(),
 				})
 			}
 			resChan <- results

@@ -42,7 +42,10 @@ func browseSearch(args []string) error {
 		return nil
 	}
 
-	noteName, lnum := parseNoteNameAndLineNumber(r)
+	noteName, lnum, isArchive := parseNoteNameAndLineNumber(r)
+	if isArchive {
+		notes = notes.GetArchive()
+	}
 	nt, err := notes.Get(noteName)
 	if err != nil {
 		return err

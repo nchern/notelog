@@ -142,6 +142,11 @@ func (n *Note) Dump(w io.Writer) error {
 	return err
 }
 
+// Archived determines if this note is archived
+func (n *Note) Archived() bool {
+	return strings.HasSuffix(n.homeDir, archiveNoteDir)
+}
+
 func (n *Note) writer() (io.WriteCloser, error) {
 	return os.OpenFile(n.FullPath(), os.O_WRONLY, defaultFilePerms)
 }

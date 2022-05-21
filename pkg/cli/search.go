@@ -17,6 +17,8 @@ var (
 	caseSensitive bool
 
 	color bool
+
+	searchInArchive bool
 )
 
 var searchCmd = &coral.Command{
@@ -34,6 +36,9 @@ var searchCmd = &coral.Command{
 		}
 
 		notes := note.NewList()
+		if searchInArchive {
+			notes = notes.GetArchive()
+		}
 
 		s := search.NewEngine(notes)
 
@@ -67,6 +72,11 @@ func bindSearchFlags(cmd *coral.Command) {
 		"l",
 		false,
 		"if set, enables colored output")
+	cmd.Flags().BoolVarP(&searchInArchive,
+		"in-archive",
+		"a",
+		false,
+		"if set, runs search in archive")
 }
 
 func init() {

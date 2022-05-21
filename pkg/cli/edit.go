@@ -47,11 +47,15 @@ func addFormatFlag(cmd *coral.Command) {
 		"note format; currently org or md are supported")
 }
 
-func parseNoteNameAndLineNumber(rawName string) (name string, lnum editor.LineNumber) {
-	nameAndLine := strings.SplitN(rawName, ":", 2)
+func parseNoteNameAndLineNumber(rawName string) (name string, lnum editor.LineNumber, isArchive bool) {
+	nameAndLine := strings.Split(rawName, ":")
 	name = nameAndLine[0]
+	isArchive = false
 	if len(nameAndLine) > 1 {
 		lnum = editor.LineNumber(nameAndLine[1])
+	}
+	if len(nameAndLine) > 2 && nameAndLine[2] == "a" {
+		isArchive = true
 	}
 	return
 }
@@ -65,7 +69,7 @@ func edit(args []string, readOnly bool) error {
 
 	var lnum editor.LineNumber
 	noteName := noteNameFromArgs(args)
-	noteName, lnum = parseNoteNameAndLineNumber(noteName)
+	noteName, lnum, _ = parseNoteNameAndLineNumber(noteName)
 
 	noteName, err = parseNoteName(noteName)
 	if err != nil {

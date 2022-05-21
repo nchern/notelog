@@ -304,6 +304,28 @@ func TestSearcShouldSearchCaseSensitiveIfSet(t *testing.T) {
 		}
 	})
 }
+func withArchivedNotes(files m, fn func(notes note.List)) {
+	// TODO: unify with the main withNotes func
+	homeDir, err := ioutil.TempDir("", "test_notes")
+	if err != nil {
+		panic(err)
+	}
+	homeDir = filepath.Join(homeDir, ".archive")
+
+	must(os.MkdirAll(homeDir, 0755))
+	defer os.RemoveAll(homeDir)
+
+	must(os.MkdirAll(filepath.Join(homeDir, note.DotNotelogDir), 0755))
+
+	for name, body := range files {
+		fullName := filepath.Join(homeDir, name)
+		dir, _ := filepath.Split(fullName)
+		must(os.MkdirAll(dir, 0755))
+		must(ioutil.WriteFile(fullName, []byte(body), mode))
+	}
+
+	fn(note.List(homeDir))
+}
 
 func withNotes(files m, fn func(notes note.List)) {
 	homeDir, err := ioutil.TempDir("", "test_notes")

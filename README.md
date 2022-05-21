@@ -81,9 +81,9 @@ As of now you have to add it manually using standard `git remote add ...`
    - [x] add regexp search
    - [x] add colors to output when at tty
  - [ ] archive: a note can:
-   - [X] be put into archive, so it will not stay in the main note list
+   - [x] be put into archive, so it will not stay in the main note list
          Current behavior: no search in the archive. Only through actual notes
-   - [ ] enable search in archive?
+   - [x] enable search in archive?
    - [ ] be restored from the archive (eventually)
  - [ ] sub-notes: notes that exist only in a context of a main note (?)
    - example notelog do subnote <notename> <sub-notename>
