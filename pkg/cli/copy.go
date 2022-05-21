@@ -1,19 +1,19 @@
 package cli
 
 import (
-	"github.com/spf13/cobra"
+	"github.com/muesli/coral"
 )
 
-var copyCmd = &cobra.Command{
+var copyCmd = &coral.Command{
 	Use:   "cp",
 	Short: "copies a given note",
 
-	Args: cobra.ExactArgs(2),
+	Args: coral.ExactArgs(2),
 
 	SilenceErrors: true,
 	SilenceUsage:  true,
 
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *coral.Command, args []string) error {
 		name, err := parseNoteName(args[0])
 		if err != nil {
 			return err

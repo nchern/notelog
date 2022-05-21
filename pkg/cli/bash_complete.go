@@ -4,19 +4,19 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/spf13/cobra"
+	"github.com/muesli/coral"
 )
 
-var bashCompleteCmd = &cobra.Command{
+var bashCompleteCmd = &coral.Command{
 	Use:   "bash-complete",
 	Short: "returns autocompete initialization script for bashrc",
 
-	Args: cobra.NoArgs,
+	Args: coral.NoArgs,
 
 	SilenceErrors: true,
 	SilenceUsage:  true,
 
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *coral.Command, args []string) error {
 		_, err := fmt.Println(autoCompleteScript())
 		return err
 	},

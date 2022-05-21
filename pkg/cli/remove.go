@@ -1,20 +1,20 @@
 package cli
 
 import (
+	"github.com/muesli/coral"
 	"github.com/nchern/notelog/pkg/note"
-	"github.com/spf13/cobra"
 )
 
-var removeCmd = &cobra.Command{
+var removeCmd = &coral.Command{
 	Use:   "rm",
 	Short: "removes a given note",
 
-	Args: cobra.MinimumNArgs(1),
+	Args: coral.MinimumNArgs(1),
 
 	SilenceErrors: true,
 	SilenceUsage:  true,
 
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *coral.Command, args []string) error {
 		var err error
 		var name string
 

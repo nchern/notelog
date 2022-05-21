@@ -1,20 +1,20 @@
 package cli
 
 import (
+	"github.com/muesli/coral"
 	"github.com/nchern/notelog/pkg/note"
-	"github.com/spf13/cobra"
 )
 
-var touchCmd = &cobra.Command{
+var touchCmd = &coral.Command{
 	Use:   "touch",
 	Short: "runs a given command to manipulate notes",
 
-	Args: cobra.ExactArgs(1),
+	Args: coral.ExactArgs(1),
 
 	SilenceUsage:  true,
 	SilenceErrors: true,
 
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *coral.Command, args []string) error {
 		return touch(notes, args)
 	},
 }

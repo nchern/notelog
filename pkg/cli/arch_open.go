@@ -1,21 +1,21 @@
 package cli
 
 import (
+	"github.com/muesli/coral"
 	"github.com/nchern/notelog/pkg/editor"
 	"github.com/nchern/notelog/pkg/note"
-	"github.com/spf13/cobra"
 )
 
 var (
-	archOpenCmd = &cobra.Command{
+	archOpenCmd = &coral.Command{
 		Use:   "arch-open",
 		Short: "opens a note from archive",
-		Args:  cobra.ExactArgs(1),
+		Args:  coral.ExactArgs(1),
 
 		SilenceErrors: true,
 		SilenceUsage:  true,
 
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *coral.Command, args []string) error {
 			return archOpen(args)
 		},
 	}

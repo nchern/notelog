@@ -1,20 +1,20 @@
 package cli
 
 import (
+	"github.com/muesli/coral"
 	"github.com/nchern/notelog/pkg/repo"
-	"github.com/spf13/cobra"
 )
 
-var syncCmd = &cobra.Command{
+var syncCmd = &coral.Command{
 	Use:   "sync",
 	Short: "syncs repo with the remote",
 
-	Args: cobra.MinimumNArgs(0),
+	Args: coral.MinimumNArgs(0),
 
 	SilenceErrors: true,
 	SilenceUsage:  true,
 
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *coral.Command, args []string) error {
 		comment := ""
 		if len(args) > 0 {
 			comment = args[0]

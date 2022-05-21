@@ -3,19 +3,19 @@ package cli
 import (
 	"fmt"
 
-	"github.com/spf13/cobra"
+	"github.com/muesli/coral"
 )
 
-var printHomeCmd = &cobra.Command{
+var printHomeCmd = &coral.Command{
 	Use:   "print-home",
 	Short: "prints current NOTELOG_HOME value",
 
-	Args: cobra.NoArgs,
+	Args: coral.NoArgs,
 
 	SilenceErrors: true,
 	SilenceUsage:  true,
 
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *coral.Command, args []string) error {
 		_, err := fmt.Print(notes.HomeDir())
 		return err
 	},

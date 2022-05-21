@@ -3,20 +3,20 @@ package cli
 import (
 	"os"
 
+	"github.com/muesli/coral"
 	"github.com/nchern/notelog/pkg/note"
-	"github.com/spf13/cobra"
 )
 
-var prnNoteCmd = &cobra.Command{
+var prnNoteCmd = &coral.Command{
 	Use:     "print",
 	Short:   "prints a given note",
-	Args:    cobra.MinimumNArgs(1),
+	Args:    coral.MinimumNArgs(1),
 	Aliases: []string{"cat"},
 
 	SilenceErrors: true,
 	SilenceUsage:  true,
 
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *coral.Command, args []string) error {
 		return printNote(args)
 	},
 }

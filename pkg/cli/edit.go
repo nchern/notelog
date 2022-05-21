@@ -3,9 +3,9 @@ package cli
 import (
 	"strings"
 
+	"github.com/muesli/coral"
 	"github.com/nchern/notelog/pkg/editor"
 	"github.com/nchern/notelog/pkg/note"
-	"github.com/spf13/cobra"
 )
 
 const (
@@ -20,16 +20,16 @@ var (
 
 	noteFormat string
 
-	editCmd = &cobra.Command{
+	editCmd = &coral.Command{
 		Use:   "edit",
 		Short: "opens a given note in editor",
 
-		Args: cobra.MinimumNArgs(1),
+		Args: coral.MinimumNArgs(1),
 
 		SilenceErrors: true,
 		SilenceUsage:  true,
 
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *coral.Command, args []string) error {
 			return edit(args, readOnly)
 		},
 	}
@@ -43,7 +43,7 @@ func init() {
 	doCmd.AddCommand(editCmd)
 }
 
-func addFormatFlag(cmd *cobra.Command) {
+func addFormatFlag(cmd *coral.Command) {
 	cmd.Flags().StringVarP(&noteFormat,
 		"format", "t", defaultFormat, "note format; currently org or md are supported")
 }

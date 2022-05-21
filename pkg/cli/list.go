@@ -6,20 +6,20 @@ import (
 	"os"
 	"sort"
 
+	"github.com/muesli/coral"
 	"github.com/nchern/notelog/pkg/note"
-	"github.com/spf13/cobra"
 )
 
 var (
 	verbose    bool
 	sortByDate bool
 
-	listCmd = &cobra.Command{
+	listCmd = &coral.Command{
 		Use:     "list",
 		Aliases: []string{"ls"},
 		Short:   "lists all notes. Output is sorted by note's name alphabetically by default",
-		Args:    cobra.NoArgs,
-		RunE: func(cmd *cobra.Command, args []string) error {
+		Args:    coral.NoArgs,
+		RunE: func(cmd *coral.Command, args []string) error {
 			return listNotes(note.NewList(), os.Stdout)
 		},
 	}

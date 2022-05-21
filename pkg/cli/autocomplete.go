@@ -7,22 +7,22 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/muesli/coral"
 	"github.com/nchern/notelog/pkg/note"
-	"github.com/spf13/cobra"
 )
 
 const cmdDo = "do"
 
-var autocompleteCmd = &cobra.Command{
+var autocompleteCmd = &coral.Command{
 	Use:   "autocomplete",
 	Short: "uses by bash to return autocompletions",
 
-	Args: cobra.ArbitraryArgs,
+	Args: coral.ArbitraryArgs,
 
 	SilenceErrors: true,
 	SilenceUsage:  true,
 
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *coral.Command, args []string) error {
 		pos, err := strconv.Atoi(os.Getenv("COMP_POINT"))
 		if err != nil {
 			return err

@@ -3,17 +3,17 @@ package cli
 import (
 	"fmt"
 
-	"github.com/spf13/cobra"
+	"github.com/muesli/coral"
 )
 
 var (
 	version string
 
-	versionCmd = &cobra.Command{
+	versionCmd = &coral.Command{
 		Use:   "version",
 		Short: "prints current version",
-		Args:  cobra.NoArgs,
-		RunE: func(cmd *cobra.Command, args []string) error {
+		Args:  coral.NoArgs,
+		RunE: func(cmd *coral.Command, args []string) error {
 			return printVersion()
 		},
 	}

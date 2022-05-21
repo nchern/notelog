@@ -1,20 +1,20 @@
 package cli
 
 import (
+	"github.com/muesli/coral"
 	"github.com/nchern/notelog/pkg/note"
-	"github.com/spf13/cobra"
 )
 
 var (
-	archiveCmd = &cobra.Command{
+	archiveCmd = &coral.Command{
 		Use:   "archive",
 		Short: "moves a note to archive",
-		Args:  cobra.ExactArgs(1),
+		Args:  coral.ExactArgs(1),
 
 		SilenceErrors: true,
 		SilenceUsage:  true,
 
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *coral.Command, args []string) error {
 			return archive(args)
 		},
 	}

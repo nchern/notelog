@@ -5,8 +5,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/muesli/coral"
 	"github.com/nchern/notelog/pkg/note"
-	"github.com/spf13/cobra"
 )
 
 const (
@@ -16,43 +16,43 @@ const (
 var (
 	notes = note.NewList()
 
-	doCmd = &cobra.Command{
+	doCmd = &coral.Command{
 		Use:   cmdDo,
 		Short: "runs a given command to manipulate notes",
-		Args:  cobra.ExactArgs(1),
+		Args:  coral.ExactArgs(1),
 
 		SilenceErrors: true,
 		SilenceUsage:  false,
 
-		Run: func(cmd *cobra.Command, args []string) {
+		Run: func(cmd *coral.Command, args []string) {
 			cmd.Help()
 		},
 	}
 
-	rootCmd = &cobra.Command{
+	rootCmd = &coral.Command{
 		Use:   "notelog",
 		Short: "Efficient CLI personal note manager",
-		Args:  cobra.MinimumNArgs(0),
+		Args:  coral.MinimumNArgs(0),
 
 		SilenceUsage:  true,
 		SilenceErrors: true,
 
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *coral.Command, args []string) error {
 			return edit(args, false)
 		},
 	}
 
 	// HACK
-	lsCmdsCmd = &cobra.Command{
+	lsCmdsCmd = &coral.Command{
 		Use:     "list-cmds",
 		Short:   "lists all subcommands",
 		Aliases: []string{"ls-cmds"},
-		Args:    cobra.NoArgs,
+		Args:    coral.NoArgs,
 
 		SilenceErrors: true,
 		SilenceUsage:  false,
 
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *coral.Command, args []string) error {
 			return listCommands(os.Stdout)
 		},
 	}
@@ -63,7 +63,7 @@ var (
 func init() {
 	doCmd.AddCommand(lsCmdsCmd)
 
-	rootCmd.SetHelpFunc(func(cmd *cobra.Command, s []string) {
+	rootCmd.SetHelpFunc(func(cmd *coral.Command, s []string) {
 		defaultHelp(cmd, s)
 
 		fmt.Println()

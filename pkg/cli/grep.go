@@ -1,21 +1,21 @@
 package cli
 
 import (
+	"github.com/muesli/coral"
 	"github.com/nchern/notelog/pkg/note"
 	"github.com/nchern/notelog/pkg/search"
-	"github.com/spf13/cobra"
 )
 
-var grepCmd = &cobra.Command{
+var grepCmd = &coral.Command{
 	Use:   "grep",
 	Short: "runs grep over notes collection",
 
-	Args: cobra.MinimumNArgs(0),
+	Args: coral.MinimumNArgs(0),
 
 	SilenceErrors: true,
 	SilenceUsage:  true,
 
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *coral.Command, args []string) error {
 		notes := note.NewList()
 
 		s := search.NewGrepEngine(notes)

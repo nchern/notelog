@@ -4,9 +4,9 @@ import (
 	"errors"
 	"os"
 
+	"github.com/muesli/coral"
 	"github.com/nchern/notelog/pkg/note"
 	"github.com/nchern/notelog/pkg/search"
-	"github.com/spf13/cobra"
 )
 
 var (
@@ -19,16 +19,16 @@ var (
 	color bool
 )
 
-var searchCmd = &cobra.Command{
+var searchCmd = &coral.Command{
 	Use:   "search",
 	Short: "runs search over notes collection",
 
-	Args: cobra.MinimumNArgs(1),
+	Args: coral.MinimumNArgs(1),
 
 	SilenceErrors: true,
 	SilenceUsage:  true,
 
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *coral.Command, args []string) error {
 		if len(args) < 1 {
 			return errors.New("Not enough args. Specify a search term")
 		}
@@ -44,7 +44,7 @@ var searchCmd = &cobra.Command{
 	},
 }
 
-func bindSearchFlags(cmd *cobra.Command) {
+func bindSearchFlags(cmd *coral.Command) {
 	cmd.Flags().BoolVarP(&interactive,
 		"interactive",
 		"i",
