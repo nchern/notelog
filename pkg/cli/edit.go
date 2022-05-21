@@ -9,7 +9,6 @@ import (
 )
 
 const (
-	// should be configurable
 	defaultSkipLines uint = 2
 
 	defaultFormat = string(note.Org)
@@ -17,8 +16,6 @@ const (
 
 var (
 	readOnly bool
-
-	noteFormat string
 
 	editCmd = &coral.Command{
 		Use:   "edit",
@@ -37,15 +34,17 @@ var (
 
 func init() {
 	editCmd.Flags().BoolVarP(&readOnly,
-		"read-only", "r", false, "opens note in read-only mode")
+		"read-only", "r", false,
+		"opens note in read-only mode")
 	addFormatFlag(editCmd)
 
 	doCmd.AddCommand(editCmd)
 }
 
 func addFormatFlag(cmd *coral.Command) {
-	cmd.Flags().StringVarP(&noteFormat,
-		"format", "t", defaultFormat, "note format; currently org or md are supported")
+	cmd.Flags().StringVarP(&conf.NoteFormat,
+		"format", "t", defaultFormat,
+		"note format; currently org or md are supported")
 }
 
 func parseNoteNameAndLineNumber(rawName string) (name string, lnum editor.LineNumber) {
@@ -58,7 +57,7 @@ func parseNoteNameAndLineNumber(rawName string) (name string, lnum editor.LineNu
 }
 
 func edit(args []string, readOnly bool) error {
-	t, err := note.ParseFormat(noteFormat)
+	t, err := note.ParseFormat(conf.NoteFormat)
 	if err != nil {
 		return err
 	}

@@ -25,7 +25,7 @@ func init() {
 }
 
 func touch(notes note.List, args []string) error {
-	t, err := note.ParseFormat(noteFormat)
+	t, err := note.ParseFormat(conf.NoteFormat)
 	if err != nil {
 		return err
 	}

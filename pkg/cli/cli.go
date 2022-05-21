@@ -2,9 +2,12 @@ package cli
 
 import (
 	"fmt"
+	"log"
 	"os"
+	"path/filepath"
 	"strings"
 
+	"github.com/BurntSushi/toml"
 	"github.com/muesli/coral"
 	"github.com/nchern/notelog/pkg/note"
 )
@@ -58,7 +61,20 @@ var (
 	}
 
 	defaultHelp = rootCmd.HelpFunc()
+
+	mainConfDir  = filepath.Join(os.Getenv("HOME"), note.DotNotelogDir)
+	mainConfPath = filepath.Join(mainConfDir, "config.toml")
+	conf         = Config{
+		NoteFormat: defaultFormat,
+		SkipLines:  defaultSkipLines,
+	}
 )
+
+// Config represents a configuration of this app
+type Config struct {
+	SkipLines  uint   `toml:"skip_lines"`
+	NoteFormat string `toml:"note_format"`
+}
 
 func init() {
 	doCmd.AddCommand(lsCmdsCmd)
@@ -73,8 +89,33 @@ func init() {
 	rootCmd.AddCommand(doCmd)
 }
 
+func loadConfig() error {
+	_, err := toml.DecodeFile(mainConfPath, &conf)
+	if err != nil {
+		return err
+	}
+
+	ft, err := note.ParseFormat(conf.NoteFormat)
+	if err != nil || ft == note.Unknown {
+		log.Printf("WARN loadConfig: %s", err)
+		conf.NoteFormat = defaultFormat
+	}
+	return nil
+}
+
 // Execute is an entry point of CLI
 func Execute() error {
+	const defaultDirPerms = 0700
+
+	err := os.Mkdir(mainConfDir, defaultDirPerms)
+	if err != nil && !os.IsExist(err) {
+		log.Printf("WARN main conf mkdir failed: %s", err)
+	}
+	if err := loadConfig(); err != nil {
+		// TODO: possibly to main app log?
+		log.Printf("WARN loadConfig failed: %s", err)
+	}
+
 	return rootCmd.Execute()
 }
 

@@ -3,6 +3,7 @@ module github.com/nchern/notelog
 go 1.13
 
 require (
+	github.com/BurntSushi/toml v1.1.0
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/muesli/coral v1.0.0
