@@ -69,8 +69,6 @@ $ notelog do sync
 As of now you have to add it manually using standard `git remote add ...`
 
 ## Roadmap
- - [ ] get rid of cobra lib - it's too dependency-bload
-        - look at https://github.com/jessevdk/go-flags or even https://github.com/muesli/coral - drop in replacement for cobra
  - [ ] conflict-free instant note taking from commandline:
         when a note is open in editor and one tries to add an instant note, editor could override amended note
  - [ ] add more description for `contrib` scripts
@@ -98,6 +96,8 @@ As of now you have to add it manually using standard `git remote add ...`
  - [ ] cross-linking: you can fetch all the references from other notes to a given note
    - [ ] embed cross links in notes?
  - [ ] (WONT DO - useless) multiple temporary drafts - when open a draft, this should not be the same file every time
+ - [x] get rid of cobra lib - it's too dependency-bload
+        - migrated to https://github.com/muesli/coral - drop in replacement for cobra
  - [x] have notes on `.md` format and not only in `.org`
  - [x] add more examples, hints, use cases and script recipes
  - [x] integration with fzf: search results
