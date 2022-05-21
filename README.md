@@ -73,7 +73,7 @@ As of now you have to add it manually using standard `git remote add ...`
         when a note is open in editor and one tries to add an instant note, editor could override amended note
  - [ ] (?) in-note macros:
    - [ ] when adding lines, format them according to a given template
- - [ ] refactoring: consolidate `withNotes` functions in tests
+ - [x] refactoring: consolidate `withNotes` functions in tests
  - [ ] refactoring: consider using testing.T.TempDir() in tests instead of manually create / cleanup temp dirs
  - [ ] (?) add man page - scdoc
  - [ ] search

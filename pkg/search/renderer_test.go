@@ -5,17 +5,18 @@ import (
 	"testing"
 
 	"github.com/nchern/notelog/pkg/note"
+	"github.com/nchern/notelog/pkg/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestPersistentRendererShoudWriteLastSearchResults(t *testing.T) {
 	files := m{
-		"a/main.org": "foo bar buzz\nbbb foo aaa",
-		"b/main.org": "foobar bar addd buzz",
-		"c/main.org": "fuzz bar xx buzz",
+		"a": "foo bar buzz\nbbb foo aaa",
+		"b": "foobar bar addd buzz",
+		"c": "fuzz bar xx buzz",
 	}
-	withNotes(files, func(notes note.List) {
+	testutil.WithNotes(files, func(notes note.List) {
 		underTest := NewEngine(notes)
 
 		res, err := underTest.Search("foo")
@@ -63,7 +64,7 @@ func TestPersistentRendererShoudWriteLastSearchResultsInArchivedNotes(t *testing
 }
 
 func TestSearchShoudWriteLastSearchResultsWithoutTermColor(t *testing.T) {
-	withNotes(mkTestFiles(), func(notes note.List) {
+	testutil.WithNotes(mkTestFiles(), func(notes note.List) {
 		underTest := NewEngine(notes)
 
 		res, err := underTest.Search("foo bar")

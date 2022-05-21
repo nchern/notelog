@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/nchern/notelog/pkg/note"
+	"github.com/nchern/notelog/pkg/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -25,20 +26,20 @@ type m map[string]string
 
 func mkTestFiles() m {
 	return m{
-		"a/main.org": "foo bar buzz",
-		"b/main.org": "foobar bar addd buzz",
-		"c/main.org": "fuzz bar xx buzz",
+		"a": "foo bar buzz",
+		"b": "foobar bar addd buzz",
+		"c": "fuzz bar xx buzz",
 	}
 }
 
 func TestShoudSearch(t *testing.T) {
 	files := m{
-		"a/main.org": "foo bar buzz",
-		"b/main.org": "foobar bar addd buzz",
-		"c/main.org": "fuzz bar xx buzz",
-		"d/main.org": "xx* yyy) abc",
+		"a": "foo bar buzz",
+		"b": "foobar bar addd buzz",
+		"c": "fuzz bar xx buzz",
+		"d": "xx* yyy) abc",
 	}
-	withNotes(files, func(notes note.List) {
+	testutil.WithNotes(files, func(notes note.List) {
 		var tests = []struct {
 			name     string
 			expected []*Result
@@ -82,7 +83,7 @@ func TestShoudSearch(t *testing.T) {
 }
 
 func TestSearchShoudReturnZeroResultsIfFoundNothing(t *testing.T) {
-	withNotes(mkTestFiles(), func(notes note.List) {
+	testutil.WithNotes(mkTestFiles(), func(notes note.List) {
 		underTest := NewEngine(notes)
 
 		actual, err := underTest.Search("you will not find me")
@@ -93,7 +94,7 @@ func TestSearchShoudReturnZeroResultsIfFoundNothing(t *testing.T) {
 }
 
 func TestSearchShouldNotSearchInLastResutsFile(t *testing.T) {
-	withNotes(mkTestFiles(), func(notes note.List) {
+	testutil.WithNotes(mkTestFiles(), func(notes note.List) {
 		// search 2 times so that last_results will be filled
 		for i := 0; i < 2; i++ {
 			underTest := NewEngine(notes)
@@ -127,11 +128,11 @@ func TestSearchShouldNotSearchInLastResutsFile(t *testing.T) {
 
 func TestSearcShouldSearchNamesOnlyIfSet(t *testing.T) {
 	files := map[string]string{
-		"a/main.org": "abc\nfoo\nfoo bar",
-		"b/main.org": "fuzz",
-		"c/main.org": "bar foo",
+		"a": "abc\nfoo\nfoo bar",
+		"b": "fuzz",
+		"c": "bar foo",
 	}
-	withNotes(files, func(notes note.List) {
+	testutil.WithNotes(files, func(notes note.List) {
 		prepare := func() *Engine {
 			s := NewEngine(notes)
 			s.OnlyNames = true
@@ -167,12 +168,12 @@ func TestSearcShouldSearchNamesOnlyIfSet(t *testing.T) {
 
 func TestSearchShouldSearchInNoteNames(t *testing.T) {
 	files := map[string]string{
-		"foo/main.org":     "bar",
-		"findme/main.org":  "abc",
-		"findme2/main.org": "dfg",
-		"buzz/main.org":    "findme",
+		"foo":     "bar",
+		"findme":  "abc",
+		"findme2": "dfg",
+		"buzz":    "findme",
 	}
-	withNotes(files, func(notes note.List) {
+	testutil.WithNotes(files, func(notes note.List) {
 		var tests = []struct {
 			name     string
 			expected []*Result
@@ -227,7 +228,7 @@ func disabledTestSearchShouldLookInArchive(t *testing.T) {
 		"findme/main.org":         "abc",
 		"foo/main.org":            "bar",
 	}
-	withNotes(files, func(notes note.List) {
+	testutil.WithNotes(files, func(notes note.List) {
 		underTest := NewEngine(notes)
 
 		actual, err := underTest.Search("abc")
@@ -246,11 +247,11 @@ func disabledTestSearchShouldLookInArchive(t *testing.T) {
 func TestSearchSearchInNotesOfDifferentTypes(t *testing.T) {
 
 	files := map[string]string{
-		"a/main.org": "foo",
-		"b/main.org": "fuzz",
-		"c/main.md":  "bar\nfoo",
+		"a": "foo",
+		"b": "fuzz",
+		"c": "bar\nfoo",
 	}
-	withNotes(files, func(notes note.List) {
+	testutil.WithNotes(files, func(notes note.List) {
 		expected := []*Result{
 			&Result{name: "a", lineNum: 1, text: "foo", matches: []string{"foo"}},
 			&Result{name: "c", lineNum: 2, text: "foo", matches: []string{"foo"}},
@@ -267,11 +268,11 @@ func TestSearchSearchInNotesOfDifferentTypes(t *testing.T) {
 
 func TestSearcShouldSearchCaseSensitiveIfSet(t *testing.T) {
 	files := map[string]string{
-		"a/main.org": "abc\nfoo\nfOo bar",
-		"b/main.org": "fuzz",
-		"c/main.org": "bar FOO",
+		"a": "abc\nfoo\nfOo bar",
+		"b": "fuzz",
+		"c": "bar FOO",
 	}
-	withNotes(files, func(notes note.List) {
+	testutil.WithNotes(files, func(notes note.List) {
 		var tests = []struct {
 			name     string
 			expected []*Result
@@ -311,27 +312,6 @@ func withArchivedNotes(files m, fn func(notes note.List)) {
 		panic(err)
 	}
 	homeDir = filepath.Join(homeDir, ".archive")
-
-	must(os.MkdirAll(homeDir, 0755))
-	defer os.RemoveAll(homeDir)
-
-	must(os.MkdirAll(filepath.Join(homeDir, note.DotNotelogDir), 0755))
-
-	for name, body := range files {
-		fullName := filepath.Join(homeDir, name)
-		dir, _ := filepath.Split(fullName)
-		must(os.MkdirAll(dir, 0755))
-		must(ioutil.WriteFile(fullName, []byte(body), mode))
-	}
-
-	fn(note.List(homeDir))
-}
-
-func withNotes(files m, fn func(notes note.List)) {
-	homeDir, err := ioutil.TempDir("", "test_notes")
-	if err != nil {
-		panic(err)
-	}
 
 	must(os.MkdirAll(homeDir, 0755))
 	defer os.RemoveAll(homeDir)

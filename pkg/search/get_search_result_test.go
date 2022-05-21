@@ -8,12 +8,13 @@ import (
 	"testing"
 
 	"github.com/nchern/notelog/pkg/note"
+	"github.com/nchern/notelog/pkg/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestGetLastNthResult(t *testing.T) {
-	withNotes(mkTestFiles(), func(notes note.List) {
+	testutil.WithNotes(mkTestFiles(), func(notes note.List) {
 		underTest := NewEngine(notes)
 
 		// perform search to generate last results file
@@ -57,7 +58,7 @@ func TestGetLastNthResult(t *testing.T) {
 }
 
 func TestGetLastNthResultShouldReturnEmptyStringIfNoResultsFound(t *testing.T) {
-	withNotes(mkTestFiles(), func(notes note.List) {
+	testutil.WithNotes(mkTestFiles(), func(notes note.List) {
 		// make sure last results file does not exist
 		_, err := os.Stat(notes.MetadataFilename(lastResultsFile))
 		assert.True(t, os.IsNotExist(err))

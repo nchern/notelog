@@ -4,17 +4,18 @@ import (
 	"testing"
 
 	"github.com/nchern/notelog/pkg/note"
+	"github.com/nchern/notelog/pkg/testutil"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestShouldGrep(t *testing.T) {
 	files := m{
-		"a/main.org": "foo bar buz",
-		"b/main.org": "foobar bar addd buzz\nabc dfgh",
-		"c/main.org": "fuzz Bar xx buzz",
-		"d/main.org": "buzz bar xx",
+		"a": "foo bar buz",
+		"b": "foobar bar addd buzz\nabc dfgh",
+		"c": "fuzz Bar xx buzz",
+		"d": "buzz bar xx",
 	}
-	withNotes(files, func(notes note.List) {
+	testutil.WithNotes(files, func(notes note.List) {
 		var tests = []struct {
 			name          string
 			caseSensitive bool
@@ -69,7 +70,7 @@ func TestShouldGrep(t *testing.T) {
 }
 
 func TestGrepShouldFailOnBrokenRegexp(t *testing.T) {
-	withNotes(mkTestFiles(), func(notes note.List) {
+	testutil.WithNotes(mkTestFiles(), func(notes note.List) {
 		underTest := NewGrepEngine(notes)
 		actual, err := underTest.Search("(a")
 		assert.Error(t, err)

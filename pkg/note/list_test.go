@@ -16,6 +16,7 @@ const (
 )
 
 func withNotes(t *testing.T, fn func(notes List)) {
+	// we can't use testutil.WithNotes as testutil depends on this pkg
 	home := filepath.Join(t.TempDir(), testDir)
 	must(os.MkdirAll(home, defaultDirPerms))
 
