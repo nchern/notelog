@@ -10,6 +10,10 @@ import (
 	"strings"
 )
 
+var (
+	errNotExist = errors.New("Note does not exist")
+)
+
 // List represents a collection of notes.
 // As of now this is a collection of folders in NOTELOG_HOME
 // Each folder represents a note: main.org is a main note file
@@ -42,7 +46,6 @@ func (l List) Init() error {
 // Get returns an existing node from the current collection with a given name
 // If the note with a given name does not exit an error is returned
 func (l List) Get(name string) (*Note, error) {
-	var errNotExist = fmt.Errorf("%s does not exist", name)
 	// beware this loop: O(n) FS lookups. Fine while there is a few of supportedTypes
 	for t := range supportedFormats {
 		nt := newNote(name, l.HomeDir())
@@ -56,7 +59,7 @@ func (l List) Get(name string) (*Note, error) {
 			return nt, nil
 		}
 	}
-	return nil, errNotExist
+	return nil, fmt.Errorf("%w: %s", errNotExist, name)
 }
 
 // MetadataFilename returns full path to the notelog metadata for a given file
@@ -117,12 +120,19 @@ func (l List) All() ([]*Note, error) {
 		return nil, err
 	}
 	for _, dir := range dirs {
+		if !dir.IsDir() {
+			continue
+		}
 		if strings.HasPrefix(dir.Name(), ".") {
 			continue
 		}
 		// This is suboptimal with different note types: yields FS lookups, O(len(supportedTypes))
 		nt, err := l.Get(dir.Name())
 		if err != nil {
+			// skip broken notes
+			if errors.Is(err, errNotExist) {
+				continue
+			}
 			return nil, err
 		}
 

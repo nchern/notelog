@@ -2,6 +2,7 @@ package note
 
 import (
 	"bytes"
+	"errors"
 	"io"
 	"os"
 	"path/filepath"
@@ -118,7 +119,8 @@ func TestGet(t *testing.T) {
 
 	withNotes(t, func(notes List) {
 		missing, err := notes.Get("nonexistent")
-		assert.Error(t, err) // FIXME: check concrete error
+		assert.Error(t, err)
+		assert.True(t, errors.Is(err, errNotExist))
 		assert.Nil(t, missing)
 
 		created := makeNote(t, notes, noteName)
@@ -126,6 +128,25 @@ func TestGet(t *testing.T) {
 		underTest, err := notes.Get(noteName)
 		assert.NoError(t, err)
 		assert.Equal(t, created.FullPath(), underTest.FullPath())
+	})
+}
+
+func TestAllShouldNotFailOnNonExistedNotes(t *testing.T) {
+	withNotes(t, func(notes List) {
+		res, err := notes.All()
+		assert.Empty(t, res)
+		assert.NoError(t, err)
+
+		notePath := filepath.Join(notes.HomeDir(), "broken")
+		must(os.MkdirAll(notePath, defaultDirPerms))
+
+		notePath = filepath.Join(notes.HomeDir(), "file")
+		_, err = os.Create(notePath)
+		require.NoError(t, err)
+
+		res, err = notes.All()
+		assert.NoError(t, err)
+		assert.Empty(t, res)
 	})
 }
 
@@ -155,6 +176,7 @@ func TestCopy(t *testing.T) {
 		assert.Equal(t, body, actualBuf.String())
 
 		err = underTest.Copy("nonexistent", newName)
-		assert.Error(t, err) // FIXME: check concrete error
+		assert.Error(t, err)
+		assert.True(t, errors.Is(err, errNotExist))
 	})
 }
