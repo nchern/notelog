@@ -47,8 +47,7 @@ var (
 
 	defaultHelp = rootCmd.HelpFunc()
 
-	mainConfDir  = filepath.Join(os.Getenv("HOME"), note.DotNotelogDir)
-	mainConfPath = filepath.Join(mainConfDir, "config.toml")
+	mainConfPath = filepath.Join(os.Getenv("HOME"), note.DotNotelogDir+"-config.toml")
 	conf         = Config{
 		NoteFormat: defaultFormat,
 		SkipLines:  defaultSkipLines,
@@ -76,11 +75,7 @@ func init() {
 func Execute() error {
 	const defaultDirPerms = 0700
 
-	err := os.Mkdir(mainConfDir, defaultDirPerms)
-	if err != nil && !os.IsExist(err) {
-		log.Printf("WARN main conf mkdir failed: %s", err)
-	}
-	if err := loadConfig(); err != nil {
+	if err := loadConfig(); err != nil && !os.IsNotExist(err) {
 		// TODO: possibly to main app log?
 		log.Printf("WARN loadConfig failed: %s", err)
 	}
