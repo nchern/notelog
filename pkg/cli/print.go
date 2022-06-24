@@ -10,14 +10,13 @@ import (
 var prnNoteCmd = &coral.Command{
 	Use:     "print",
 	Short:   "prints a given note",
-	Args:    coral.MinimumNArgs(1),
 	Aliases: []string{"cat"},
 
 	SilenceErrors: true,
 	SilenceUsage:  true,
 
 	RunE: func(cmd *coral.Command, args []string) error {
-		return printNote(args)
+		return printNotes(args)
 	},
 }
 
@@ -25,21 +24,30 @@ func init() {
 	doCmd.AddCommand(prnNoteCmd)
 }
 
-func printNote(args []string) error {
+func printNote(notes note.List, name string) error {
+	nt, err := notes.Get(name)
+	if err != nil {
+		return err
+	}
+
+	return nt.Dump(os.Stdout)
+}
+
+func printNotes(args []string) error {
 	notes := note.NewList()
+
+	if len(args) == 0 {
+		// handle scratchpad
+		noteName := noteNameFromArgs(args)
+		return printNote(notes, noteName)
+	}
 
 	for _, arg := range args {
 		noteName, err := parseNoteName(arg)
 		if err != nil {
 			return err
 		}
-
-		nt, err := notes.Get(noteName)
-		if err != nil {
-			return err
-		}
-
-		if err = nt.Dump(os.Stdout); err != nil {
+		if err := printNote(notes, noteName); err != nil {
 			return err
 		}
 	}
