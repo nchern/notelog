@@ -71,7 +71,6 @@ As of now you have to add it manually using standard `git remote add ...`
 ## Roadmap
 - [ ] conflict-free instant note taking from commandline:
         when a note is open in editor and one tries to add an instant note, editor could override amended note
-- [ ] refactoring: consider using testing.T.TempDir() in tests instead of manually create / cleanup temp dirs
 - [ ] cross-linking: you can fetch all the references from other notes to a given note
    - [ ] embed cross links in notes?
 - [ ] search: consider indexing full text search solutions, e.g. https://github.com/blevesearch/bleve
@@ -90,7 +89,9 @@ As of now you have to add it manually using standard `git remote add ...`
    - [ ] notelog do attach-open <notename> <attach-name> - opens attach
    - [ ] integrate with search?
 - [ ] (?) note templates
-- [ ] (WONT DO - useless) multiple temporary drafts - when open a draft, this should not be the same file every time
+- [x] (WONT DO - useless) multiple temporary drafts - when open a draft, this should not be the same file every time
+- [x] (WONT DO - useless) refactoring: consider using testing.T.TempDir() in tests instead of manually create / cleanup temp dirs
+    - using testing.TempDir() will unnecessary complicate the current code
 - [x] search
    - [x] add regexp search
    - [x] add colors to output when at tty
