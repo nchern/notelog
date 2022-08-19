@@ -82,15 +82,15 @@ As of now you have to add it manually using standard `git remote add ...`
 - [ ] (?) sub-notes: notes that exist only in a context of a main note
    - example notelog do subnote <notename> <sub-notename>
 - [ ] (?) add man page - scdoc
-- [ ] (?) in-note macros:
-   - [ ] when adding lines, format them according to a given template
 - [ ] (?) attachments to notes
    - [ ] notelog do attach <notename> <filepath> - puts <filepath> into note directory
    - [ ] notelog do attach-open <notename> <attach-name> - opens attach
    - [ ] integrate with search?
-- [ ] (?) note templates
-- [x] (WONT DO - useless) multiple temporary drafts - when open a draft, this should not be the same file every time
-- [x] (WONT DO - useless) refactoring: consider using testing.T.TempDir() in tests instead of manually create / cleanup temp dirs
+- [x] (WON'T DO - can be solved by existing tools) note templates
+- [x] in-note macros:
+   - [x] when adding lines, format them according to a given template
+- [x] (WON'T DO - useless) multiple temporary drafts - when open a draft, this should not be the same file every time
+- [x] (WON'T DO - useless) refactoring: consider using testing.T.TempDir() in tests instead of manually create / cleanup temp dirs
     - using testing.TempDir() will unnecessary complicate the current code
 - [x] search
    - [x] add regexp search

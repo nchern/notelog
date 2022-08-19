@@ -2,6 +2,7 @@ package note
 
 import (
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"regexp"
@@ -9,16 +10,20 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 const sample = "instant"
 
-func TestWriteInstantRecord(t *testing.T) {
-	n := &Note{homeDir: t.TempDir(), name: testDir}
+func mkTestNotes(dir string) *Note {
+	n := &Note{homeDir: dir, name: testDir}
 	if err := n.Init(); err != nil && !errors.Is(err, os.ErrExist) {
-		require.NoError(t, err)
+		panic(err)
 	}
+	return n
+}
+
+func TestWriteInstantRecord(t *testing.T) {
+	underTest := mkTestNotes(t.TempDir())
 
 	initial := text(
 		"foo",
@@ -70,12 +75,13 @@ func TestWriteInstantRecord(t *testing.T) {
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
-			must(ioutil.WriteFile(n.FullPath(), []byte(initial), defaultFilePerms))
-			defer os.Remove(n.FullPath())
+			must(ioutil.WriteFile(underTest.FullPath(), []byte(initial), defaultFilePerms))
+			defer os.Remove(underTest.FullPath())
 
-			assert.NoError(t, n.WriteInstantRecord(sample, SkipLines(tt.givenSkipLines)))
+			assert.NoError(t,
+				underTest.WriteInstantRecord(sample, SkipLines(tt.givenSkipLines)))
 
-			actual, err := ioutil.ReadFile(n.FullPath())
+			actual, err := ioutil.ReadFile(underTest.FullPath())
 
 			assert.NoError(t, err)
 			assert.Equal(t, tt.expected, string(actual))
@@ -84,10 +90,7 @@ func TestWriteInstantRecord(t *testing.T) {
 }
 
 func TestWriteInstantRecordWithSkipLinesByRegex(t *testing.T) {
-	n := &Note{homeDir: t.TempDir(), name: testDir}
-	if err := n.Init(); err != nil && !errors.Is(err, os.ErrExist) {
-		require.NoError(t, err)
-	}
+	underTest := mkTestNotes(t.TempDir())
 
 	initial := text(
 		"foo",
@@ -144,12 +147,40 @@ func TestWriteInstantRecordWithSkipLinesByRegex(t *testing.T) {
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
-			must(ioutil.WriteFile(n.FullPath(), []byte(initial), defaultFilePerms))
-			defer os.Remove(n.FullPath())
+			must(ioutil.WriteFile(underTest.FullPath(), []byte(initial), defaultFilePerms))
+			defer os.Remove(underTest.FullPath())
 
-			assert.NoError(t, n.WriteInstantRecord(sample, SkipLinesByRegex(tt.givenSkipLinesRegexp)))
+			assert.NoError(t,
+				underTest.WriteInstantRecord(sample, SkipLinesByRegex(tt.givenSkipLinesRegexp)))
 
-			actual, err := ioutil.ReadFile(n.FullPath())
+			actual, err := ioutil.ReadFile(underTest.FullPath())
+
+			assert.NoError(t, err)
+			assert.Equal(t, tt.expected, string(actual))
+		})
+	}
+}
+
+func TestWriteInstantRecordShouldExpand(t *testing.T) {
+	underTest := mkTestNotes(t.TempDir())
+
+	var tests = []struct {
+		name     string
+		expected string
+		given    string
+	}{
+		{"date macro",
+			fmt.Sprintf("\n%s foobar\n", testToday), "$d foobar"},
+	}
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			defer os.Remove(underTest.FullPath())
+
+			assert.NoError(t,
+				underTest.WriteInstantRecord(tt.given, SkipLines(0)))
+
+			actual, err := ioutil.ReadFile(underTest.FullPath())
 
 			assert.NoError(t, err)
 			assert.Equal(t, tt.expected, string(actual))

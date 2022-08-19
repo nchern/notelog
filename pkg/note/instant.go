@@ -9,6 +9,8 @@ import (
 
 const (
 	recordTemplate = "%s"
+
+	dateFormat = "2006-01-02"
 )
 
 // ShouldWriteFunc defines a function that determines if instant record should be written after a given line
@@ -44,6 +46,16 @@ func (w *writer) writeRecord(record string) error {
 	return w.err
 }
 
+func expandVars(s string) string {
+	mapping := func(s string) string {
+		if s == "d" {
+			return nowFn().Format(dateFormat)
+		}
+		return s
+	}
+	return os.Expand(s, mapping)
+}
+
 // WriteInstantRecord directly writes an `instant` string to a given note
 func (n *Note) WriteInstantRecord(record string, shouldWrite ShouldWriteFunc) error {
 	filename := n.FullPath()
@@ -72,7 +84,7 @@ func (n *Note) WriteInstantRecord(record string, shouldWrite ShouldWriteFunc) er
 			dst.println()
 		}
 		if !written && shouldWrite(i, s, prev) {
-			dst.writeRecord(record)
+			dst.writeRecord(expandVars(record))
 			dst.println()
 			written = true
 		}
@@ -85,7 +97,7 @@ func (n *Note) WriteInstantRecord(record string, shouldWrite ShouldWriteFunc) er
 	}
 	if !written {
 		dst.println()
-		dst.writeRecord(record)
+		dst.writeRecord(expandVars(record))
 	}
 	if dst.err != nil {
 		return dst.err
