@@ -4,6 +4,7 @@ import (
 	"errors"
 	"io/ioutil"
 	"os"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -11,8 +12,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+const sample = "instant"
+
 func TestWriteInstantRecord(t *testing.T) {
-	const sample = "instant"
 	n := &Note{homeDir: t.TempDir(), name: testDir}
 	if err := n.Init(); err != nil && !errors.Is(err, os.ErrExist) {
 		require.NoError(t, err)
@@ -71,7 +73,67 @@ func TestWriteInstantRecord(t *testing.T) {
 			must(ioutil.WriteFile(n.FullPath(), []byte(initial), defaultFilePerms))
 			defer os.Remove(n.FullPath())
 
-			assert.NoError(t, n.WriteInstantRecord(sample, tt.givenSkipLines))
+			assert.NoError(t, n.WriteInstantRecord(sample, SkipLines(tt.givenSkipLines)))
+
+			actual, err := ioutil.ReadFile(n.FullPath())
+
+			assert.NoError(t, err)
+			assert.Equal(t, tt.expected, string(actual))
+		})
+	}
+}
+
+func TestWriteInstantRecordWithSkipLinesByRegex(t *testing.T) {
+	n := &Note{homeDir: t.TempDir(), name: testDir}
+	if err := n.Init(); err != nil && !errors.Is(err, os.ErrExist) {
+		require.NoError(t, err)
+	}
+
+	initial := text(
+		"foo",
+		"bar",
+		"buzz")
+
+	var tests = []struct {
+		name                 string
+		expected             string
+		givenSkipLinesRegexp *regexp.Regexp
+	}{
+		{"should write after regexp matches",
+			text(
+				"foo",
+				sample,
+				"",
+				"bar",
+				"buzz"),
+			regexp.MustCompile("foo"),
+		},
+		{"should write after 1st occurance of regexp matching",
+			text(
+				"foo",
+				"bar",
+				sample,
+				"",
+				"buzz"),
+			regexp.MustCompile("b.*?"),
+		},
+		{"should write to the end if no mateches",
+			text(
+				"foo",
+				"bar",
+				"buzz",
+				sample,
+				""),
+			regexp.MustCompile("abc"),
+		},
+	}
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			must(ioutil.WriteFile(n.FullPath(), []byte(initial), defaultFilePerms))
+			defer os.Remove(n.FullPath())
+
+			assert.NoError(t, n.WriteInstantRecord(sample, SkipLinesByRegex(tt.givenSkipLinesRegexp)))
 
 			actual, err := ioutil.ReadFile(n.FullPath())
 

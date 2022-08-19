@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"regexp"
 	"strings"
 
 	"github.com/muesli/coral"
@@ -85,7 +86,15 @@ func edit(args []string, readOnly bool) error {
 		instantRecord = strings.TrimSpace(strings.Join(args[1:], " "))
 	}
 	if instantRecord != "" {
-		return nt.WriteInstantRecord(instantRecord, conf.SkipLines)
+		skipFn := note.SkipLines(conf.SkipLines)
+		if conf.SkipLinesAfterMatch != "" {
+			rx, err := regexp.Compile(conf.SkipLinesAfterMatch)
+			if err != nil {
+				return err
+			}
+			skipFn = note.SkipLinesByRegex(rx)
+		}
+		return nt.WriteInstantRecord(instantRecord, skipFn)
 	}
 
 	return editor.Edit(nt, readOnly, lnum)

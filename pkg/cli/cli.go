@@ -56,8 +56,9 @@ var (
 
 // Config represents a configuration of this app
 type Config struct {
-	SkipLines  uint   `toml:"skip_lines"`
-	NoteFormat string `toml:"note_format"`
+	NoteFormat          string `toml:"note_format"`
+	SkipLines           uint   `toml:"skip_lines"`
+	SkipLinesAfterMatch string `toml:"skip_lines_after_match"`
 }
 
 func init() {
