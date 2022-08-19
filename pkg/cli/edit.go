@@ -85,7 +85,7 @@ func edit(args []string, readOnly bool) error {
 		instantRecord = strings.TrimSpace(strings.Join(args[1:], " "))
 	}
 	if instantRecord != "" {
-		return nt.WriteInstantRecord(instantRecord, defaultSkipLines)
+		return nt.WriteInstantRecord(instantRecord, conf.SkipLines)
 	}
 
 	return editor.Edit(nt, readOnly, lnum)
