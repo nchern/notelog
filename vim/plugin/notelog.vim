@@ -96,6 +96,10 @@ command! -nargs=+ -complete=custom,NotesList NLLog :NLQuickLog <args>
 " Replaces selection with contents of a given note
 command! -range -nargs=1 -complete=custom,NotesList NLPasteNote :<line1>,<line2>!notelog do print <q-args>
 
+" Runs fzf to search through note names and then opens selected note
+" Requires FZF plugin
+command! NLBrowse :call fzf#run({'source': 'notelog do ls', 'sink': 'NLOpen'})
+
 " Sorts checkboxed items with notelog
 autocmd FileType org command! -range=% NLSortCheckList :<line1>,<line2>!notelog do org-checklist-sort
 
@@ -121,7 +125,3 @@ autocmd FileType org command! NLArchive : call NotesArchive()
 
 " Deletes the current note
 autocmd FileType org command! NLDelete :w | execute "!notelog do rm -f '%'" | bd
-
-" Runs fzf to search through note names and then opens selected note
-" Requires FZF plugin
-autocmd FileType org command! NLBrowse :call fzf#run({'source': 'notelog do ls', 'sink': 'NLOpen'})
