@@ -91,6 +91,7 @@ func TestWriteInstantRecordWithSkipLinesByRegex(t *testing.T) {
 
 	initial := text(
 		"foo",
+		"fuu",
 		"bar",
 		"buzz")
 
@@ -99,18 +100,30 @@ func TestWriteInstantRecordWithSkipLinesByRegex(t *testing.T) {
 		expected             string
 		givenSkipLinesRegexp *regexp.Regexp
 	}{
-		{"should write after regexp matches",
+		{"should write after regexp match",
 			text(
 				"foo",
 				sample,
 				"",
+				"fuu",
 				"bar",
 				"buzz"),
 			regexp.MustCompile("foo"),
 		},
-		{"should write after 1st occurance of regexp matching",
+		{"should write after regexp matching more than one line only after the first match",
 			text(
 				"foo",
+				sample,
+				"",
+				"fuu",
+				"bar",
+				"buzz"),
+			regexp.MustCompile("f(o|u)"),
+		},
+		{"should write after 1st occurance of regexp matching near the end",
+			text(
+				"foo",
+				"fuu",
 				"bar",
 				sample,
 				"",
@@ -120,6 +133,7 @@ func TestWriteInstantRecordWithSkipLinesByRegex(t *testing.T) {
 		{"should write to the end if no mateches",
 			text(
 				"foo",
+				"fuu",
 				"bar",
 				"buzz",
 				sample,

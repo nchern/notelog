@@ -71,7 +71,7 @@ func (n *Note) WriteInstantRecord(record string, shouldWrite ShouldWriteFunc) er
 		if i > 0 {
 			dst.println()
 		}
-		if shouldWrite(i, s, prev) {
+		if !written && shouldWrite(i, s, prev) {
 			dst.writeRecord(record)
 			dst.println()
 			written = true

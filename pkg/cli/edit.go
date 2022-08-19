@@ -46,6 +46,9 @@ func addFormatFlag(cmd *coral.Command) {
 	cmd.Flags().StringVarP(&conf.NoteFormat,
 		"format", "t", defaultFormat,
 		"note format; currently org or md are supported")
+	cmd.Flags().StringVarP(&conf.SkipLinesAfterMatch,
+		"skip-lines-after", "s", "",
+		"sets regexp to define where to write instant records")
 }
 
 func parseNoteNameAndLineNumber(rawName string) (name string, lnum editor.LineNumber, isArchive bool) {
