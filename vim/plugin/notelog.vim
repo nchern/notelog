@@ -101,27 +101,27 @@ command! -range -nargs=1 -complete=custom,NotesList NLPasteNote :<line1>,<line2>
 command! NLBrowse :call fzf#run({'source': 'notelog do ls', 'sink': 'NLOpen'})
 
 " Sorts checkboxed items with notelog
-autocmd FileType org command! -range=% NLSortCheckList :<line1>,<line2>!notelog do org-checklist-sort
+autocmd FileType org, markdown command! -range=% NLSortCheckList :<line1>,<line2>!notelog do org-checklist-sort
 
 " Inserts link to another note under the cursor pos
-autocmd FileType org command! -nargs=1 -complete=custom,NotesList NLLinkNote :call NotesDoInsertLink(<f-args>)
+autocmd FileType org, markdown command! -nargs=1 -complete=custom,NotesList NLLinkNote :call NotesDoInsertLink(<f-args>)
 
 " Performs search
-autocmd FileType org command! -nargs=1 NLSearch :call NotesDoSearch(<f-args>)
+autocmd FileType org, markdown command! -nargs=1 NLSearch :call NotesDoSearch(<f-args>)
 
 " Syncs notes
-autocmd FileType org command! -nargs=? NLSync :!notelog do sync <q-args>
+autocmd FileType org, markdown command! -nargs=? NLSync :!notelog do sync <q-args>
 
 " Installs notelog binaries
-autocmd FileType org command! NLInstallBinaries :call NotesGoGet(0)
+autocmd FileType org, markdown command! NLInstallBinaries :call NotesGoGet(0)
 " Updates notelog binaries
-autocmd FileType org command! NLUpdateBinaries :call NotesGoGet(1)
+autocmd FileType org, markdown command! NLUpdateBinaries :call NotesGoGet(1)
 
 " Calls an external command to search info on a person
-autocmd FileType org nnoremap <Localleader>gd :call NotesBrowseGroupDirectory()<CR>
+autocmd FileType org, markdown nnoremap <Localleader>gd :call NotesBrowseGroupDirectory()<CR>
 
 " Archives current note
-autocmd FileType org command! NLArchive : call NotesArchive()
+autocmd FileType org, markdown command! NLArchive : call NotesArchive()
 
 " Deletes the current note
-autocmd FileType org command! NLDelete :w | execute "!notelog do rm -f '%'" | bd
+autocmd FileType org, markdown command! NLDelete :w | execute "!notelog do rm -f '%'" | bd
