@@ -14,4 +14,9 @@ cat "$coverprofile_raw" \
     | grep -v ".pb." \
     | grep -v ".xo." \
     > $coverprofile
-go tool cover -html="$coverprofile"
+
+if [ "${1:-""}" = html ]; then
+    go tool cover -html="$coverprofile"
+else
+    go tool cover -func="$coverprofile"
+fi

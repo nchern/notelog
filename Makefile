@@ -27,3 +27,7 @@ gen-version:
 .PHONY: coverage
 coverage: vet
 	@./coverage.sh
+
+.PHONY: coverage-html
+coverage-html: vet
+	@./coverage.sh html
