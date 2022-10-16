@@ -1,0 +1,10 @@
+#!/bin/sh
+set -ue
+
+# Help: updates multiple notes at once. Expects text on stdin and a list of notes as arguments
+
+TEXT=$(cat)
+
+for name in "$@"; do
+    notelog do edit "$name" "$TEXT"    
+done
