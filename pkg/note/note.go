@@ -128,11 +128,6 @@ func (n *Note) Init() error {
 	return os.Mkdir(n.dir(), defaultDirPerms)
 }
 
-// Reader returns a reader to read this note content
-func (n *Note) Reader() (io.ReadCloser, error) {
-	return os.Open(n.FullPath())
-}
-
 // Dump writes this note contents to a given writer
 func (n *Note) Dump(w io.Writer) error {
 	f, err := os.Open(n.FullPath())

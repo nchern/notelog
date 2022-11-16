@@ -2,6 +2,7 @@ package search
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
 	"log"
 	"sort"
@@ -74,15 +75,15 @@ func colorize(s string, color int, attrs ...string) string {
 }
 
 func searchNote(notes Notes, nt *note.Note, matcher matcherFunc) ([]*Result, error) {
-	r, err := nt.Reader()
+	var buf bytes.Buffer
+	err := nt.Dump(&buf)
 	if err != nil {
 		return nil, err
 	}
-	defer r.Close()
 
 	lnum := 0
 	res := []*Result{}
-	scanner := bufio.NewScanner(r)
+	scanner := bufio.NewScanner(&buf)
 	for scanner.Scan() {
 		lnum++
 		l := scanner.Text()
