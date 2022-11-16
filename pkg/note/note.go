@@ -2,6 +2,7 @@ package note
 
 import (
 	"io"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -142,6 +143,11 @@ func (n *Note) Dump(w io.Writer) error {
 
 	_, err = io.Copy(w, f)
 	return err
+}
+
+// Write overwrites this note content with a given string
+func (n *Note) Write(s string) error {
+	return ioutil.WriteFile(n.FullPath(), []byte(s), defaultFilePerms)
 }
 
 // Archived determines if this note is archived

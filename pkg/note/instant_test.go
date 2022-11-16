@@ -62,13 +62,13 @@ func TestWriteInstantRecord(t *testing.T) {
 				"buzz"),
 			2,
 		},
-		{"should write to the end if asked to skip more lines that a file contains",
+		{"should write at the beginning if asked to skip more lines that a file contains",
 			text(
+				sample,
+				"",
 				"foo",
 				"bar",
-				"buzz",
-				sample,
-				""),
+				"buzz"),
 			20,
 		},
 	}
@@ -79,7 +79,7 @@ func TestWriteInstantRecord(t *testing.T) {
 			defer os.Remove(underTest.FullPath())
 
 			assert.NoError(t,
-				underTest.WriteInstantRecord(sample, SkipLines(tt.givenSkipLines)))
+				underTest.WriteInstantRecord(sample, tt.givenSkipLines, nil))
 
 			actual, err := ioutil.ReadFile(underTest.FullPath())
 
@@ -133,14 +133,14 @@ func TestWriteInstantRecordWithSkipLinesByRegex(t *testing.T) {
 				"buzz"),
 			regexp.MustCompile("b.*?"),
 		},
-		{"should write to the end if no mateches",
+		{"should write at the beginning if no mateches",
 			text(
+				sample,
+				"",
 				"foo",
 				"fuu",
 				"bar",
-				"buzz",
-				sample,
-				""),
+				"buzz"),
 			regexp.MustCompile("abc"),
 		},
 	}
@@ -151,7 +151,7 @@ func TestWriteInstantRecordWithSkipLinesByRegex(t *testing.T) {
 			defer os.Remove(underTest.FullPath())
 
 			assert.NoError(t,
-				underTest.WriteInstantRecord(sample, SkipLinesByRegex(tt.givenSkipLinesRegexp)))
+				underTest.WriteInstantRecord(sample, 0, tt.givenSkipLinesRegexp))
 
 			actual, err := ioutil.ReadFile(underTest.FullPath())
 
@@ -170,7 +170,7 @@ func TestWriteInstantRecordShouldExpand(t *testing.T) {
 		given    string
 	}{
 		{"date macro",
-			fmt.Sprintf("\n%s foobar\n", testToday), "$d foobar"},
+			fmt.Sprintf("%s foobar\n", testToday), "$d foobar"},
 	}
 	for _, tt := range tests {
 		tt := tt
@@ -178,7 +178,7 @@ func TestWriteInstantRecordShouldExpand(t *testing.T) {
 			defer os.Remove(underTest.FullPath())
 
 			assert.NoError(t,
-				underTest.WriteInstantRecord(tt.given, SkipLines(0)))
+				underTest.WriteInstantRecord(tt.given, 0, nil))
 
 			actual, err := ioutil.ReadFile(underTest.FullPath())
 

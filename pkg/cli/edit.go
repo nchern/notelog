@@ -89,15 +89,14 @@ func edit(args []string, readOnly bool) error {
 		instantRecord = strings.TrimSpace(strings.Join(args[1:], " "))
 	}
 	if instantRecord != "" {
-		skipFn := note.SkipLines(conf.SkipLines)
+		var rx *regexp.Regexp
 		if conf.SkipLinesAfterMatch != "" {
-			rx, err := regexp.Compile(conf.SkipLinesAfterMatch)
+			rx, err = regexp.Compile(conf.SkipLinesAfterMatch)
 			if err != nil {
 				return err
 			}
-			skipFn = note.SkipLinesByRegex(rx)
 		}
-		return nt.WriteInstantRecord(instantRecord, skipFn)
+		return nt.WriteInstantRecord(instantRecord, conf.SkipLines, rx)
 	}
 
 	return editor.Edit(nt, readOnly, lnum)
