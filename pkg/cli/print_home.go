@@ -22,5 +22,5 @@ var printHomeCmd = &coral.Command{
 }
 
 func init() {
-	doCmd.AddCommand(printHomeCmd)
+	rootCmd.AddCommand(printHomeCmd)
 }

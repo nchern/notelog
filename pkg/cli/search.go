@@ -82,7 +82,7 @@ func bindSearchFlags(cmd *coral.Command) {
 func init() {
 	bindSearchFlags(searchCmd)
 
-	doCmd.AddCommand(searchCmd)
+	rootCmd.AddCommand(searchCmd)
 }
 
 type searcher interface {

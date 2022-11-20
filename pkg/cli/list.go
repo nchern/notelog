@@ -35,7 +35,7 @@ func init() {
 	listCmd.Flags().BoolVarP(&sortByDate, "by-date", "d", false, "sorts notes by last modified date in asc order")
 	listCmd.Flags().BoolVarP(&longOutput, "long", "l", false, "verbose output: includes note modified dates")
 
-	doCmd.AddCommand(listCmd)
+	rootCmd.AddCommand(listCmd)
 }
 
 func formatNote(nt *note.Note) string {

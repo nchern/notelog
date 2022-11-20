@@ -28,5 +28,5 @@ var copyCmd = &coral.Command{
 }
 
 func init() {
-	doCmd.AddCommand(copyCmd)
+	rootCmd.AddCommand(copyCmd)
 }

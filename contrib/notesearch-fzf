@@ -5,8 +5,8 @@
 
 # depends on: https://github.com/junegunn/fzf
 
-exec notelog 'do' search $@ | 
+exec notelog search "$@" | 
     fzf -0 \
         --preview-window 'up,70%' \
-        --preview 'notelog do print $(echo {} | cut -d":" -f1) | NOTE_NAME="{}" notelog-preview.awk' \
+        --preview 'notelog print $(echo {} | cut -d":" -f1) | NOTE_NAME="{}" notelog-preview.awk' \
         --bind 'enter:execute(notelog $(echo {} | cut -d":" -f1-2))'

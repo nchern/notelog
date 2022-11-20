@@ -11,8 +11,6 @@ import (
 	"github.com/nchern/notelog/pkg/note"
 )
 
-const cmdDo = "do"
-
 var autocompleteCmd = &coral.Command{
 	Use:   "autocomplete",
 	Short: "uses by bash to return autocompletions",
@@ -33,7 +31,7 @@ var autocompleteCmd = &coral.Command{
 }
 
 func init() {
-	doCmd.AddCommand(autocompleteCmd)
+	rootCmd.AddCommand(autocompleteCmd)
 }
 
 func autoComplete(list note.List, line string, i int, w io.Writer) error {
@@ -41,7 +39,7 @@ func autoComplete(list note.List, line string, i int, w io.Writer) error {
 	curTok := getCurrentCompletingToken(beforeCursor)
 	prevToks := strings.TrimSpace(strings.TrimSuffix(strings.TrimSpace(beforeCursor), curTok))
 
-	if strings.HasSuffix(prevToks, cmdDo) {
+	if strings.HasSuffix(prevToks, rootCmd.Use) {
 		return printCommandsWithPrefix(curTok, w)
 	}
 
@@ -56,7 +54,7 @@ func autoComplete(list note.List, line string, i int, w io.Writer) error {
 }
 
 func printCommandsWithPrefix(prefix string, w io.Writer) error {
-	for _, c := range doCmd.Commands() {
+	for _, c := range rootCmd.Commands() {
 		if !strings.HasPrefix(c.Use, prefix) {
 			continue
 		}
@@ -67,29 +65,7 @@ func printCommandsWithPrefix(prefix string, w io.Writer) error {
 	return nil
 }
 
-func autoCompleteDoCommand(curTok string, prevToks string, w io.Writer) error {
-	// Hack: this hacky function attempts to autocomplete do command
-	// if this is required
-	for _, cmd := range doCmd.Commands() {
-		// no need to autocomplete "do" if subcommands are already entered
-		if strings.HasSuffix(prevToks, cmd.Use) {
-			return nil
-		}
-	}
-	if strings.HasPrefix(cmdDo, curTok) {
-		_, err := fmt.Fprintln(w, cmdDo)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
 func printNotesWithPrefix(notes []*note.Note, curTok string, prevToks string, w io.Writer) error {
-	if err := autoCompleteDoCommand(curTok, prevToks, w); err != nil {
-		return err
-	}
-
 	for _, note := range notes {
 		if !strings.HasPrefix(note.Name(), curTok) {
 			continue

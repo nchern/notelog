@@ -6,5 +6,5 @@ set -ue
 TEXT=$(cat)
 
 for name in "$@"; do
-    notelog do edit "$name" "$TEXT"    
+    notelog edit "$name" "$TEXT"    
 done

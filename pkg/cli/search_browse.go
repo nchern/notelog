@@ -25,7 +25,7 @@ var browseSearchCmd = &coral.Command{
 }
 
 func init() {
-	doCmd.AddCommand(browseSearchCmd)
+	rootCmd.AddCommand(browseSearchCmd)
 }
 
 func browseSearch(args []string) error {

@@ -1,4 +1,4 @@
 #!/bin/sh
 set -ue
 
-exec notelog do cat "$1"
+exec notelog cat "$1"

@@ -28,5 +28,5 @@ var renameCmd = &coral.Command{
 }
 
 func init() {
-	doCmd.AddCommand(renameCmd)
+	rootCmd.AddCommand(renameCmd)
 }

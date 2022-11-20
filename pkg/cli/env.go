@@ -23,5 +23,5 @@ var envCmd = &coral.Command{
 }
 
 func init() {
-	doCmd.AddCommand(envCmd)
+	rootCmd.AddCommand(envCmd)
 }

@@ -6,9 +6,9 @@ ARG="${1:-""}"
 
 case "$ARG" in
     -+([0-9]) )
-        exec notelog 'do' search-browse "$(echo "$ARG" | tr -d "-")"
+        exec notelog search-browse "$(echo "$ARG" | tr -d "-")"
         ;;
     * )
-        exec notelog 'do' search -i --color "$@"
+        exec notelog search -i --color "$@"
         ;;
 esac

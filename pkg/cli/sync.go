@@ -24,5 +24,5 @@ var syncCmd = &coral.Command{
 }
 
 func init() {
-	doCmd.AddCommand(syncCmd)
+	rootCmd.AddCommand(syncCmd)
 }

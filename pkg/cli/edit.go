@@ -39,7 +39,7 @@ func init() {
 		"opens note in read-only mode")
 	addFormatFlag(editCmd)
 
-	doCmd.AddCommand(editCmd)
+	rootCmd.AddCommand(editCmd)
 }
 
 func addFormatFlag(cmd *coral.Command) {

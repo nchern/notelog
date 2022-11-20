@@ -21,7 +21,7 @@ var prnNoteCmd = &coral.Command{
 }
 
 func init() {
-	doCmd.AddCommand(prnNoteCmd)
+	rootCmd.AddCommand(prnNoteCmd)
 }
 
 func printNote(notes note.List, name string) error {

@@ -22,7 +22,7 @@ var (
 )
 
 func init() {
-	doCmd.AddCommand(archOpenCmd)
+	rootCmd.AddCommand(archOpenCmd)
 }
 
 func archOpen(args []string) error {

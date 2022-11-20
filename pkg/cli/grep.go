@@ -29,5 +29,5 @@ var grepCmd = &coral.Command{
 func init() {
 	bindSearchFlags(grepCmd)
 
-	doCmd.AddCommand(grepCmd)
+	rootCmd.AddCommand(grepCmd)
 }

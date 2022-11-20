@@ -20,7 +20,7 @@ var (
 )
 
 func init() {
-	doCmd.AddCommand(versionCmd)
+	rootCmd.AddCommand(versionCmd)
 }
 
 func printVersion() error {

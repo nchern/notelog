@@ -22,5 +22,5 @@ var repoInitCmd = &coral.Command{
 }
 
 func init() {
-	doCmd.AddCommand(repoInitCmd)
+	rootCmd.AddCommand(repoInitCmd)
 }

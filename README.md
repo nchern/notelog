@@ -26,10 +26,10 @@ $ notelog my-note foo bar
 
 # Archive a note: the note becomes unavailable in this collection
 # for direct edits, also is not visible for search by default
-$ notelog do archive my-note
+$ notelog archive my-note
 
 # Lists all notes in collection sorted by last modified date
-$ notelog do list --by-date
+$ notelog list --by-date
 
 # Prints help
 $ notelog help
@@ -43,12 +43,12 @@ Notelog supports search over notes collection.
 
 ```bash
 # Search all lines that contain "foo" over all notes
-$ notelog do search --interactive foo
+$ notelog search --interactive foo
 1. noteA:1:foo bar
 2. noteB:10:hello foo
 
 # Open the second search result note from previous search in editor
-$ notelog do search-browse 2
+$ notelog search-browse 2
 ```
 
 ### Integrate with git
@@ -59,10 +59,10 @@ Notelog has a couple of commands to simplify this task though currently this fun
 
 ```bash
 # Initialize a repo in the current notes collection
-$ notelog do init-repo
+$ notelog init-repo
 
 # Synchronize the repo with origin: add all the changes, commit, update from the origin and push
-$ notelog do sync
+$ notelog sync
 ```
 
 **Please note that the "origin" remote is not automatically added**.
@@ -80,11 +80,11 @@ As of now you have to add it manually using standard `git remote add ...`
    - [x] enable search in archive?
    - [ ] be restored from the archive (eventually)
 - [ ] (?) sub-notes: notes that exist only in a context of a main note
-   - example notelog do subnote <notename> <sub-notename>
+   - example notelog subnote <notename> <sub-notename>
 - [ ] (?) add man page - scdoc
 - [ ] (?) attachments to notes
-   - [ ] notelog do attach <notename> <filepath> - puts <filepath> into note directory
-   - [ ] notelog do attach-open <notename> <attach-name> - opens attach
+   - [ ] notelog attach <notename> <filepath> - puts <filepath> into note directory
+   - [ ] notelog attach-open <notename> <attach-name> - opens attach
    - [ ] integrate with search?
 - [x] (WON'T DO - can be solved by existing tools) note templates
 - [x] in-note macros:

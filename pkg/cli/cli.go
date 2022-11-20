@@ -1,7 +1,6 @@
 package cli
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -19,19 +18,6 @@ const (
 var (
 	notes = note.NewList()
 
-	doCmd = &coral.Command{
-		Use:   cmdDo,
-		Short: "runs a given command to manipulate notes",
-		Args:  coral.ExactArgs(1),
-
-		SilenceErrors: true,
-		SilenceUsage:  false,
-
-		Run: func(cmd *coral.Command, args []string) {
-			cmd.Help()
-		},
-	}
-
 	rootCmd = &coral.Command{
 		Use:   "notelog",
 		Short: "Efficient CLI personal note manager",
@@ -39,10 +25,6 @@ var (
 
 		SilenceUsage:  true,
 		SilenceErrors: true,
-
-		RunE: func(cmd *coral.Command, args []string) error {
-			return edit(args, false)
-		},
 	}
 
 	defaultHelp = rootCmd.HelpFunc()
@@ -64,12 +46,7 @@ type Config struct {
 func init() {
 	rootCmd.SetHelpFunc(func(cmd *coral.Command, s []string) {
 		defaultHelp(cmd, s)
-
-		fmt.Println()
-		fmt.Println("Use \"notelog <note-name>\" as a shortcut of \"notelog do edit <note-name>\"")
 	})
-
-	rootCmd.AddCommand(doCmd)
 }
 
 // Execute is an entry point of CLI

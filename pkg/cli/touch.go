@@ -21,7 +21,7 @@ var touchCmd = &coral.Command{
 
 func init() {
 	addFormatFlag(touchCmd)
-	doCmd.AddCommand(touchCmd)
+	rootCmd.AddCommand(touchCmd)
 }
 
 func touch(notes note.List, args []string) error {

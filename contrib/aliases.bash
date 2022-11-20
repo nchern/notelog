@@ -1,7 +1,7 @@
 # notelog search alias
-alias notesearch='notelog do search -i --color'
-alias notesearch-jump='notelog do search-browse'
-alias notesearch-go='notelog do search-browse'
+alias notesearch='notelog search -i --color'
+alias notesearch-jump='notelog search-browse'
+alias notesearch-go='notelog search-browse'
 
 
-alias nlgrep='notelog do grep -i --color'
+alias nlgrep='notelog grep -i --color'

@@ -24,5 +24,5 @@ var (
 )
 
 func init() {
-	doCmd.AddCommand(lsCmdsCmd)
+	rootCmd.AddCommand(lsCmdsCmd)
 }

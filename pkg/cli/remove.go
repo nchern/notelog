@@ -44,5 +44,5 @@ func init() {
 		false,
 		"addresses a note by filename")
 
-	doCmd.AddCommand(removeCmd)
+	rootCmd.AddCommand(removeCmd)
 }

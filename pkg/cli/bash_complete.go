@@ -23,7 +23,7 @@ var bashCompleteCmd = &coral.Command{
 }
 
 func init() {
-	doCmd.AddCommand(bashCompleteCmd)
+	rootCmd.AddCommand(bashCompleteCmd)
 }
 
 func autoCompleteScript() string {

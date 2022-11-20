@@ -21,7 +21,7 @@ var printPathCmd = &coral.Command{
 }
 
 func init() {
-	doCmd.AddCommand(printPathCmd)
+	rootCmd.AddCommand(printPathCmd)
 }
 
 func printFullPath(args []string) error {

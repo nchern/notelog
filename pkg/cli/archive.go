@@ -29,7 +29,7 @@ func init() {
 		false,
 		"addresses a note by filename")
 
-	doCmd.AddCommand(archiveCmd)
+	rootCmd.AddCommand(archiveCmd)
 }
 
 func archive(args []string) error {
