@@ -9,4 +9,4 @@ exec notelog search "$@" |
     fzf -0 \
         --preview-window 'up,70%' \
         --preview 'notelog print $(echo {} | cut -d":" -f1) | NOTE_NAME="{}" notelog-preview.awk' \
-        --bind 'enter:execute(notelog $(echo {} | cut -d":" -f1-2))'
+        --bind 'enter:execute(notelog edit $(echo {} | cut -d":" -f1-2))'
