@@ -71,8 +71,6 @@ As of now you have to add it manually using standard `git remote add ...`
 ## Roadmap
 - [ ] conflict-free instant note taking from commandline:
         when a note is open in editor and one tries to add an instant note, editor could override amended note
-- [ ] cross-linking: you can fetch all the references from other notes to a given note
-   - [ ] embed cross links in notes?
 - [ ] search: consider indexing full text search solutions, e.g. https://github.com/blevesearch/bleve
 - [ ] archive: a note can:
    - [x] be put into archive, so it will not stay in the main note list
@@ -86,6 +84,8 @@ As of now you have to add it manually using standard `git remote add ...`
    - [ ] notelog attach <notename> <filepath> - puts <filepath> into note directory
    - [ ] notelog attach-open <notename> <attach-name> - opens attach
    - [ ] integrate with search?
+- [ ] cross-linking: you can fetch all the references from other notes to a given note
+- [x] embed cross links in notes: implemented as note: scheme for [Utl vim plugin](https://github.com/vim-scripts/utl.vim)
 - [x] (WON'T DO - can be solved by existing tools) note templates
 - [x] in-note macros:
    - [x] when adding lines, format them according to a given template
