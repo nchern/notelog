@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/BurntSushi/toml"
@@ -41,6 +42,13 @@ type Config struct {
 	NoteFormat          string `toml:"note_format"`
 	SkipLines           uint   `toml:"skip_lines"`
 	SkipLinesAfterMatch string `toml:"skip_lines_after_match"`
+}
+
+func (c *Config) skipLinesRegex() (*regexp.Regexp, error) {
+	if conf.SkipLinesAfterMatch == "" {
+		return nil, nil
+	}
+	return regexp.Compile(conf.SkipLinesAfterMatch)
 }
 
 func init() {

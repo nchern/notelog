@@ -1,7 +1,8 @@
 package cli
 
 import (
-	"regexp"
+	"io/ioutil"
+	"os"
 	"strings"
 
 	"github.com/muesli/coral"
@@ -16,7 +17,8 @@ const (
 )
 
 var (
-	readOnly bool
+	readOnly  bool
+	fromStdin bool
 
 	editCmd = &coral.Command{
 		Use:   "edit",
@@ -34,6 +36,9 @@ var (
 )
 
 func init() {
+	editCmd.Flags().BoolVarP(&fromStdin,
+		"stdin", "", false,
+		"reads data from stdin and writes this data into the note")
 	editCmd.Flags().BoolVarP(&readOnly,
 		"read-only", "r", false,
 		"opens note in read-only mode")
@@ -64,12 +69,27 @@ func parseNoteNameAndLineNumber(rawName string) (name string, lnum editor.LineNu
 	return
 }
 
+func writeRecord(nt *note.Note, record string) error {
+	rx, err := conf.skipLinesRegex()
+	if err != nil {
+		return err
+	}
+	return nt.WriteInstantRecord(record, conf.SkipLines, rx)
+}
+
+func writeFromStdin(nt *note.Note) error {
+	b, err := ioutil.ReadAll(os.Stdin)
+	if err != nil {
+		return err
+	}
+	return writeRecord(nt, string(b))
+}
+
 func edit(args []string, readOnly bool) error {
 	t, err := note.ParseFormat(conf.NoteFormat)
 	if err != nil {
 		return err
 	}
-	notes := note.NewList()
 
 	var lnum editor.LineNumber
 	noteName := noteNameFromArgs(args)
@@ -79,24 +99,22 @@ func edit(args []string, readOnly bool) error {
 	if err != nil {
 		return err
 	}
+
+	notes := note.NewList()
 	nt, err := notes.GetOrCreate(noteName, t)
 	if err != nil {
 		return err
 	}
 
-	instantRecord := ""
-	if len(args) > 1 {
-		instantRecord = strings.TrimSpace(strings.Join(args[1:], " "))
+	if fromStdin {
+		return writeFromStdin(nt)
 	}
-	if instantRecord != "" {
-		var rx *regexp.Regexp
-		if conf.SkipLinesAfterMatch != "" {
-			rx, err = regexp.Compile(conf.SkipLinesAfterMatch)
-			if err != nil {
-				return err
-			}
+
+	if len(args) > 1 {
+		instantRecord := strings.TrimSpace(strings.Join(args[1:], " "))
+		if instantRecord != "" {
+			return writeRecord(nt, instantRecord)
 		}
-		return nt.WriteInstantRecord(instantRecord, conf.SkipLines, rx)
 	}
 
 	return editor.Edit(nt, readOnly, lnum)
