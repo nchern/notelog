@@ -9,6 +9,6 @@ case "$ARG" in
         exec notelog search-browse "$(echo "$ARG" | tr -d "-")"
         ;;
     * )
-        exec notelog search -i --color "$@"
+        exec notelog grep -i --color "$@"
         ;;
 esac
