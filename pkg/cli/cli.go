@@ -101,3 +101,16 @@ func noteNameFromArgs(args []string) string {
 	}
 	return args[0]
 }
+
+func text(lines ...string) string { return strings.Join(lines, "\n") + "\n" }
+
+func cutString(s string, sep string) (a string, b string) {
+	toks := strings.SplitN(s, " ", 2)
+	if len(toks) > 0 {
+		a = toks[0]
+	}
+	if len(toks) > 1 {
+		b = toks[1]
+	}
+	return
+}

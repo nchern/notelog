@@ -5,7 +5,6 @@ import (
 	"io"
 	"os"
 	"strconv"
-	"strings"
 	"testing"
 
 	"github.com/nchern/notelog/pkg/note"
@@ -56,6 +55,21 @@ func TestAutoCompleteShould(t *testing.T) {
 			{"complete help command correctly",
 				"notelog hel",
 				text("help")},
+			{"complete archive command notes",
+				"notelog archive f",
+				text("foo")},
+			{"complete rm command notes",
+				"notelog rm b",
+				text("bar", "buzz")},
+			{"complete rename command notes",
+				"notelog rename b",
+				text("bar", "buzz")},
+			{"complete cp command notes",
+				"notelog cp b",
+				text("bar", "buzz")},
+			{"complete touch command notes",
+				"notelog touch b",
+				text("bar", "buzz")},
 		}
 		for _, tt := range tests {
 			tt := tt
@@ -104,15 +118,54 @@ func TestAutoCompleteWithArchivedNotesShould(t *testing.T) {
 		for _, tt := range tests {
 			tt := tt
 			t.Run(tt.name, func(t *testing.T) {
-				pos := len(tt.given) - 1
-
 				w := &bytes.Buffer{}
-				assert.NoError(t,
-					autoComplete(notes, tt.given, pos, w))
+
+				// HACK: setting env variables mean global state modification. Bug-prone
+				require.NoError(t, os.Setenv("COMP_LINE", tt.given))
+				require.NoError(t, os.Setenv("COMP_POINT", strconv.Itoa(len(tt.given))))
+				require.NoError(t, runCommandWithEnv(notes.HomeDir(), w, "autocomplete"))
+
 				assert.Equal(t, tt.expected, w.String())
 			})
 		}
 	})
 }
 
-func text(lines ...string) string { return strings.Join(lines, "\n") + "\n" }
+func TestAutoCompleteShoundNOTCompleteNoteNamesFor(t *testing.T) {
+	names := []string{"bar", "buzz", "drum", "foo"}
+	files := mkFiles(names...)
+
+	testutil.WithNotes(files, func(notes note.List) {
+		var tests = []struct {
+			given string
+		}{
+			{"autocomplete "},
+			{"bash-complete "},
+			{"completion "},
+			{"env "},
+			{"grep "},
+			{"help "},
+			{"init-repo "},
+			{"list"},
+			{"list-cmds "},
+			{"path "},
+			{"print-home "},
+			{"search "},
+			{"search-browse "},
+			{"sync "},
+			{"version "},
+		}
+		for _, tt := range tests {
+			tt := tt
+			t.Run(tt.given, func(t *testing.T) {
+				w := &bytes.Buffer{}
+
+				require.NoError(t, os.Setenv("COMP_LINE", tt.given))
+				require.NoError(t, os.Setenv("COMP_POINT", strconv.Itoa(len(tt.given))))
+				require.NoError(t, runCommandWithEnv(notes.HomeDir(), w, "autocomplete"))
+
+				assert.Zero(t, w.String())
+			})
+		}
+	})
+}

@@ -3,6 +3,7 @@ package cli
 import (
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -27,7 +28,7 @@ var autocompleteCmd = &coral.Command{
 			return err
 		}
 		pos-- // bash sets position as 1- array based
-		return autoComplete(note.NewList(), os.Getenv("COMP_LINE"), pos, cmd.OutOrStdout())
+		return autoComplete(note.NewList(), os.Getenv("COMP_LINE"), pos, cmd)
 	},
 }
 
@@ -35,7 +36,8 @@ func init() {
 	rootCmd.AddCommand(autocompleteCmd)
 }
 
-func autoComplete(list note.List, line string, i int, w io.Writer) error {
+func autoComplete(list note.List, line string, i int, cmd *coral.Command) error {
+	w := cmd.OutOrStdout()
 	beforeCursor := line[0 : i+1]
 	curTok := getCurrentCompletingToken(beforeCursor)
 	prevToks := strings.TrimSpace(strings.TrimSuffix(strings.TrimSpace(beforeCursor), curTok))
@@ -44,26 +46,55 @@ func autoComplete(list note.List, line string, i int, w io.Writer) error {
 		return printCommands(w, func(s string) bool { return strings.HasPrefix(s, curTok) })
 	}
 
-	if strings.HasSuffix(prevToks, archOpenCmd.Use) {
-		list = list.GetArchive()
+	// Autocomplete for subcommand
+	return autoCompleteForSubcommand(cmd.Parent(), prevToks, curTok, w)
+}
+
+func autoCompleteForSubcommand(root *coral.Command, prevToks string, curTok string, w io.Writer) error {
+	toks := strings.Split(prevToks, " ")
+	if len(toks) < 2 {
+		return nil
 	}
-	notes, err := list.All()
+	complCmdName := toks[1] // second command, the 1st is "notelog"
+	complCmd, _, err := root.Find([]string{complCmdName})
 	if err != nil {
 		return err
 	}
-	return printNotesWithPrefix(notes, curTok, prevToks, w)
-}
-
-func printNotesWithPrefix(notes []*note.Note, curTok string, prevToks string, w io.Writer) error {
-	for _, note := range notes {
-		if !strings.HasPrefix(note.Name(), curTok) {
-			continue
-		}
-		if _, err := fmt.Fprintln(w, note.Name()); err != nil {
+	if complCmd == nil || complCmd.ValidArgsFunction == nil {
+		return nil
+	}
+	names, _ := complCmd.ValidArgsFunction(complCmd, []string{complCmdName}, curTok)
+	for _, name := range names {
+		if _, err := fmt.Fprintln(w, name); err != nil {
 			return err
 		}
 	}
 	return nil
+}
+
+func completeNoteNames(cmd *coral.Command, args []string, toComplete string) ([]string, coral.ShellCompDirective) {
+	prevTok := ""
+	list := note.NewList()
+	if len(args) > 0 {
+		prevTok = args[0]
+	}
+	if strings.HasSuffix(prevTok, archOpenCmdName) {
+		list = list.GetArchive()
+	}
+	notes, err := list.All()
+	if err != nil {
+		// HACK: better to return the error, but API does not support it
+		log.Fatalf("fatal: %T %s", err, err)
+		return nil, coral.ShellCompDirectiveError
+	}
+	names := make([]string, 0, len(notes))
+	for _, note := range notes {
+		if !strings.HasPrefix(note.Name(), toComplete) {
+			continue
+		}
+		names = append(names, note.Name())
+	}
+	return names, coral.ShellCompDirectiveDefault
 }
 
 func getCurrentCompletingToken(s string) string {

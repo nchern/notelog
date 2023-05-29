@@ -14,6 +14,8 @@ var touchCmd = &coral.Command{
 	SilenceUsage:  true,
 	SilenceErrors: true,
 
+	ValidArgsFunction: completeNoteNames,
+
 	RunE: func(cmd *coral.Command, args []string) error {
 		return touch(notes, args)
 	},

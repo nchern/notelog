@@ -14,6 +14,8 @@ var removeCmd = &coral.Command{
 	SilenceErrors: true,
 	SilenceUsage:  true,
 
+	ValidArgsFunction: completeNoteNames,
+
 	RunE: func(cmd *coral.Command, args []string) error {
 		var err error
 		var name string

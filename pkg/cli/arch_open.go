@@ -6,14 +6,18 @@ import (
 	"github.com/nchern/notelog/pkg/note"
 )
 
+const archOpenCmdName = "arch-open"
+
 var (
 	archOpenCmd = &coral.Command{
-		Use:   "arch-open",
+		Use:   archOpenCmdName,
 		Short: "opens a note from archive",
 		Args:  coral.ExactArgs(1),
 
 		SilenceErrors: true,
 		SilenceUsage:  true,
+
+		ValidArgsFunction: completeNoteNames,
 
 		RunE: func(cmd *coral.Command, args []string) error {
 			return archOpen(args)

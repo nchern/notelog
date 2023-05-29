@@ -13,6 +13,8 @@ var copyCmd = &coral.Command{
 	SilenceErrors: true,
 	SilenceUsage:  true,
 
+	ValidArgsFunction: completeNoteNames,
+
 	RunE: func(cmd *coral.Command, args []string) error {
 		name, err := parseNoteName(args[0])
 		if err != nil {
