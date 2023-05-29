@@ -27,7 +27,7 @@ var autocompleteCmd = &coral.Command{
 			return err
 		}
 		pos-- // bash sets position as 1- array based
-		return autoComplete(note.NewList(), os.Getenv("COMP_LINE"), pos, os.Stdout)
+		return autoComplete(note.NewList(), os.Getenv("COMP_LINE"), pos, cmd.OutOrStdout())
 	},
 }
 
@@ -41,7 +41,7 @@ func autoComplete(list note.List, line string, i int, w io.Writer) error {
 	prevToks := strings.TrimSpace(strings.TrimSuffix(strings.TrimSpace(beforeCursor), curTok))
 
 	if strings.HasSuffix(prevToks, rootCmd.Use) {
-		return printCommandsWithPrefix(curTok, w)
+		return printCommands(w, func(s string) bool { return strings.HasPrefix(s, curTok) })
 	}
 
 	if strings.HasSuffix(prevToks, archOpenCmd.Use) {
@@ -52,18 +52,6 @@ func autoComplete(list note.List, line string, i int, w io.Writer) error {
 		return err
 	}
 	return printNotesWithPrefix(notes, curTok, prevToks, w)
-}
-
-func printCommandsWithPrefix(prefix string, w io.Writer) error {
-	for _, c := range rootCmd.Commands() {
-		if !strings.HasPrefix(c.Use, prefix) {
-			continue
-		}
-		if _, err := fmt.Fprintln(w, c.Use); err != nil {
-			return err
-		}
-	}
-	return nil
 }
 
 func printNotesWithPrefix(notes []*note.Note, curTok string, prevToks string, w io.Writer) error {

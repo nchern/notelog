@@ -2,6 +2,9 @@ package cli
 
 import (
 	"bytes"
+	"io"
+	"os"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -19,11 +22,11 @@ func mkFiles(names ...string) map[string]string {
 	return files
 }
 
-func TestAutoComplete(t *testing.T) {
+func TestAutoCompleteShould(t *testing.T) {
 	names := []string{"bar", "buzz", "drum", "foo"}
 
 	allCommands := bytes.Buffer{}
-	listCommands(&allCommands)
+	require.NoError(t, runCommandWithEnv("/tmp", &allCommands, "list-cmds"))
 
 	files := mkFiles(names...)
 	testutil.WithNotes(files, func(notes note.List) {
@@ -32,40 +35,55 @@ func TestAutoComplete(t *testing.T) {
 			given    string
 			expected string
 		}{
-			{"should complete subcommands",
+			{"complete subcommands",
 				"notelog ",
 				allCommands.String()},
-			{"should complete subcommands with common prefix only",
+			{"complete subcommands with common prefix only",
 				"notelog li",
 				text("list", "list-cmds")},
-			{"should complete subcommands with common prefix only-2",
+			{"complete subcommands with common prefix only-2",
 				"notelog p",
 				text("path", "print", "print-home")},
-			{"should complete names after edit command",
+			{"complete names after edit command",
 				"notelog edit b",
 				text("bar", "buzz")},
-			{"should complete names after subcommands and already given names",
+			{"complete names after subcommands and already given names",
 				"notelog edit foo b",
 				text("bar", "buzz")},
-			{"should complete note names subcommand edit",
+			{"complete note names subcommand edit",
 				"notelog edit ",
 				text("bar", "buzz", "drum", "foo")},
+			{"complete help command correctly",
+				"notelog hel",
+				text("help")},
 		}
 		for _, tt := range tests {
 			tt := tt
 			t.Run(tt.name, func(t *testing.T) {
 				w := &bytes.Buffer{}
-				pos := len(tt.given) - 1
 
-				assert.NoError(t,
-					autoComplete(notes, tt.given, pos, w))
+				// HACK: setting env variables mean global state modification. Bug-prone
+				require.NoError(t, os.Setenv("COMP_LINE", tt.given))
+				require.NoError(t, os.Setenv("COMP_POINT", strconv.Itoa(len(tt.given))))
+				require.NoError(t, runCommandWithEnv(notes.HomeDir(), w, "autocomplete"))
+
 				assert.Equal(t, tt.expected, w.String())
 			})
 		}
 	})
 }
 
-func TestAutoCompleteWithArchivedNotes(t *testing.T) {
+func runCommandWithEnv(homeDir string, w io.Writer, args ...string) error {
+	rootCmd.SetOut(w)
+	rootCmd.SetErr(w)
+	rootCmd.SetArgs(args)
+	if err := os.Setenv("NOTELOG_HOME", homeDir); err != nil {
+		return err
+	}
+	return rootCmd.Execute()
+}
+
+func TestAutoCompleteWithArchivedNotesShould(t *testing.T) {
 	files := mkFiles("bar", "buzz", "drum", "foo", "foobar")
 	testutil.WithNotes(files, func(notes note.List) {
 		require.NoError(t, notes.Archive("bar"))
@@ -76,10 +94,10 @@ func TestAutoCompleteWithArchivedNotes(t *testing.T) {
 			given    string
 			expected string
 		}{
-			{"should complete non-archived names",
+			{"complete non-archived names",
 				"notelog edit ",
 				text("buzz", "drum", "foo")},
-			{"should complete archived names for arch-open",
+			{"complete archived names for arch-open",
 				"notelog arch-open ",
 				text("bar", "foobar")},
 		}

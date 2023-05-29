@@ -25,8 +25,6 @@ const (
 )
 
 var (
-	notesRootPath = defineNotesRootPath()
-
 	nowFn = func() time.Time { return time.Now() }
 )
 

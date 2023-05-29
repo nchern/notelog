@@ -1,8 +1,6 @@
 package cli
 
 import (
-	"os"
-
 	"github.com/muesli/coral"
 )
 
@@ -18,7 +16,7 @@ var (
 		SilenceUsage:  false,
 
 		RunE: func(cmd *coral.Command, args []string) error {
-			return listCommands(os.Stdout)
+			return listCommands(cmd.OutOrStdout())
 		},
 	}
 )

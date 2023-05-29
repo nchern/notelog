@@ -190,5 +190,6 @@ func (l List) GetArchive() List {
 
 // NewList returns a list of notes
 func NewList() List {
-	return List(notesRootPath)
+	path := defineNotesRootPath()
+	return List(path)
 }
