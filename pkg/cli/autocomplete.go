@@ -12,31 +12,57 @@ import (
 	"github.com/nchern/notelog/pkg/note"
 )
 
-var autocompleteCmd = &coral.Command{
-	Use:   "autocomplete",
-	Short: "uses by bash to return autocompletions",
+const completeNoteNamesOnlyFlag = "--note-names"
 
-	Args: coral.ArbitraryArgs,
+var (
+	completeNoteNamesOnly bool
 
-	SilenceErrors:      true,
-	SilenceUsage:       true,
-	DisableFlagParsing: true,
+	autocompleteCmd = &coral.Command{
+		Use:   "autocomplete",
+		Short: "uses by bash to return autocompletions",
 
-	RunE: func(cmd *coral.Command, args []string) error {
-		pos, err := strconv.Atoi(os.Getenv("COMP_POINT"))
-		if err != nil {
-			return err
-		}
-		pos-- // bash sets position as 1- array based
-		return autoComplete(note.NewList(), os.Getenv("COMP_LINE"), pos, cmd)
-	},
-}
+		Args: coral.ArbitraryArgs,
+
+		SilenceErrors:      true,
+		SilenceUsage:       true,
+		DisableFlagParsing: true,
+
+		RunE: func(cmd *coral.Command, args []string) error {
+			pos, err := strconv.Atoi(os.Getenv("COMP_POINT"))
+			if err != nil {
+				return err
+			}
+			pos-- // bash sets position as 1- array based
+			compLine := os.Getenv("COMP_LINE")
+			for _, arg := range args {
+				if arg == completeNoteNamesOnlyFlag {
+					return autoCompleteNoteNames(compLine, pos, cmd)
+				}
+			}
+			return autoComplete(compLine, pos, cmd)
+		},
+	}
+)
 
 func init() {
 	rootCmd.AddCommand(autocompleteCmd)
 }
 
-func autoComplete(list note.List, line string, i int, cmd *coral.Command) error {
+func autoCompleteNoteNames(line string, i int, cmd *coral.Command) error {
+	w := cmd.OutOrStdout()
+	beforeCursor := line[0 : i+1]
+	curTok := getCurrentCompletingToken(beforeCursor)
+
+	names, _ := completeNoteNames(cmd.Parent(), []string{}, curTok)
+	for _, name := range names {
+		if _, err := fmt.Fprintln(w, name); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func autoComplete(line string, i int, cmd *coral.Command) error {
 	w := cmd.OutOrStdout()
 	beforeCursor := line[0 : i+1]
 	curTok := getCurrentCompletingToken(beforeCursor)

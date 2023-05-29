@@ -87,6 +87,27 @@ func TestAutoCompleteShould(t *testing.T) {
 	})
 }
 
+func TestAutoCompleteShouldCompleteNotNamesOnly(t *testing.T) {
+	// this mode exists for integration with notelog wrapper commands
+	names := []string{"bar", "buzz", "drum", "foo"}
+
+	files := mkFiles(names...)
+	testutil.WithNotes(files, func(notes note.List) {
+		w := &bytes.Buffer{}
+
+		given := "arbitrary-command b"
+		expected := text("bar", "buzz")
+
+		// HACK: setting env variables mean global state modification. Bug-prone
+		require.NoError(t, os.Setenv("COMP_LINE", given))
+		require.NoError(t, os.Setenv("COMP_POINT", strconv.Itoa(len(given))))
+		require.NoError(t, runCommandWithEnv(notes.HomeDir(), w, "autocomplete", "--note-names"))
+
+		assert.Equal(t, expected, w.String())
+	})
+
+}
+
 func runCommandWithEnv(homeDir string, w io.Writer, args ...string) error {
 	rootCmd.SetOut(w)
 	rootCmd.SetErr(w)
