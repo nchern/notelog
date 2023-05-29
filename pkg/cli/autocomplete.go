@@ -17,8 +17,9 @@ var autocompleteCmd = &coral.Command{
 
 	Args: coral.ArbitraryArgs,
 
-	SilenceErrors: true,
-	SilenceUsage:  true,
+	SilenceErrors:      true,
+	SilenceUsage:       true,
+	DisableFlagParsing: true,
 
 	RunE: func(cmd *coral.Command, args []string) error {
 		pos, err := strconv.Atoi(os.Getenv("COMP_POINT"))
