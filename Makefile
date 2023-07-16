@@ -6,14 +6,10 @@ build: vet
 
 .PHONY: install
 install: test gen-version
-	go get ./...
-
-.PHONY: lint
-lint:
-	@golint ./...
+	go install ./...
 
 .PHONY: vet
-vet: lint
+vet:
 	@go vet ./...
 
 .PHONY: test
