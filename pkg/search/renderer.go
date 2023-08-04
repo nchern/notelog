@@ -5,7 +5,6 @@ import (
 	"io"
 	"log"
 	"os"
-	"sort"
 )
 
 // Renderer renders given search results
@@ -17,9 +16,6 @@ type Renderer interface {
 // Render renders a results collection using given renderer
 func Render(renderer Renderer, results []*Result, onlyNames bool) error {
 	defer renderer.Close()
-	if onlyNames {
-		sort.Sort(byName(results))
-	}
 	for _, res := range results {
 		if err := renderer.Render(res); err != nil {
 			return err
