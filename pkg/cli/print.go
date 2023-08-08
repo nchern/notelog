@@ -15,6 +15,8 @@ var prnNoteCmd = &coral.Command{
 	SilenceErrors: true,
 	SilenceUsage:  true,
 
+	ValidArgsFunction: completeNoteNames,
+
 	RunE: func(cmd *coral.Command, args []string) error {
 		return printNotes(args)
 	},
