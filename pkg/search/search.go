@@ -121,8 +121,13 @@ func parseRequest(args ...string) *request {
 	return res
 }
 
-type byName []*Result
+type byNameAndLine []*Result
 
-func (a byName) Len() int           { return len(a) }
-func (a byName) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
-func (a byName) Less(i, j int) bool { return a[i].name < a[j].name }
+func (a byNameAndLine) Len() int      { return len(a) }
+func (a byNameAndLine) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
+func (a byNameAndLine) Less(i, j int) bool {
+	if a[i].name == a[j].name {
+		return a[i].lineNum < a[j].lineNum
+	}
+	return a[i].name < a[j].name
+}

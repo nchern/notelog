@@ -107,7 +107,6 @@ func searchNote(notes Notes, nt *note.Note, matcher matcherFunc) ([]*Result, err
 }
 
 func searchInNotes(notes Notes, matcher matcherFunc, onlyNames bool) ([]*Result, error) {
-
 	l, err := notes.All()
 	if err != nil {
 		return nil, err
@@ -158,7 +157,7 @@ func searchInNotes(notes Notes, matcher matcherFunc, onlyNames bool) ([]*Result,
 		}
 	}
 
-	sort.Sort(byName(results))
+	sort.Sort(byNameAndLine(results))
 
 	return results, nil
 }
