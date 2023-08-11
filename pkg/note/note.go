@@ -77,11 +77,6 @@ func (n *Note) FullPath() string {
 	return filepath.Join(n.homeDir, n.name, defaultFileBaseName+string(n.typ))
 }
 
-// MetadataFilename returns full path to the metadata file in this note namespace
-func (n *Note) MetadataFilename(name string) string {
-	return filepath.Join(n.dir(), name)
-}
-
 // Name returns a note's name
 func (n *Note) Name() string {
 	return n.name
