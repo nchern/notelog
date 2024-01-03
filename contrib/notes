@@ -5,4 +5,4 @@
 
 # depends on: https://github.com/junegunn/fzf
 
-exec notelog list | fzf --preview 'notelog print {}' --bind 'enter:execute(notelog edit {})'
+exec notelog list -d | fzf --tac --preview 'notelog print {}' --bind 'enter:execute(notelog edit {})'
