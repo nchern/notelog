@@ -3,12 +3,19 @@ package cli
 import (
 	"fmt"
 	"io"
+	"sort"
 )
 
 func printCommands(w io.Writer, filter func(string) bool) error {
+	cmds := make([]string, 0, 2*len(rootCmd.Commands()))
 	for _, c := range rootCmd.Commands() {
 		// handle the case when Use has a format of "help [command]"
 		cmd, _ := cutString(c.Use, " ")
+		cmds = append(cmds, cmd)
+		cmds = append(cmds, c.Aliases...)
+	}
+	sort.Strings(cmds)
+	for _, cmd := range cmds {
 		if !filter(cmd) {
 			continue
 		}
