@@ -59,8 +59,6 @@ func init() {
 
 // Execute is an entry point of CLI
 func Execute() error {
-	const defaultDirPerms = 0700
-
 	if err := loadConfig(); err != nil && !os.IsNotExist(err) {
 		// TODO: possibly to main app log?
 		log.Printf("WARN loadConfig failed: %s", err)
