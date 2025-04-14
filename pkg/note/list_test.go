@@ -120,7 +120,7 @@ func TestGet(t *testing.T) {
 	withNotes(t, func(notes List) {
 		missing, err := notes.Get("nonexistent")
 		assert.Error(t, err)
-		assert.True(t, errors.Is(err, errNotExist))
+		assert.True(t, errors.Is(err, ErrNotExist))
 		assert.Nil(t, missing)
 
 		created := makeNote(t, notes, noteName)
@@ -177,6 +177,6 @@ func TestCopy(t *testing.T) {
 
 		err = underTest.Copy("nonexistent", newName)
 		assert.Error(t, err)
-		assert.True(t, errors.Is(err, errNotExist))
+		assert.True(t, errors.Is(err, ErrNotExist))
 	})
 }

@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	errNotExist = errors.New("Note does not exist")
+	ErrNotExist = errors.New("Note does not exist")
 )
 
 // List represents a collection of notes.
@@ -59,7 +59,7 @@ func (l List) Get(name string) (*Note, error) {
 			return nt, nil
 		}
 	}
-	return nil, fmt.Errorf("%w: %s", errNotExist, name)
+	return nil, fmt.Errorf("%w: %s", ErrNotExist, name)
 }
 
 // MetadataFilename returns full path to the notelog metadata for a given file
@@ -130,7 +130,7 @@ func (l List) All() ([]*Note, error) {
 		nt, err := l.Get(dir.Name())
 		if err != nil {
 			// skip broken notes
-			if errors.Is(err, errNotExist) {
+			if errors.Is(err, ErrNotExist) {
 				continue
 			}
 			return nil, err
