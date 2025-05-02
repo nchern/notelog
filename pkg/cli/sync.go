@@ -1,6 +1,8 @@
 package cli
 
 import (
+	"os"
+
 	"github.com/muesli/coral"
 	"github.com/nchern/notelog/pkg/repo"
 )
@@ -19,7 +21,7 @@ var syncCmd = &coral.Command{
 		if len(args) > 0 {
 			comment = args[0]
 		}
-		return repo.Sync(notes, comment)
+		return repo.Sync(notes, comment, os.Stderr)
 	},
 }
 

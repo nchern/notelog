@@ -2,6 +2,7 @@ package repo
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"os/user"
@@ -11,24 +12,18 @@ import (
 )
 
 // Sync syncs git repo in current $NOTELOG_HOME if the repo exists
-func Sync(notes note.List, customMsg string) error {
+func Sync(notes note.List, customMsg string, stderr io.Writer) error {
 	msg := createMessage(customMsg)
-
-	logName := notes.MetadataFilename(gitErrorLog)
-	logFile, err := openErrorLog(logName)
-	if err != nil {
-		return err
-	}
-	defer logFile.Close()
 
 	doCommit := fmt.Sprintf("%s diff-index --quiet HEAD || %s commit -q -m '%s'", gitCmd, gitCmd, msg)
 	cmds := []*exec.Cmd{
-		git(notes, logFile, "add", "."),
-		sh(doCommit, notes.HomeDir(), logFile),
-		git(notes, logFile, "pull", "-q", "--rebase"),
-		git(notes, logFile, "push", "-q", "origin", "master"),
+		git(notes, stderr, "add", "."),
+		sh(doCommit, notes.HomeDir(), stderr),
+		git(notes, stderr, "pull", "-q", "--rebase"),
+		git(notes, stderr, "push", "-q", "origin", "master"),
 	}
 
+	var err error
 	for _, cmd := range cmds {
 		fmt.Printf("notelog: calling %s\n", cmd)
 		err = cmd.Run()
