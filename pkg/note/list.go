@@ -3,7 +3,6 @@ package note
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -115,7 +114,7 @@ func (l List) Copy(srcName string, dstName string) error {
 // All returns all notes from this list
 func (l List) All() ([]*Note, error) {
 	res := []*Note{}
-	dirs, err := ioutil.ReadDir(l.HomeDir())
+	dirs, err := os.ReadDir(l.HomeDir())
 	if err != nil {
 		return nil, err
 	}
@@ -138,7 +137,11 @@ func (l List) All() ([]*Note, error) {
 
 		// HACK: this works only as a whole note file gets re-created.
 		// Vim does it when writes the file
-		nt.modifiedAt = dir.ModTime()
+		info, err := dir.Info()
+		if err != nil {
+			return nil, err
+		}
+		nt.modifiedAt = info.ModTime()
 		res = append(res, nt)
 	}
 

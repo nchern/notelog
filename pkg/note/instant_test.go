@@ -3,7 +3,6 @@ package note
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"regexp"
 	"strings"
@@ -81,7 +80,7 @@ func TestWriteInstantRecord(t *testing.T) {
 			assert.NoError(t,
 				underTest.WriteInstantRecord(sample, tt.givenSkipLines, nil))
 
-			actual, err := ioutil.ReadFile(underTest.FullPath())
+			actual, err := os.ReadFile(underTest.FullPath())
 
 			assert.NoError(t, err)
 			assert.Equal(t, tt.expected, string(actual))
@@ -153,7 +152,7 @@ func TestWriteInstantRecordWithSkipLinesByRegex(t *testing.T) {
 			assert.NoError(t,
 				underTest.WriteInstantRecord(sample, 0, tt.givenSkipLinesRegexp))
 
-			actual, err := ioutil.ReadFile(underTest.FullPath())
+			actual, err := os.ReadFile(underTest.FullPath())
 
 			assert.NoError(t, err)
 			assert.Equal(t, tt.expected, string(actual))
@@ -180,7 +179,7 @@ func TestWriteInstantRecordShouldExpand(t *testing.T) {
 			assert.NoError(t,
 				underTest.WriteInstantRecord(tt.given, 0, nil))
 
-			actual, err := ioutil.ReadFile(underTest.FullPath())
+			actual, err := os.ReadFile(underTest.FullPath())
 
 			assert.NoError(t, err)
 			assert.Equal(t, tt.expected, string(actual))

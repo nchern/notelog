@@ -2,7 +2,6 @@ package repo
 
 import (
 	"bytes"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
@@ -29,7 +28,7 @@ func TestInit(t *testing.T) {
 		assert.Equal(t, "init\n", out.String())
 
 		// check if gitignore is created and contains proper files to ignore
-		gitIgnoreContent, err := ioutil.ReadFile(filepath.Join(notes.HomeDir(), gitIgnoreFile))
+		gitIgnoreContent, err := os.ReadFile(filepath.Join(notes.HomeDir(), gitIgnoreFile))
 		assert.NoError(t, err)
 		assert.Equal(t, note.DotNotelogDir, string(gitIgnoreContent))
 	})

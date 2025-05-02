@@ -2,7 +2,7 @@ package repo
 
 import (
 	"io"
-	"io/ioutil"
+	"os"
 	"path/filepath"
 
 	"github.com/nchern/notelog/pkg/note"
@@ -21,5 +21,5 @@ func Init(notes note.List, errStream io.Writer) error {
 
 func createGitIgnore(notes note.List) error {
 	path := filepath.Join(notes.HomeDir(), gitIgnoreFile)
-	return ioutil.WriteFile(path, []byte(note.DotNotelogDir), defaultFilePerms)
+	return os.WriteFile(path, []byte(note.DotNotelogDir), defaultFilePerms)
 }

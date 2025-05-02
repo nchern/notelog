@@ -3,7 +3,7 @@ package search
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -305,12 +305,6 @@ func TestSearcShouldSearchCaseSensitiveIfSet(t *testing.T) {
 	})
 }
 
-func must(err error) {
-	if err != nil {
-		panic(err)
-	}
-}
-
 func toSortedLines(s string) []string {
 	lines := strings.Split(strings.Trim(s, "\n"), "\n")
 	sort.Strings(lines)
@@ -319,7 +313,7 @@ func toSortedLines(s string) []string {
 
 func mustReadLastResults(t *testing.T, notes note.List) string {
 	resultsFilename := filepath.Join(notes.HomeDir(), note.DotNotelogDir, lastResultsFile)
-	body, err := ioutil.ReadFile(resultsFilename)
+	body, err := os.ReadFile(resultsFilename)
 	require.NoError(t, err) // file must exist
 
 	return string(body)

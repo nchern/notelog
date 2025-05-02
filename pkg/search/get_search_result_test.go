@@ -2,7 +2,6 @@ package search
 
 import (
 	"bytes"
-	"io/ioutil"
 	"os"
 	"strings"
 	"testing"
@@ -26,9 +25,10 @@ func TestGetLastNthResult(t *testing.T) {
 		r, err := NewPersistentRenderer(
 			notes,
 			&StreamRenderer{W: buf})
+		require.NoError(t, err)
 		assert.NoError(t, Render(r, actual, false))
 
-		b, err := ioutil.ReadFile(notes.MetadataFilename(lastResultsFile))
+		b, err := os.ReadFile(notes.MetadataFilename(lastResultsFile))
 		require.NoError(t, err)
 		persistedResults := strings.Split(string(b), "\n")
 

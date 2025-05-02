@@ -1,7 +1,6 @@
 package testutil
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 
@@ -15,7 +14,7 @@ const (
 
 // WithNotes - test helper function
 func WithNotes(files map[string]string, fn func(notes note.List)) {
-	homeDir, err := ioutil.TempDir("", "test_notes")
+	homeDir, err := os.MkdirTemp("", "test_notes")
 	if err != nil {
 		panic(err)
 	}
@@ -29,7 +28,7 @@ func WithNotes(files map[string]string, fn func(notes note.List)) {
 		fullName := filepath.Join(homeDir, name, "main.org")
 		dir, _ := filepath.Split(fullName)
 		must(os.MkdirAll(dir, dirMode))
-		must(ioutil.WriteFile(fullName, []byte(body), mode))
+		must(os.WriteFile(fullName, []byte(body), mode))
 	}
 
 	fn(note.List(homeDir))
