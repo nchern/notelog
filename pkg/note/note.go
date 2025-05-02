@@ -133,8 +133,8 @@ func (n *Note) Dump(w io.Writer) error {
 	return err
 }
 
-// Write overwrites this note content with a given string
-func (n *Note) Write(s string) error {
+// overwrite overwrites this note content with a given string
+func (n *Note) overwrite(s string) error {
 	return ioutil.WriteFile(n.FullPath(), []byte(s), defaultFilePerms)
 }
 

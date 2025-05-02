@@ -75,7 +75,7 @@ func TestWriteInstantRecord(t *testing.T) {
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
-			must(underTest.Write(initial))
+			must(underTest.overwrite(initial))
 			defer os.Remove(underTest.FullPath())
 
 			assert.NoError(t,
@@ -147,7 +147,7 @@ func TestWriteInstantRecordWithSkipLinesByRegex(t *testing.T) {
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
-			must(underTest.Write(initial))
+			must(underTest.overwrite(initial))
 			defer os.Remove(underTest.FullPath())
 
 			assert.NoError(t,
