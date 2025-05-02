@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"errors"
 	"io"
 	"os"
 	"strings"
@@ -38,6 +39,9 @@ var (
 )
 
 func init() {
+	editCmd.Flags().StringVarP(&fromName,
+		"from", "f", "",
+		"create a new note from a given one as a template")
 	editCmd.Flags().BoolVarP(&fromStdin,
 		"stdin", "", false,
 		"reads data from stdin and writes this data into the note")
@@ -109,9 +113,17 @@ func edit(args []string, readOnly bool) error {
 	}
 
 	if fromStdin {
+		if fromName != "" {
+			return errors.New("--stdin and --from can't be used together")
+		}
 		return writeFromStdin(nt)
 	}
 
+	if fromName != "" {
+		if err := createFromTemplate(nt, fromName); err != nil {
+			return err
+		}
+	}
 	if len(args) > 1 {
 		instantRecord := strings.TrimSpace(strings.Join(args[1:], " "))
 		if instantRecord != "" {
