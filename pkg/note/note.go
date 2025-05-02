@@ -133,14 +133,14 @@ func (n *Note) Dump(w io.Writer) error {
 	return err
 }
 
-// overwrite overwrites this note content with a given string
-func (n *Note) overwrite(s string) error {
-	return ioutil.WriteFile(n.FullPath(), []byte(s), defaultFilePerms)
-}
-
 // Archived determines if this note is archived
 func (n *Note) Archived() bool {
 	return strings.HasSuffix(n.homeDir, archiveNoteDir)
+}
+
+// overwrite overwrites this note content with a given string
+func (n *Note) overwrite(s string) error {
+	return ioutil.WriteFile(n.FullPath(), []byte(s), defaultFilePerms)
 }
 
 func (n *Note) writer() (io.WriteCloser, error) {

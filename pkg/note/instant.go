@@ -40,8 +40,6 @@ func (n *Note) WriteInstantRecord(record string, skipLines uint, skipLinesAfter 
 		lines = strings.Split(buf.String(), "\n")
 	}
 
-	out := []string{}
-
 	if skipLinesAfter != nil {
 		for i, l := range lines {
 			if skipLinesAfter.MatchString(l) {
@@ -51,6 +49,7 @@ func (n *Note) WriteInstantRecord(record string, skipLines uint, skipLinesAfter 
 		}
 	}
 
+	var out []string
 	if skipLines >= uint(len(lines)) || skipLines == 0 {
 		out = append([]string{expandVars(record), ""}, lines...)
 	} else {
