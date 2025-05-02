@@ -58,5 +58,5 @@ func (n *Note) WriteInstantRecord(record string, skipLines uint, skipLinesAfter 
 	}
 
 	body := strings.Join(out, "\n")
-	return n.overwrite(body)
+	return n.Overwrite(body)
 }

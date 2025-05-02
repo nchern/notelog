@@ -2,7 +2,6 @@ package note
 
 import (
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -138,9 +137,18 @@ func (n *Note) Archived() bool {
 	return strings.HasSuffix(n.homeDir, archiveNoteDir)
 }
 
-// overwrite overwrites this note content with a given string
-func (n *Note) overwrite(s string) error {
-	return ioutil.WriteFile(n.FullPath(), []byte(s), defaultFilePerms)
+// ReadAll reads and returns note content
+func (n *Note) ReadAll() (string, error) {
+	b, err := os.ReadFile(n.FullPath())
+	if err != nil {
+		return "", err
+	}
+	return string(b), nil
+}
+
+// Overwrite overwrites this note content with a given string
+func (n *Note) Overwrite(s string) error {
+	return os.WriteFile(n.FullPath(), []byte(s), defaultFilePerms)
 }
 
 func (n *Note) writer() (io.WriteCloser, error) {

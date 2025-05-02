@@ -1,7 +1,7 @@
 package cli
 
 import (
-	"io/ioutil"
+	"io"
 	"os"
 	"strings"
 
@@ -80,7 +80,7 @@ func writeRecord(nt *note.Note, record string) error {
 }
 
 func writeFromStdin(nt *note.Note) error {
-	b, err := ioutil.ReadAll(os.Stdin)
+	b, err := io.ReadAll(os.Stdin)
 	if err != nil {
 		return err
 	}
