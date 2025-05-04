@@ -14,7 +14,7 @@ import (
 const (
 	defaultSkipLines uint = 2
 
-	defaultFormat = string(note.Org)
+	defaultFormat = string(note.Md)
 )
 
 var (
