@@ -79,11 +79,20 @@ fun NotesArchive()
     bd
 endfun
 
+fun s:note_open(...)
+    let l:name = a:0 > 0 ? a:1 : ''
+    if l:name == ''
+        :NLBrowse
+        return
+    endif
+    execute ':e ' . NotesFullPath(l:name)
+endfun
+
 " Creates a new note with Notelog
 command! -nargs=1 -complete=custom,NotesList NLNew execute ':silent !notelog touch <f-args>' | execute ':e ' NotesFullPath(<f-args>)
 
 " Opens an existing note with Notelog
-command! -nargs=1 -complete=custom,NotesList NLOpen execute ':e ' NotesFullPath(<f-args>)
+command! -nargs=? -complete=custom,NotesList NLOpen call s:note_open(<f-args>)
 " Opens Notelog's scratchpad
 command! -nargs=0 NLOpenScratch execute ':e ' NotesFullPath("")
 
