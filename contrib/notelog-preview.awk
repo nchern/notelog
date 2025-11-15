@@ -1,4 +1,4 @@
-#!/usr/bin/env awk -f
+#!/usr/bin/awk -f
 
 BEGIN {
     LN=1;
@@ -7,7 +7,7 @@ BEGIN {
     if (name_var in ENVIRON) {
         name = ENVIRON[name_var]
         if (split(name, toks, ":") > 1) {
-            LN = int(toks[2]) 
+            LN = int(toks[2])
         }
         name = toks[1]
     }
@@ -18,4 +18,3 @@ NR >= LN-CTX_LINES && NR <= LN+CTX_LINES && NR != LN { print "\033[38;5;244m" NR
 
 # print selected line in bold; \033[1mBOLD TEXT\033[0m
 NR == LN { print NR " \033[1m" $0 "\033[0m"}
-
