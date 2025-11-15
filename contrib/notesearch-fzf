@@ -5,7 +5,7 @@
 
 # depends on: https://github.com/junegunn/fzf
 
-exec notelog search "$@" | 
+exec notelog grep -i "$@" |
     fzf -0 \
         --preview-window 'up,70%' \
         --preview 'notelog print $(echo {} | cut -d":" -f1) | NOTE_NAME="{}" notelog-preview.awk' \
