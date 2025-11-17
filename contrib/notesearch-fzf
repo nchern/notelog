@@ -5,7 +5,11 @@
 
 # depends on: https://github.com/junegunn/fzf
 
-exec notelog grep -i "$@" |
+die() {   echo "fatal: $1" && exit "${2-1}" ; }
+
+[ $# -gt 0 ] || die "empty search query"
+
+exec notelog grep "$@" |
     fzf -0 \
         --preview-window 'up,70%' \
         --preview 'notelog print $(echo {} | cut -d":" -f1) | NOTE_NAME="{}" notelog-preview.awk' \
