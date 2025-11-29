@@ -20,7 +20,7 @@ highlight   notelogMarker   ctermbg=Yellow  ctermfg=Black term=bold cterm=bold g
 
 
 " highlights references to people: @John.Doe
-syntax      match           notelogPerson   /\v(^|\s)@<=\@[a-zA-Z.]+/    containedin=ALL
+syntax      match           notelogPerson   /\v(^|\s)@<=\@[a-zA-Z.-]+/    containedin=ALL
 highlight   notelogPerson   ctermfg=Blue    term=bold cterm=bold gui=bold
 
 
